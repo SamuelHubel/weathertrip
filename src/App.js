@@ -1,6 +1,7 @@
 import logo from './logo.svg';
 import './App.css';
-
+import TripMap from './components/TripMap';
+import TripList from './components/TripList';
 function App() {
   return (
     <div className="App">
