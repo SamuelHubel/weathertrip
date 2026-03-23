@@ -14,7 +14,8 @@
 }
 
 .App-header {
-  background-color: #282c34;
+  font-family: 'Caveat';
+  background-color: lightslategray;
   min-height: 10vh;
   display: flex;
   flex-direction: column;
