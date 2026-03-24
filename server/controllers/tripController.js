@@ -18,18 +18,24 @@ const getTrip = (req, res) => {
         return res.status(400).json({ error: 'No route found' });
     }
     // return trip info
+    // returns 
+    // start: {lat lon}
+    // end: {lat lon}
+    // route: {distance, duration, geometry}
     res.json({
         start: {
-            name: startLocation.display_name,
             lat: startLocation.lat,
             lon: startLocation.lon
         },
-        end: {
-            name: endLocation.display_name,
-            lat: endLocation.lat,
-            lon: endLocation.lon
-        },
-        route
+            end: {
+                lat: endLocation.lat,
+                lon: endLocation.lon
+            },
+        route: {
+            distance: route.distance,
+            duration: route.duration,
+            polyline: route.geometry
+        }
     });
 
 
