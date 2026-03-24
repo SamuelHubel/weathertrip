@@ -10,20 +10,25 @@ const geocodingService = {
         params: {
           q: locationString,
           format: 'json'
+        },
+        headers: {
+          'User-Agent': 'WeatherTripApp/1.0 (road-trip-weather-app)'
         }
       });
 
       if (!response.data || response.data.length === 0) {
+        console.warn(`No results found for location: ${locationString}`);
         return null;
       }
 
       const result = response.data[0];
+      console.log(`Geocoded "${locationString}" to lat: ${result.lat}, lon: ${result.lon}`);
       return {
         lat: parseFloat(result.lat),
         lon: parseFloat(result.lon)
       };
     } catch (error) {
-      console.error('Geocoding error:', error);
+      console.error(`Geocoding error for "${locationString}":`, error.message);
       return null;
     }
   }
