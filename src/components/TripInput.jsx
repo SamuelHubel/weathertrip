@@ -12,6 +12,8 @@ function TripInput({ addTrip }) {
         addTrip({ start: tripStartLocation, end: tripEndLocation });
         setTripStartLocation('');
         setTripEndLocation('');
+        // dummy window alert to show trip added
+        // window.alert(`Trip added: ${tripStartLocation} to ${tripEndLocation}`);
     };
   return (
     <div>
