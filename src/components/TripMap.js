@@ -8,7 +8,7 @@ function TripMap() {
   return (
     <div>
       <h2>Map</h2>
-      {/* map component goes here */}
+      {/* map component */}
       <MapContainer center={[39.8, -98.6]} zoom={4} style={{height: '600px', width: '85%'}}>
         <TileLayer  
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'

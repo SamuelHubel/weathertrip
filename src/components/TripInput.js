@@ -15,7 +15,7 @@ function TripInput({ addTrip }) {
     };
   return (
     <div>
-      <h2>Where would you like to go?</h2>
+      <h2>Where're we headed?</h2>
       <form onSubmit={handleSubmit}>
         <input 
           type="text"
