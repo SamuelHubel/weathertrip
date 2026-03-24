@@ -18,7 +18,7 @@ const getRoute = async (start, end) => {
     return {
         distance: route.distance,
         duration: route.duration,
-        polyline: route.geometry
+        geometry: route.geometry
     };
 }
 
