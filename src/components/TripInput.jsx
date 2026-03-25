@@ -1,17 +1,39 @@
 // component to input trip details and add to list
-// need to add submit buttne
+//
 import React, { useState } from 'react';
+import  fetchTrip  from '../services/tripService';
 
 function TripInput({ addTrip }) {
   // trip info
     const [tripStartLocation, setTripStartLocation] = useState('');
     const [tripEndLocation, setTripEndLocation] = useState('');
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState(null);
     // handle form submission
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        addTrip({ start: tripStartLocation, end: tripEndLocation });
-        setTripStartLocation('');
-        setTripEndLocation('');
+        setLoading(true);
+        setError(null);
+        try {
+          // fetch trip data from server
+            const tripData = await fetchTrip(tripStartLocation, tripEndLocation);
+
+            // add trip to list if data is valid
+            if (tripData) {
+                addTrip(tripData);
+                setTripStartLocation('');
+                setTripEndLocation('');
+                // dummy window alert to show trip added - replace with better UI in future
+                window.alert(`Trip added: ${tripStartLocation} to ${tripEndLocation}`);
+              } else {
+                setError('Failed to fetch trip data');
+              }
+            } catch (err) {
+              setError(err.message || 'Error fetching trip');
+            } finally {
+              setLoading(false);
+             
+        }
     };
   return (
     <div>
