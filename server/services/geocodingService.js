@@ -1,4 +1,7 @@
 import axios from 'axios';
+import dotenv from 'dotenv';
+
+dotenv.config();
 
 // Take location string and return geocoded location with lat and lon
 // from Nominatim API
@@ -6,7 +9,7 @@ import axios from 'axios';
 const geocodingService = {
   async geocodeLocation(locationString) {
     try {
-      const response = await axios.get('https://nominatim.openstreetmap.org/search', {
+      const response = await axios.get(`${process.env.NOMINATIM_URL}/search`, {
         params: {
           q: locationString,
           format: 'json'

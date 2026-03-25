@@ -1,6 +1,6 @@
 import './App.css';
-import TripMap from './components/TripMap';
-import TripInput from './components/TripInput';
+import TripMap from './components/TripMap.jsx';
+import TripInput from './components/TripInput.jsx';
 import { useState } from 'react';
 
 
@@ -18,7 +18,7 @@ function App() {
       </header>
       <main>
         <TripInput addTrip={addTrip} />
-        <TripMap />
+        <TripMap trips={trips} />
       </main>
     </div>
   );

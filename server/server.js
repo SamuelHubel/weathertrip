@@ -11,7 +11,7 @@ app.use(express.json());
 app.get('/', (req, res) => {
   res.send('Welcome to the Weather Trip API');
 });
-app.use('/trips', tripRouter);
+app.use('/api/trip', tripRouter);
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {

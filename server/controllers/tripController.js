@@ -7,10 +7,18 @@ import getRoute from '../services/routingService.js';
 const getTrip = async (req, res) => {
     try {
         const { start, end } = req.body;
+        console.log('Start:', start, 'End:', end);
+        
+        if (!start || !end) {
+            console.error('Missing start or end location in request body');
+            return res.status(400).json({ error: 'Missing start or end location' });
+        }
+        
         // geocode start and end locations
         const startLocation = await geocodingService.geocodeLocation(start);
         const endLocation = await geocodingService.geocodeLocation(end);
         if (!startLocation || !endLocation) {
+            console.error(`Geocoding failed - start: ${startLocation}, end: ${endLocation}`);
             return res.status(400).json({ error: 'Invalid start or end location' });
         }
         // get route from OSRM API

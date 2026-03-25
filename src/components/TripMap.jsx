@@ -4,7 +4,7 @@ import React from 'react';
 import { MapContainer, TileLayer, Polyline } from 'react-leaflet';
 // leaflet stylesheet is imported in index.js
 
-function TripMap() {
+function TripMap({ trips }) {
   return (
     <div>
       <h2>Map</h2>
