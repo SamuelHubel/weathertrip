@@ -9,7 +9,8 @@ const fetchTrip = async (startLocation, endLocation) => {
         const response = await axios.post('http://localhost:5000/api/trip', { 
             // setting start and end to the raw location strings instead of geocoded lat/lon, since server will handle geocoding
             start: startLocation, 
-            end: endLocation 
+            end: endLocation,
+
         });
         return response.data;
     } catch (error) {

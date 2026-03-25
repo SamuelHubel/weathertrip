@@ -16,7 +16,7 @@ function TripMap({ trip }) {
         />
         {/* render polyline for the most recent trip */}
         {trip && trip.route && (
-          <Polyline positions={trip.route} color="blue" />
+          <Polyline positions={trip.route.geometry} color="blue" />
         )}
 
 
