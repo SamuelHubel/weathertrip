@@ -23,6 +23,8 @@ function TripInput({ addTrip }) {
                 addTrip(tripData);
                 setTripStartLocation('');
                 setTripEndLocation('');
+                // dummy window alert to show trip added - replace with better UI in future
+                window.alert(`Trip added: ${tripStartLocation} to ${tripEndLocation}`);
               } else {
                 setError('Failed to fetch trip data');
               }
@@ -30,9 +32,7 @@ function TripInput({ addTrip }) {
               setError(err.message || 'Error fetching trip');
             } finally {
               setLoading(false);
-              // dummy window alert to show trip added - replace with better UI in future
-              window.alert(`Trip added: ${tripStartLocation} to ${tripEndLocation}`);
-              window.alert(`Trip data: ${JSON.stringify(tripData)}`);
+             
         }
     };
   return (

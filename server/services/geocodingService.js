@@ -23,7 +23,7 @@ const geocodingService = {
         console.warn(`No results found for location: ${locationString}`);
         return null;
       }
-
+      // parse each location in seperate api calls
       const result = response.data[0];
       console.log(`Geocoded "${locationString}" to lat: ${result.lat}, lon: ${result.lon}`);
       return {
