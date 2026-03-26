@@ -5,7 +5,7 @@ dotenv.config();
 
 // take start and end geocoded locations and return route from OSRM API
 // returns raw geometry from OSRM API, which is a list of lat/lon pairs
-// frontend will need to convert this to a polyline for display on the map
+// decode and send to frontend for rendering on map
 const getRoute = async (start, end) => {
   try {
     const url = `${process.env.OSRM_URL}/route/v1/driving/${start.lon},${start.lat};${end.lon},${end.lat}`;
@@ -16,7 +16,7 @@ const getRoute = async (start, end) => {
         geometries: 'geojson'
       }
     });
-    // object with distance, duration, and geometry
+    // object with distance, duration, and polyline route
     const route = response.data.routes[0];
    
       return {

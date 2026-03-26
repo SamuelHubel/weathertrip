@@ -1,30 +1,42 @@
-// component to display map with trip route
-// using react-leaflet for map display
 import React from 'react';
-import { MapContainer, TileLayer, Polyline } from 'react-leaflet';
-// leaflet stylesheet is imported in index.js
+import { MapContainer, TileLayer, Polyline, Marker, Popup } from 'react-leaflet';
 
 function TripMap({ trip }) {
+//
+
   return (
     <div>
       <h2>Map</h2>
-      {/* map component */}
-      <MapContainer center={[39.8, -98.6]} zoom={4} style={{height: '600px', width: '85%'}}>
+
+      <MapContainer
+        center={[39.8, -98.6]}
+        zoom={4}
+        style={{ height: '600px', width: '85%' }}
+      >
         <TileLayer  
-          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+          attribution='&copy; OpenStreetMap contributors'
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
-        {/* render polyline for the most recent trip */}
+        {/* render route polyline if trip and route data is available */}
         {trip && trip.route && (
-          <Polyline positions={trip.route} color="blue" />
+          <Polyline positions={trip.route.geometry} color="blue" />
         )}
+        {/* render start and end markers if trip data is available */}
+                {/* ✅ Markers only render when data is ready */}
+        {trip?.start?.lat && trip?.end?.lat && (
+          <>
+            <Marker position={[trip.start.lat, trip.start.lon]}>
+              <Popup>Start Location</Popup>
+            </Marker>
 
-
+            <Marker position={[trip.end.lat, trip.end.lon]}>
+              <Popup>End Location</Popup>
+            </Marker>
+          </>
+        )}
       </MapContainer>
-    
     </div>
   );
 }
-
 
 export default TripMap;

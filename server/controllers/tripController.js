@@ -31,6 +31,8 @@ const getTrip = async (req, res) => {
         // start: {lat lon}
         // end: {lat lon}
         // route: {distance, duration, geometry}
+        // convert geometry to polyline string for frontend rendering
+        const coordPairs = route.geometry.coordinates.map(([lon, lat]) => [lat, lon]);
         res.json({
             start: {
                 lat: startLocation.lat,
@@ -43,7 +45,7 @@ const getTrip = async (req, res) => {
             route: {
                 distance: route.distance,
                 duration: route.duration,
-                geometry: route.geometry
+                geometry: coordPairs
             }
         });
     } catch (error) {
