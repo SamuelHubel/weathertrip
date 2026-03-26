@@ -4,6 +4,7 @@ import TripInput from './components/TripInput.jsx';
 import { useState } from 'react';
 
 
+
 function App() {
 // only one trip at a time for now - can expand to list of trips in future
 // through database and UI changes - for now just display most recent trip on map
@@ -12,6 +13,7 @@ function App() {
   const addTrip = (trip) => {
     setTrip(trip);
   };
+ 
 
   return (
     <div className="App">
@@ -21,6 +23,7 @@ function App() {
       <main>
         <TripInput addTrip={addTrip} />
         <TripMap trip={trip} />
+  
       </main>
     </div>
   );
