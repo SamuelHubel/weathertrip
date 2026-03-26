@@ -22,7 +22,6 @@ function TripMap({ trip }) {
           <Polyline positions={trip.route.geometry} color="blue" />
         )}
         {/* render start and end markers if trip data is available */}
-                {/* ✅ Markers only render when data is ready */}
         {trip?.start?.lat && trip?.end?.lat && (
           <>
             <Marker position={[trip.start.lat, trip.start.lon]}>
