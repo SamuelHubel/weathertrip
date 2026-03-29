@@ -1,0 +1,94 @@
+/* ─── Map Panel ─────────────────────────────────────────────── */
+.map-panel .panel-body.open {
+  max-height: none;
+}
+
+.map-wrapper {
+  position: relative;
+  height: 520px;
+}
+
+.map-wrapper .leaflet-container {
+  height: 100%;
+  width: 100%;
+  background: #080e14;
+}
+
+/* Leaflet dark tile filter */
+.leaflet-tile {
+  filter: brightness(0.75) saturate(0.6) hue-rotate(185deg);
+}
+
+/* Leaflet popup dark theme */
+.leaflet-popup-content-wrapper {
+  background: var(--bg-card) !important;
+  border: 1px solid var(--border) !important;
+  border-radius: var(--radius) !important;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.5) !important;
+  color: var(--text-primary) !important;
+  font-family: 'Share Tech Mono', monospace !important;
+  font-size: 11px !important;
+}
+
+.leaflet-popup-tip {
+  background: var(--bg-card) !important;
+}
+
+.leaflet-popup-close-button {
+  color: var(--text-muted) !important;
+}
+
+/* Empty state overlay */
+.map-empty-state {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  color: var(--text-muted);
+  pointer-events: none;
+  z-index: 1000;
+}
+
+.map-empty-icon {
+  font-size: 48px;
+  opacity: 0.3;
+}
+
+.map-empty-text {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+}
+
+/* ─── Stat Bar ──────────────────────────────────────────────── */
+.map-stat-bar {
+  background: var(--bg-panel-alt);
+  border-top: 1px solid var(--border);
+  padding: 10px 16px;
+  display: flex;
+  gap: 24px;
+}
+
+.map-stat {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.map-stat-label {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 9px;
+  color: var(--text-muted);
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+}
+
+.map-stat-value {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 13px;
+  color: var(--cyan);
+}

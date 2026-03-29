@@ -1,0 +1,115 @@
+/* ─── Trip Input Bar ────────────────────────────────────────── */
+.trip-input-bar {
+  background: var(--bg-deep);
+  border-bottom: 1px solid var(--border);
+  padding: 14px 24px;
+}
+
+.trip-input-inner {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  max-width: 1400px;
+  margin: 0 auto;
+  flex-wrap: wrap;
+}
+
+.input-label {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 10px;
+  color: var(--text-muted);
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.input-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+  min-width: 280px;
+}
+
+.location-input {
+  flex: 1;
+  background: var(--bg-panel);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--text-primary);
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 13px;
+  padding: 9px 14px;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
+  letter-spacing: 0.02em;
+}
+
+.location-input::placeholder {
+  color: var(--text-muted);
+  font-size: 12px;
+}
+
+.location-input:focus {
+  border-color: var(--cyan-dim);
+  background: var(--bg-panel-alt);
+  box-shadow: 0 0 0 1px rgba(0, 212, 255, 0.1), inset 0 0 20px rgba(0, 212, 255, 0.03);
+}
+
+.input-arrow {
+  color: var(--text-muted);
+  font-size: 18px;
+  flex-shrink: 0;
+}
+
+.btn-plot {
+  background: transparent;
+  border: 1px solid var(--cyan-dim);
+  color: var(--cyan);
+  font-family: 'Barlow Condensed', sans-serif;
+  font-weight: 700;
+  font-size: 13px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  padding: 9px 22px;
+  border-radius: var(--radius);
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-plot::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--cyan-ghost);
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+
+.btn-plot:hover::before { opacity: 1; }
+
+.btn-plot:hover {
+  box-shadow: var(--glow-cyan);
+  border-color: var(--cyan);
+}
+
+.btn-plot:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.btn-plot.loading {
+  color: var(--cyan-dim);
+}
+
+.input-error {
+  width: 100%;
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 11px;
+  color: var(--red);
+  letter-spacing: 0.05em;
+  padding: 6px 0 0;
+}
