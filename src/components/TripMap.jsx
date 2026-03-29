@@ -22,7 +22,10 @@ function TripMap({ trip }) {
     <div className="panel map-panel">
       {/* Panel Header */}
       <div className="panel-header" onClick={() => setOpen(o => !o)}>
+        <span className="panel-icon">🗺</span>
         <span className="panel-title">Route Map</span>
+        {/* able to open and close the map panel */}  
+        <span className={`panel-toggle${open ? ' open' : ''}`}>▼</span>
       </div>
 
       {/* Panel Body */}
@@ -31,12 +34,12 @@ function TripMap({ trip }) {
           <MapContainer
             center={[39.8, -98.6]}
             zoom={4}
-            style={{ height: '100%', width: '75%' }}
+            style={{ height: '100%', width: '100%' }}
             zoomControl={true}
           >
             <TileLayer
-              attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-              url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+              attribution='&copy; <a href="https://www.stadiamaps.com/" target="_blank">Stadia Maps</a> &copy; <a href="https://openmaptiles.org/" target="_blank">OpenMapTiles</a> &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+              url="https://tiles.stadiamaps.com/tiles/alidade_smooth_dark/{z}/{x}/{y}{r}.png"
             />
 
             {trip?.route?.geometry && (
@@ -82,7 +85,7 @@ function TripMap({ trip }) {
           </div>
           <div className="map-stat">
             <span className="map-stat-label">Weather Points</span>
-            <span className="map-stat-value">—</span>
+            <span className="map-stat-value">Coming soon...</span>
           </div>
         </div>
       </div>

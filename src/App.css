@@ -1,42 +1,169 @@
-.App {
-  text-align: center;
-}
-
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
-}
-
-.App-header {
-  font-family: 'Caveat';
-  background-color: lightslategray;
-  min-height: 10vh;
+/* ─── App Shell ─────────────────────────────────────────────── */
+.app {
+  position: relative;
+  z-index: 1;
+  min-height: 100vh;
   display: flex;
   flex-direction: column;
+}
+
+/* ─── Header ────────────────────────────────────────────────── */
+.app-header {
+  height: var(--header-h);
+  background: var(--bg-deep);
+  border-bottom: 1px solid var(--border);
+  display: flex;
   align-items: center;
-  justify-content: center;
-  font-size: calc(10px + 2vmin);
-  color: white;
+  padding: 0 24px;
+  gap: 16px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
 }
 
-.App-link {
-  color: #61dafb;
+.app-header::after {
+  content: '';
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--cyan-dim), transparent);
+  opacity: 0.4;
 }
 
-.App-body {
-  font-family: 'Caveat';
-  background-color: #282c34;
-  min-height: 90vh;
+.header-logo {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-weight: 900;
+  font-size: 26px;
+  letter-spacing: 0.05em;
+  color: var(--text-primary);
+  text-transform: uppercase;
+}
+
+.header-logo span {
+  color: var(--cyan);
+}
+
+.header-tag {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 10px;
+  color: var(--text-muted);
+  letter-spacing: 0.15em;
+  padding: 3px 8px;
+  border: 1px solid var(--border);
+  border-radius: 2px;
+}
+
+.header-status {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 11px;
+  color: var(--text-secondary);
+}
+
+.status-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--green);
+  box-shadow: 0 0 8px var(--green);
+  animation: pulse 2.5s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.3; }
+}
+
+/* ─── Main Layout ───────────────────────────────────────────── */
+.app-body {
+  flex: 1;
   display: flex;
   flex-direction: column;
+  max-width: 1400px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 20px 24px;
+  gap: 16px;
+}
+
+.main-row {
+  display: grid;
+  grid-template-columns: 1fr 340px;
+  gap: 16px;
+  align-items: start;
+}
+
+.bottom-row {
+  display: grid;
+  grid-template-columns: 1fr;
+}
+
+/* ─── Shared Panel Base ─────────────────────────────────────── */
+/* Used by TripMap, TripLog, WeatherEvents */
+.panel {
+  background: var(--bg-panel);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+
+.panel-header {
+  display: flex;
   align-items: center;
-  justify-content: center;
-  font-size: calc(10px + 2vmin);
-  color: white;
+  gap: 10px;
+  padding: 11px 16px;
+  background: var(--bg-panel-alt);
+  border-bottom: 1px solid var(--border);
+  cursor: pointer;
+  user-select: none;
+  transition: background 0.2s;
+}
+
+.panel-header:hover {
+  background: var(--bg-hover);
+}
+
+.panel-icon {
+  font-size: 14px;
+  opacity: 0.85;
+}
+
+.panel-title {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-weight: 700;
+  font-size: 12px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+  flex: 1;
+}
+
+.panel-toggle {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 10px;
+  color: var(--text-muted);
+  transition: transform 0.25s, color 0.2s;
+}
+
+.panel-header:hover .panel-toggle {
+  color: var(--cyan);
+}
+
+.panel-toggle.open {
+  transform: rotate(180deg);
+}
+
+.panel-body {
+  overflow: hidden;
+  transition: max-height 0.35s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.25s;
+  max-height: 0;
+  opacity: 0;
+}
+
+.panel-body.open {
+  max-height: 2000px;
+  opacity: 1;
 }

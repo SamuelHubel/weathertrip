@@ -9,19 +9,14 @@ function App() {
   const [trip, setTrip] = useState(null);
   const [tripLog, setTripLog] = useState([]);
 
-  const addTrip = (tripData, startLabel, endLabel) => {
-    const entry = {
-      id: Date.now(),
-      start: startLabel,
-      end: endLabel,
-      data: tripData,
-      timestamp: new Date(),
-    };
+  const addTrip = (tripData) => {
     setTrip(tripData);
-    // 
-    setTripLog(prev => [entry, ...prev]);
+    // TODO add trip to log with timestamp and route info
+    // start and end, and route to replot on click
   };
 
+
+  // function to replot a trip from the log when clicked — for now just sets the current trip to the selected log entry's data, but will eventually also update the weather events and other info based on the selected trip
   const replotTrip = (entry) => {
     setTrip(entry.data);
   };
