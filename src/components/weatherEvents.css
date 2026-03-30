@@ -1,0 +1,86 @@
+/* ─── Weather Events Panel ──────────────────────────────────── */
+.weather-events-panel {
+  margin-top: 0;
+}
+
+.weather-events-list {
+  display: flex;
+  flex-direction: column;
+}
+
+.weather-event-item {
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+}
+
+.weather-event-item:last-child {
+  border-bottom: none;
+}
+
+.weather-event-icon {
+  font-size: 20px;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.weather-event-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.weather-event-headline {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-weight: 600;
+  font-size: 14px;
+  color: var(--text-primary);
+  line-height: 1.3;
+}
+
+.weather-event-location {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 10px;
+  color: var(--text-muted);
+  letter-spacing: 0.1em;
+}
+
+.weather-event-severity {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  padding: 2px 6px;
+  border-radius: 2px;
+  align-self: flex-start;
+}
+
+.severity-high {
+  background: rgba(255, 77, 109, 0.12);
+  color: var(--red);
+  border: 1px solid rgba(255, 77, 109, 0.25);
+}
+
+.severity-med {
+  background: var(--amber-ghost);
+  color: var(--amber);
+  border: 1px solid rgba(255, 179, 71, 0.25);
+}
+
+.severity-low {
+  background: rgba(57, 211, 83, 0.08);
+  color: var(--green);
+  border: 1px solid rgba(57, 211, 83, 0.2);
+}
+
+.weather-events-empty {
+  padding: 32px 16px;
+  text-align: center;
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 11px;
+  color: var(--text-muted);
+  letter-spacing: 0.1em;
+}

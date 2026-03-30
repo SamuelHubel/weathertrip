@@ -1,16 +1,65 @@
-/* import for font */
-@import url('https://fonts.googleapis.com/css2?family=Caveat&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Barlow+Condensed:wght@300;400;600;700;900&family=Barlow:wght@300;400;500&display=swap');
+
+/* ─── Design Tokens ─────────────────────────────────────────── */
+:root {
+  --bg-void:      #080c10;
+  --bg-deep:      #0d1117;
+  --bg-panel:     #111820;
+  --bg-panel-alt: #141c26;
+  --bg-card:      #19232f;
+  --bg-hover:     #1e2a38;
+
+  --border:       #1e2d3d;
+  --border-glow:  #1e3a50;
+
+  --cyan:         #00d4ff;
+  --cyan-dim:     #0097b8;
+  --cyan-ghost:   rgba(0, 212, 255, 0.08);
+  --amber:        #ffb347;
+  --amber-dim:    #c4813a;
+  --amber-ghost:  rgba(255, 179, 71, 0.08);
+  --red:          #ff4d6d;
+  --green:        #39d353;
+
+  --text-primary:   #e8f4f8;
+  --text-secondary: #6b8fa8;
+  --text-muted:     #3d5568;
+  --text-mono:      #7dd3fc;
+
+  --header-h: 64px;
+  --radius:   4px;
+
+  --glow-cyan:  0 0 20px rgba(0, 212, 255, 0.15), 0 0 60px rgba(0, 212, 255, 0.05);
+  --glow-amber: 0 0 20px rgba(255, 179, 71, 0.15), 0 0 60px rgba(255, 179, 71, 0.05);
+}
+
+/* ─── Reset ─────────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 body {
-  margin: 0;
-  font-family: 'Caveat', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+  background: var(--bg-void);
+  color: var(--text-primary);
+  font-family: 'Barlow', sans-serif;
+  font-size: 14px;
+  min-height: 100vh;
+  overflow-x: hidden;
 }
 
-code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
-    monospace;
+/* Subtle grid texture */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(0,212,255,0.015) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0,212,255,0.015) 1px, transparent 1px);
+  background-size: 40px 40px;
+  pointer-events: none;
+  z-index: 0;
 }
+
+/* ─── Scrollbars ─────────────────────────────────────────────── */
+::-webkit-scrollbar { width: 4px; height: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+::-webkit-scrollbar-thumb:hover { background: var(--border-glow); }

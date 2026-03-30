@@ -1,62 +1,79 @@
-// component to input trip details and add to list
-//
 import React, { useState } from 'react';
-import  fetchTrip  from '../services/tripService';
+import './TripInput.css';
+import fetchTrip from '../services/tripService';
 
 function TripInput({ addTrip }) {
-  // trip info
-    const [tripStartLocation, setTripStartLocation] = useState('');
-    const [tripEndLocation, setTripEndLocation] = useState('');
-    const [loading, setLoading] = useState(false);
-    const [error, setError] = useState(null);
-    // handle form submission
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-        setLoading(true);
-        setError(null);
-        try {
-          // fetch trip data from server
-            const tripData = await fetchTrip(tripStartLocation, tripEndLocation);
+  const [start, setStart] = useState('');
+  const [end, setEnd] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
 
-            // add trip to list if data is valid
-            if (tripData) {
-                addTrip(tripData);
-                setTripStartLocation('');
-                setTripEndLocation('');
-                // dummy window alert to show trip added - replace with better UI in future
-                window.alert(`Trip added: ${tripStartLocation} to ${tripEndLocation}`);
-              } else {
-                setError('Failed to fetch trip data');
-              }
-            } catch (err) {
-              setError(err.message || 'Error fetching trip');
-            } finally {
-              setLoading(false);
-             
-        }
-    };
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!start.trim() || !end.trim()) return;
+
+    setLoading(true);
+    setError(null);
+
+    try {
+      const tripData = await fetchTrip(start, end);
+      if (tripData) {
+        addTrip(tripData, start.trim(), end.trim());
+        setStart('');
+        setEnd('');
+      } else {
+        setError('ERR: Route not found — check locations and retry');
+      }
+    } catch (err) {
+      setError(`ERR: ${err.message || 'Failed to connect to routing service'}`);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
-    <div>
-      <h2>Where're we headed?</h2>
+    <div className="trip-input-bar">
       <form onSubmit={handleSubmit}>
-        <input 
-          type="text"
-          placeholder="Start Location"
-          value={tripStartLocation}
-          onChange={(e) => setTripStartLocation(e.target.value)}
-        />
-        <input 
-          type="text"
-          placeholder="End Location"
-          value={tripEndLocation}
-          onChange={(e) => setTripEndLocation(e.target.value)}
-        />
-        <button type="submit">Add Trip</button>
+        <div className="trip-input-inner">
+          <span className="input-label">Plot Route</span>
+
+          <div className="input-group">
+            <input
+              className="location-input"
+              type="text"
+              placeholder="Origin  (e.g. Denver, CO)"
+              value={start}
+              onChange={(e) => setStart(e.target.value)}
+              disabled={loading}
+              autoComplete="off"
+            />
+            <span className="input-arrow">→</span>
+            <input
+              className="location-input"
+              type="text"
+              placeholder="Destination  (e.g. Salt Lake City, UT)"
+              value={end}
+              onChange={(e) => setEnd(e.target.value)}
+              disabled={loading}
+              autoComplete="off"
+            />
+          </div>
+
+          <button
+            className={`btn-plot${loading ? ' loading' : ''}`}
+            type="submit"
+            disabled={loading || !start.trim() || !end.trim()}
+          >
+            {loading ? '[ ROUTING... ]' : '[ PLOT ROUTE ]'}
+          </button>
+        </div>
+
+        {error && (
+          <div className="input-error">{error}</div>
+        )}
       </form>
     </div>
   );
+}
 
-  }
-
-
-export default TripInput;  
+export default TripInput;
