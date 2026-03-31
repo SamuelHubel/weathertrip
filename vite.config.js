@@ -16,6 +16,13 @@ export default defineConfig(({ mode }) => {
             importPrefixPlugin(),
             htmlPlugin(mode),
         ],
+        // tests
+        test: {
+            globals: true,
+            environment: "jsdom",
+            setupFiles: "./src/setupTests.js",
+            css: true,
+        },
     };
 });
 function setEnv(mode) {
