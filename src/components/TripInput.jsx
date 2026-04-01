@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import './TripInput.css';
+import './tripInput.css';
 import fetchTrip from '../services/tripService';
 
 function TripInput({ addTrip }) {
@@ -35,7 +35,7 @@ function TripInput({ addTrip }) {
     <div className="trip-input-bar">
       <form onSubmit={handleSubmit}>
         <div className="trip-input-inner">
-          <span className="input-label">Plot Route</span>
+          <span className="input-label">Route</span>
 
           <div className="input-group">
             <input

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import './WeatherEvents.css';
+import './weatherEvents.css';
 
 // Placeholder events — replace with real API data when weather service is wired up
 

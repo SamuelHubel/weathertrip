@@ -26,7 +26,7 @@ function App() {
       {/* ── Header ── */}
       <header className="app-header">
         <div className="header-logo">
-          Weather<span>.</span>Trip
+          Weather.Trip
         </div>
         <div className="header-tag">ROUTE WEATHER SYSTEM</div>
       </header>

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import './TripMap.css';
+import './tripMap.css';
 import { MapContainer, TileLayer, Polyline, Marker, Popup } from 'react-leaflet';
 
 function formatDistance(meters) {
