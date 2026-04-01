@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import './TripInput.css';
+import './tripInput.css';
 import fetchTrip from '../services/tripService';
 
 function TripInput({ addTrip }) {

@@ -16,12 +16,13 @@ export default defineConfig(({ mode }) => {
             importPrefixPlugin(),
             htmlPlugin(mode),
         ],
-        // tests
+        // tests — only scan src/, never the server/ directory
         test: {
             globals: true,
             environment: "jsdom",
             setupFiles: "./src/setupTests.js",
             css: true,
+            include: ["src/**/*.{test,spec}.{js,jsx,ts,tsx}"],
         },
     };
 });
@@ -35,9 +36,6 @@ function setEnv(mode) {
             : `/${homepage}`}`.replace(/\/$/, "")
         : "";
 }
-// Expose `process.env` environment variables to your client code
-// Migration guide: Follow the guide below to replace process.env with import.meta.env in your app, you may also need to rename your environment variable to a name that begins with VITE_ instead of REACT_APP_
-// https://vitejs.dev/guide/env-and-mode.html#env-variables
 function envPlugin() {
     return {
         name: "env-plugin",
@@ -52,11 +50,6 @@ function envPlugin() {
         },
     };
 }
-// Setup HOST, SSL, PORT
-// Migration guide: Follow the guides below
-// https://vitejs.dev/config/server-options.html#server-host
-// https://vitejs.dev/config/server-options.html#server-https
-// https://vitejs.dev/config/server-options.html#server-port
 function devServerPlugin() {
     return {
         name: "dev-server-plugin",
@@ -81,8 +74,6 @@ function devServerPlugin() {
         },
     };
 }
-// Migration guide: Follow the guide below
-// https://vitejs.dev/config/build-options.html#build-sourcemap
 function sourcemapPlugin() {
     return {
         name: "sourcemap-plugin",
@@ -98,8 +89,6 @@ function sourcemapPlugin() {
         },
     };
 }
-// Migration guide: Follow the guide below
-// https://vitejs.dev/config/build-options.html#build-outdir
 function buildPathPlugin() {
     return {
         name: "build-path-plugin",
@@ -115,8 +104,6 @@ function buildPathPlugin() {
         },
     };
 }
-// Migration guide: Follow the guide below and remove homepage field in package.json
-// https://vitejs.dev/config/shared-options.html#base
 function basePlugin() {
     return {
         name: "base-plugin",
@@ -128,10 +115,6 @@ function basePlugin() {
         },
     };
 }
-// To resolve modules from node_modules, you can prefix paths with ~
-// https://create-react-app.dev/docs/adding-a-sass-stylesheet
-// Migration guide: Follow the guide below
-// https://vitejs.dev/config/shared-options.html#resolve-alias
 function importPrefixPlugin() {
     return {
         name: "import-prefix-plugin",
@@ -144,10 +127,6 @@ function importPrefixPlugin() {
         },
     };
 }
-// Replace %ENV_VARIABLES% in index.html
-// https://vitejs.dev/guide/api-plugin.html#transformindexhtml
-// Migration guide: Follow the guide below, you may need to rename your environment variable to a name that begins with VITE_ instead of REACT_APP_
-// https://vitejs.dev/guide/env-and-mode.html#html-env-replacement
 function htmlPlugin(mode) {
     const env = loadEnv(mode, ".", ["REACT_APP_", "NODE_ENV", "PUBLIC_URL"]);
     return {

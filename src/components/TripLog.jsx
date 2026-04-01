@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import './TripLog.css';
+import './tripLog.css';
 
 
 
