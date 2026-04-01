@@ -30,4 +30,4 @@ const getRoute = async (start, end) => {
   }
 }
 
-export default  getRoute;
+export default getRoute;
