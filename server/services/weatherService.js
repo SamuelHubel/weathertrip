@@ -14,6 +14,10 @@ const getWeather = async (lat, lon) => {
         const url = `${process.env.WEATHER_URL}?latitude=${lat}&longitude=${lon}&current_weather=true`;
         console.log(`Fetching weather from: ${url}`);
         const response = await axios.get(url, {
+            location: {
+                latitude: lat,
+                longitude: lon
+            },
             temperature: temperature,
             windspeed: windspeed,
             weathercode: weathercode,
