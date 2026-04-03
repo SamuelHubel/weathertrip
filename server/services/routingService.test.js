@@ -4,7 +4,7 @@
 
 import { test } from 'vitest';
 import getRoute  from './routingService';
-import axios from 'axios';
+import axios from 'axios'; 
 
 test('routingService should return route data for valid origin and destination', async () => {
     const origin = { lat: 39.7392364, lon: -104.990251 }; // Denver, CO
@@ -14,7 +14,7 @@ test('routingService should return route data for valid origin and destination',
             routes: [{
                 distance: 685000,
                 duration: 22200,
-                geometry: [[39.7392364, -104.990251], [40.1, -106.5], [40.7608, -111.8910]],
+                geometry: [[39.7392364, -104.990251], [40.1, -106.5], [40.7608, -111.8910]]
             }]
         }
 };

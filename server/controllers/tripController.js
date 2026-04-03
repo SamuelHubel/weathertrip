@@ -3,6 +3,7 @@
 // includes start and end locations and route info from OSRM API
 import geocodingService from '../services/geocodingService.js';
 import getRoute from '../services/routingService.js';
+import sampleRoute from '../services/routeSamplingService.js';
 
 const getTrip = async (req, res) => {
     try {
@@ -45,7 +46,7 @@ const getTrip = async (req, res) => {
             route: {
                 distance: route.distance,
                 duration: route.duration,
-                geometry: coordPairs
+                geometry: coordPairs,
             }
         });
     } catch (error) {

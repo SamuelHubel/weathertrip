@@ -17,7 +17,7 @@ const getRoute = async (start, end) => {
         geometries: 'geojson'
       }
     });
-    // object with distance, duration, and polyline route and sampled points along the route
+    // object with distance, duration, and polyline route
     
     const route = response.data.routes[0];
    
@@ -25,15 +25,12 @@ const getRoute = async (start, end) => {
           distance: route.distance,
           duration: route.duration,
           geometry: route.geometry,
-          weatherPoints: sampleRoutePoints(route.geometry.coordinates, 80) // sample points every 80 km
-      };
+        
+        };
   } catch (error) {
     console.error('Routing error:', error.message);
     return null;
   }
-  // collect points along the route at regular intervals ever 50 miles ish for weather data collection
-  // take the geometry and sample points along the route every 50 miles (80 km) and return those points for weather data collection
- 
 
 
 }

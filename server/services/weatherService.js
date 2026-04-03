@@ -6,34 +6,37 @@ import axios from 'axios';
 import dotenv from 'dotenv';
 
 dotenv.config();
-
+// function to get weather data for a provided lat/lon from Open-Meteo API
+// returns an object with current weather info and hourly precipitation, rain, snowfall for available hours
+// will be called for each sampled point along the route
 const getWeather = async (lat, lon) => {
     try {
+        const url = `${process.env.WEATHER_URL}?latitude=${lat}&longitude=${lon}&current_weather=true&hourly=precipitation,rain,snowfall`;
 
-        // url in .env
-        const url = `${process.env.WEATHER_URL}?latitude=${lat}&longitude=${lon}&current_weather=true`;
-        console.log(`Fetching weather from: ${url}`);
-        const response = await axios.get(url, {
+        const response = await axios.get(url);
+
+        const data = response.data;
+
+        return {
             location: {
-                latitude: lat,
-                longitude: lon
+                latitude: data.latitude,
+                longitude: data.longitude,
             },
-            temperature: temperature,
-            windspeed: windspeed,
-            weathercode: weathercode,
-            precipitation: precipitation,
-            snowfall: snowfall,
-            rain: rain,
-            
+            temperature: data.current_weather?.temperature,
+            windspeed: data.current_weather?.windspeed,
+            weathercode: data.current_weather?.weathercode,
 
-        }
+            // hourly arrays
+            // need to find current hour index to get current precipitation, rain, snowfall
+            precipitation: data.hourly?.precipitation?.[0],
+            rain: data.hourly?.rain?.[0],
+            snowfall: data.hourly?.snowfall?.[0],
+        };
 
-        );
-        return response.data;
     } catch (error) {
         console.error('Weather error:', error.message);
         return null;
     }
-}
+};
 
 export default getWeather;

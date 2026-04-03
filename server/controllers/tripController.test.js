@@ -28,8 +28,8 @@ const mockRoute = {
             [-104.990251, 39.7392364],
             [-106.5,      40.1      ],
             [-111.8910,   40.7608   ],
-        ],
-    },
+        ]
+    }
 };
 
 // Expected geometry after lon/lat swap performed by the controller
@@ -71,8 +71,8 @@ describe('getTrip — happy path', () => {
             route: {
                 distance: mockRoute.distance,
                 duration: mockRoute.duration,
-                geometry: expectedGeometry,
-            },
+                geometry: expectedGeometry
+            }
         });
     });
 
