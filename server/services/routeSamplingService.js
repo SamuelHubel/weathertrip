@@ -44,5 +44,5 @@ function sampleRoute(coords, intervalMeters) {
   return samples;
 }
 
-export default sampleRoute ;
+export default sampleRoute;
 export { haversineDistance, interpolate };

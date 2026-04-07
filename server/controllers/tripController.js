@@ -3,7 +3,7 @@
 // includes start and end locations and route info from OSRM API
 import geocodingService from '../services/geocodingService.js';
 import getRoute from '../services/routingService.js';
-import sampleRoute from '../services/routeSamplingService.js';
+
 
 const getTrip = async (req, res) => {
     try {
@@ -31,9 +31,8 @@ const getTrip = async (req, res) => {
         // returns 
         // start: {lat lon}
         // end: {lat lon}
-        // route: {distance, duration, geometry}
-        // convert geometry to polyline string for frontend rendering
-        const coordPairs = route.geometry.coordinates.map(([lon, lat]) => [lat, lon]);
+        // route: {distance, duration, geometry, weatherPoints}
+
         res.json({
             start: {
                 lat: startLocation.lat,
@@ -46,10 +45,14 @@ const getTrip = async (req, res) => {
             route: {
                 distance: route.distance,
                 duration: route.duration,
-                geometry: coordPairs,
-            }
+                geometry: route.geometry,
+                // sample points along the route for weather pings 
+                weatherPoints: route.weatherPoints
+            },
         });
-    } catch (error) {
+
+    } 
+    catch (error) {
         console.error('Trip error:', error);
         res.status(500).json({ error: 'Failed to process trip' });
     }
