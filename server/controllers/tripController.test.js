@@ -162,8 +162,11 @@ describe('getTrip', () => {
                     distance:      MOCK_ROUTE.distance,
                     duration:      MOCK_ROUTE.duration,
                     geometry:      MOCK_ROUTE.geometry,
-                    weatherPoints: MOCK_ROUTE.weatherPoints,
+                   
                 },
+                // weather data for each sampled point along the route
+                // test expects that there is some array of weather data, but doesn't check the contents since that's tested in weatherService.test.js
+                weather: expect.any(Array), 
             });
         });
 
