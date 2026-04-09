@@ -13,14 +13,14 @@ function haversineDistance([lat1, lon1], [lat2, lon2]) {
 
 // function to interpolate between two lat/lon points
 function interpolate([lat1, lon1], [lat2, lon2], t) {
-  return {
-    lat: lat1 + (lat2 - lat1) * t,
-    lon: lon1 + (lon2 - lon1) * t
-  };
+  return [
+    lat1 + (lat2 - lat1) * t,
+    lon1 + (lon2 - lon1) * t
+  ];
 }
 
 function sampleRoute(coords, intervalMeters) {
-  const samples = [{ lat: coords[0][0], lon: coords[0][1] }]; 
+  const samples = [coords[0]];  // already an array
   let accumulated = 0;
 
   for (let i = 1; i < coords.length; i++) {
@@ -28,14 +28,14 @@ function sampleRoute(coords, intervalMeters) {
     let remaining = intervalMeters - accumulated;
 
     while (remaining <= segDist) {
-      samples.push(interpolate(coords[i - 1], coords[i], remaining / segDist)); 
+      samples.push(interpolate(coords[i - 1], coords[i], remaining / segDist));
       remaining += intervalMeters;
     }
 
     accumulated = segDist - (remaining - intervalMeters);
   }
 
-  samples.push({ lat: coords[coords.length - 1][0], lon: coords[coords.length - 1][1] }); 
+  samples.push(coords[coords.length - 1]);
   return samples;
 }
 

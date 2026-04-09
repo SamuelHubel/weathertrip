@@ -1,27 +1,23 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import axios from 'axios';
 
-// Stub env before import
 vi.stubEnv('WEATHER_URL', 'https://api.open-meteo.com/v1/forecast');
-
-// Mock axios
 vi.mock('axios');
 
 import getWeather from './weatherService.js';
 
-// ── Fixtures ────────────────────────────────────────────────────────────────
-
 const LAT = 39.7392;
 const LON = -104.9903;
 
+// updated to match current Open-Meteo response format
 const mockApiResponse = {
   data: {
     latitude: LAT,
     longitude: LON,
-    current_weather: {
-      temperature: 12.5,
-      windspeed: 18.3,
-      weathercode: 3,
+    current: {
+      temperature_2m: 12.5,
+      wind_speed_10m: 18.3,
+      weather_code: 3,
       time: '2026-04-03T14:00',
     },
     hourly: {
@@ -46,10 +42,7 @@ describe('getWeather — success', () => {
     const result = await getWeather(LAT, LON);
 
     expect(result).toEqual({
-      location: {
-        latitude: LAT,
-        longitude: LON,
-      },
+      location: { latitude: LAT, longitude: LON },
       temperature: 12.5,
       windspeed: 18.3,
       weathercode: 3,
@@ -61,38 +54,38 @@ describe('getWeather — success', () => {
 
   it('calls axios.get once', async () => {
     axios.get.mockResolvedValue(mockApiResponse);
-
     await getWeather(LAT, LON);
-
     expect(axios.get).toHaveBeenCalledTimes(1);
   });
 
-  it('builds correct URL with query params', async () => {
+it('builds correct URL with query params', async () => {
     axios.get.mockResolvedValue(mockApiResponse);
-
     await getWeather(LAT, LON);
 
-    const calledUrl = axios.get.mock.calls[0][0];
+    const [calledUrl, calledConfig] = axios.get.mock.calls[0];
+    const params = calledConfig.params;
 
-    expect(calledUrl).toContain(`latitude=${LAT}`);
-    expect(calledUrl).toContain(`longitude=${LON}`);
-    expect(calledUrl).toContain('current_weather=true');
-    expect(calledUrl).toContain('hourly=precipitation,rain,snowfall');
-  });
+    expect(calledUrl).toContain('api.open-meteo.com');
+    expect(params.toString()).toContain(`latitude=${LAT}`);
+    expect(params.toString()).toContain(`longitude=${LON}`);
+    expect(params.toString()).toContain('current=temperature_2m');
+    expect(params.toString()).toContain('current=wind_speed_10m');
+    expect(params.toString()).toContain('current=weather_code');
+    expect(params.toString()).toContain('hourly=precipitation');
+    expect(params.toString()).toContain('hourly=rain');
+    expect(params.toString()).toContain('hourly=snowfall');
+});
 
   it('uses WEATHER_URL env variable', async () => {
     axios.get.mockResolvedValue(mockApiResponse);
-
     await getWeather(LAT, LON);
 
     const calledUrl = axios.get.mock.calls[0][0];
-
     expect(calledUrl).toContain('api.open-meteo.com');
   });
 
   it('extracts correct hourly values (index 0)', async () => {
     axios.get.mockResolvedValue(mockApiResponse);
-
     const result = await getWeather(LAT, LON);
 
     expect(result.precipitation).toBe(0.2);
@@ -109,10 +102,10 @@ describe('getWeather — edge cases', () => {
       data: {
         latitude: LAT,
         longitude: LON,
-        current_weather: {
-          temperature: 10,
-          windspeed: 5,
-          weathercode: 1,
+        current: {
+          temperature_2m: 10,
+          wind_speed_10m: 5,
+          weather_code: 1,
         },
         hourly: {},
       },
@@ -125,7 +118,7 @@ describe('getWeather — edge cases', () => {
     expect(result.snowfall).toBeUndefined();
   });
 
-  it('handles missing current_weather gracefully', async () => {
+  it('handles missing current data gracefully', async () => {
     axios.get.mockResolvedValue({
       data: {
         latitude: LAT,
@@ -144,6 +137,11 @@ describe('getWeather — edge cases', () => {
     expect(result.windspeed).toBeUndefined();
     expect(result.weathercode).toBeUndefined();
   });
+
+  it('returns null for invalid coordinates', async () => {
+    const result = await getWeather(undefined, undefined);
+    expect(result).toBeNull();
+  });
 });
 
 // ── Error handling ──────────────────────────────────────────────────────────
@@ -151,25 +149,18 @@ describe('getWeather — edge cases', () => {
 describe('getWeather — error handling', () => {
   it('returns null on network error', async () => {
     axios.get.mockRejectedValue(new Error('Network error'));
-
     const result = await getWeather(LAT, LON);
-
     expect(result).toBeNull();
   });
 
   it('returns null on API error', async () => {
-    axios.get.mockRejectedValue({
-      response: { status: 500 },
-    });
-
+    axios.get.mockRejectedValue({ response: { status: 500 } });
     const result = await getWeather(LAT, LON);
-
     expect(result).toBeNull();
   });
 
   it('never throws', async () => {
     axios.get.mockRejectedValue(new Error('timeout'));
-
     await expect(getWeather(LAT, LON)).resolves.not.toThrow();
   });
 });
@@ -185,19 +176,13 @@ describe('getWeather — multiple calls (route sampling)', () => {
 
   it('can be called for multiple points', async () => {
     axios.get.mockResolvedValue(mockApiResponse);
-
-    const results = await Promise.all(
-      points.map(p => getWeather(p.lat, p.lon))
-    );
-
+    const results = await Promise.all(points.map(p => getWeather(p.lat, p.lon)));
     expect(results).toHaveLength(points.length);
   });
 
   it('calls axios once per point', async () => {
     axios.get.mockResolvedValue(mockApiResponse);
-
     await Promise.all(points.map(p => getWeather(p.lat, p.lon)));
-
     expect(axios.get).toHaveBeenCalledTimes(points.length);
   });
 
@@ -207,9 +192,7 @@ describe('getWeather — multiple calls (route sampling)', () => {
       .mockRejectedValueOnce(new Error('timeout'))
       .mockResolvedValueOnce(mockApiResponse);
 
-    const results = await Promise.all(
-      points.map(p => getWeather(p.lat, p.lon))
-    );
+    const results = await Promise.all(points.map(p => getWeather(p.lat, p.lon)));
 
     expect(results[0]).not.toBeNull();
     expect(results[1]).toBeNull();
