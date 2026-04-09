@@ -3,38 +3,44 @@
 // will be used a lot as we ping weather for some points along the route
 // every 50 miles or so, and also for start and end locations
 import axios from 'axios';
-import dotenv from 'dotenv';
 
-dotenv.config();
+
+
 // function to get weather data for a provided lat/lon from Open-Meteo API
 // returns an object with current weather info and hourly precipitation, rain, snowfall for available hours
 // will be called for each sampled point along the route
 const getWeather = async (lat, lon) => {
     try {
-        const url = `${process.env.WEATHER_URL}?latitude=${lat}&longitude=${lon}&current_weather=true&hourly=precipitation,rain,snowfall`;
-
-        const response = await axios.get(url);
-
-        const data = response.data;
-
+        const { data } = await axios.get("https://api.open-meteo.com/v1/forecast", {
+            params: new URLSearchParams([
+        ['latitude', lat],
+        ['longitude', lon],
+        ['current', 'temperature_2m'],
+        ['current', 'wind_speed_10m'],
+        ['current', 'weather_code'],
+        ['hourly', 'precipitation'],
+        ['hourly', 'rain'],
+        ['hourly', 'snowfall'],
+        ['forecast_days', '1'],
+        ])
+    });
+    console.log('RAW DATA:', JSON.stringify(data, null, 2));
         return {
-            location: {
-                latitude: data.latitude,
-                longitude: data.longitude,
-            },
-            temperature: data.current_weather?.temperature,
-            windspeed: data.current_weather?.windspeed,
-            weathercode: data.current_weather?.weathercode,
-
-            // hourly arrays
-            // need to find current hour index to get current precipitation, rain, snowfall
-            precipitation: data.hourly?.precipitation?.[0],
-            rain: data.hourly?.rain?.[0],
-            snowfall: data.hourly?.snowfall?.[0],
+            // location to plot point on map
+            location: { latitude: data.latitude, longitude: data.longitude },
+            // current weather info
+            temperature: data.current.temperature_2m,
+            windspeed: data.current.wind_speed_10m,
+            weathercode: data.current.weather_code,
+            // hourly precipitation, rain, snowfall for available hours
+            precipitation: data.hourly.precipitation[0],
+            rain: data.hourly.rain[0],
+            snowfall: data.hourly.snowfall[0],
         };
 
     } catch (error) {
         console.error('Weather error:', error.message);
+        console.error('Weather details:', error.response?.data); 
         return null;
     }
 };

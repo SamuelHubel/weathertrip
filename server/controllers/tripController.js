@@ -41,6 +41,7 @@ const getTrip = async (req, res) => {
         // snowfall (cm) for current hour
         const weather = [];
         for (const point of route.weatherPoints) {
+            console.log(`Fetching weather for point: ${point.lat}, ${point.lon}`);
             const weatherData = await getWeather(point.lat, point.lon);
             weather.push(weatherData);
         }

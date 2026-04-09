@@ -12,6 +12,9 @@ const fetchTrip = async (startLocation, endLocation) => {
             end: endLocation,
 
         });
+
+        // returns the trip data
+        // locations, route, weather
         return response.data;
     } catch (error) {
         console.error('Error fetching trip data:', error);

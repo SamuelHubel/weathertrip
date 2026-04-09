@@ -12,20 +12,15 @@ function haversineDistance([lat1, lon1], [lat2, lon2]) {
 }
 
 // function to interpolate between two lat/lon points
-// returns a point at a fraction t along the line between the two points
-// should be close to the actual point on the route at that distance, 
-// but not exactly
 function interpolate([lat1, lon1], [lat2, lon2], t) {
-  return [lat1 + (lat2 - lat1) * t, lon1 + (lon2 - lon1) * t];
+  return {
+    lat: lat1 + (lat2 - lat1) * t,
+    lon: lon1 + (lon2 - lon1) * t
+  };
 }
 
-
-// sample points along the route every 50 miles (80 km) and return those points for weather data collection
-// takes a point, goes 50 miles out, and finds the point on the route that is closest to that distance,
-// then adds that point to the samples array and continues until the end of the route
-
 function sampleRoute(coords, intervalMeters) {
-  const samples = [coords[0]];
+  const samples = [{ lat: coords[0][0], lon: coords[0][1] }]; 
   let accumulated = 0;
 
   for (let i = 1; i < coords.length; i++) {
@@ -33,14 +28,14 @@ function sampleRoute(coords, intervalMeters) {
     let remaining = intervalMeters - accumulated;
 
     while (remaining <= segDist) {
-      samples.push(interpolate(coords[i - 1], coords[i], remaining / segDist));
+      samples.push(interpolate(coords[i - 1], coords[i], remaining / segDist)); 
       remaining += intervalMeters;
     }
 
     accumulated = segDist - (remaining - intervalMeters);
   }
-  // add the last point if it's not already included
-  samples.push(coords[coords.length - 1]);
+
+  samples.push({ lat: coords[coords.length - 1][0], lon: coords[coords.length - 1][1] }); 
   return samples;
 }
 
