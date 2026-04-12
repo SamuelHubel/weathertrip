@@ -15,6 +15,41 @@ function formatDuration(seconds) {
   return h > 0 ? `${h}h ${m}m` : `${m}m`;
 }
 
+// markers for weather points
+const weatherIcons = {
+  0: '☀️',   // Clear sky
+  1: '🌤️',   // Mainly clear
+  2: '⛅',    // Partly cloudy
+  3: '☁️',    // Overcast
+  45: '🌫️',   // Fog
+  48: '🌫️',   // Depositing rime fog
+  51: '🌦️',   // Drizzle: Light
+  53: '🌦️',   // Drizzle: Moderate
+  55: '🌦️',   // Drizzle: Dense
+  56: '🌧️',   // Freezing Drizzle: Light
+  57: '🌧️',   // Freezing Drizzle: Dense
+  61: '🌧️',   // Rain: Slight
+  63: '🌧️',   // Rain: Moderate
+  65: '🌧️',   // Rain: Heavy
+  66: '🌨️',   // Freezing Rain: Light
+  67: '🌨️',   // Freezing Rain: Heavy
+  71: '🌨️',   // Snow fall: Slight
+  73: '🌨️',   // Snow fall: Moderate
+  75: '🌨️',   // Snow fall: Heavy
+  77: '🌨️',   // Snow grains
+  80: '🌧️',   // Rain showers: Slight
+  81: '🌧️',   // Rain showers: Moderate
+  82: '🌧️',   // Rain showers: Violent
+  85: '🌨️',   // Snow showers slight
+  86: '🌨️',   // Snow showers heavy
+  95: '⛈️',   // Thunderstorm: Slight or moderate 
+  96: '⛈️',   // Thunderstorm with slight hail
+  99: '⛈️',   // Thunderstorm with heavy hail
+  // thunderstorm with hail only available in forecast for central Europe
+}; 
+
+
+
 function TripMap({ trip }) {
   const [open, setOpen] = useState(true);
 
@@ -62,6 +97,25 @@ function TripMap({ trip }) {
                 <Popup>DESTINATION</Popup>
               </Marker>
             )}
+            {/* Weather points along the route */}
+            {trip?.weather?.map((point, idx) => (
+              <Marker
+                key={idx}
+                position={[point.location.latitude, point.location.longitude]}
+                icon={L.divIcon({
+                  className: 'weather-icon',
+                  html: weatherIcons[point.weathercode] || '❓',
+                })}
+              >
+                <Popup>
+                  <div><strong>Weather Point {idx + 1}</strong></div>
+                  <div>Temp: {point.temperature}°C</div>
+                  <div>Wind: {point.windspeed} m/s</div>
+                  <div>Rain: {point.rain} mm</div>
+                  <div>Snow: {point.snowfall} cm</div>
+                </Popup>
+              </Marker>
+            ))}
           </MapContainer>
 
           {/* Empty state overlay */}
