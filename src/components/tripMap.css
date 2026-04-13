@@ -92,3 +92,14 @@
   font-size: 13px;
   color: var(--cyan);
 }
+
+
+.weather-icon {
+  font-size: 24px;         /* controls emoji size */
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+}

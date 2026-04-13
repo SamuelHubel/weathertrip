@@ -20,7 +20,8 @@
     "axios": "^1.4.0",
     "cors": "^2.8.5",
     "dotenv": "^16.0.3",
-    "express": "^4.18.2"
+    "express": "^4.18.2",
+    "openmeteo": "^1.2.3"
   },
   "devDependencies": {
     "nodemon": "^3.0.1",

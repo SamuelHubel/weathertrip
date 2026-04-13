@@ -3,6 +3,7 @@
 // includes start and end locations and route info from OSRM API
 import geocodingService from '../services/geocodingService.js';
 import getRoute from '../services/routingService.js';
+import getWeather from '../services/weatherService.js';
 
 const getTrip = async (req, res) => {
     try {
@@ -26,13 +27,33 @@ const getTrip = async (req, res) => {
         if (!route) {
             return res.status(400).json({ error: 'No route found' });
         }
+
+
+        // fetch weather for points in route.weatherPoints
+        // this is an array of {lat, lon} points sampled along the route every ~50 miles
+        // fetches the following data for each point:
+        // location: {latitude, longitude}
+        // temperature
+        // windspeed
+        // weathercode (Open-Meteo's numeric code for current weather conditions)
+        // precipitation (mm) for current hour
+        // rain (mm) for current hour
+        // snowfall (cm) for current hour
+        const weather = [];
+        for (const [lat, lon] of route.weatherPoints) {
+            console.log(`Fetching weather for point: ${lat}, ${lon}`);
+            const weatherData = await getWeather(lat, lon);
+            weather.push(weatherData);
+        }
+
+
+
         // return trip info
         // returns 
         // start: {lat lon}
         // end: {lat lon}
-        // route: {distance, duration, geometry}
-        // convert geometry to polyline string for frontend rendering
-        const coordPairs = route.geometry.coordinates.map(([lon, lat]) => [lat, lon]);
+        // route: {distance, duration, geometry, weatherPoints}
+        // weather for each point retrieved from 
         res.json({
             start: {
                 lat: startLocation.lat,
@@ -45,10 +66,14 @@ const getTrip = async (req, res) => {
             route: {
                 distance: route.distance,
                 duration: route.duration,
-                geometry: coordPairs
-            }
+                geometry: route.geometry,            
+            },
+            // weather data for each sampled point along the route
+            weather: weather
         });
-    } catch (error) {
+
+    } 
+    catch (error) {
         console.error('Trip error:', error);
         res.status(500).json({ error: 'Failed to process trip' });
     }
