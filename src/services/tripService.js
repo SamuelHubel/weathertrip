@@ -22,4 +22,17 @@ const fetchTrip = async (startLocation, endLocation) => {
     }
 };
 
+const fetchTripLog = async () => {
+    try {
+        // send GET request to server to fetch logged trips
+        const response = await axios.get('http://localhost:5000/api/trip');
+        return response.data; // returns array of logged trips
+    } catch (error) {
+        console.error('Error fetching logged trips:', error);
+        return [];
+    }
+};
+
+
 export default fetchTrip;
+export { fetchTripLog };

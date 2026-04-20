@@ -8,6 +8,8 @@ import './tripLog.css';
 function TripLog({ tripLog, onReplot }) {
   const [open, setOpen] = useState(false);
 
+
+  
   // using panel to allow opening and closing
   return (
     <div className="panel trip-log-panel">
@@ -29,8 +31,15 @@ function TripLog({ tripLog, onReplot }) {
 
       {/* Panel Body */}
       <div className={`panel-body${open ? ' open' : ''}`}>
-        Coming soon...
-        <p>Here you'll see a history of your recent trips! Click on any entry to replot the route and check the weather along the way!</p>
+       {tripLog.length === 0 
+    ? <p>No trips yet</p>
+    : tripLog.map((entry) => (
+        <div key={entry._id} onClick={() => onReplot(entry)}>
+            <p>{entry.start.location} → {entry.end.location}</p>
+            <p>{new Date(entry.createdAt).toLocaleDateString()}</p>
+        </div>
+    ))
+}
       </div>
     </div>
   );

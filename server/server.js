@@ -2,6 +2,8 @@ import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import tripRouter from './routes/tripRoutes.js';
+import mongoose from 'mongoose';
+
 
 dotenv.config();
 
@@ -13,6 +15,11 @@ app.get('/', (req, res) => {
   res.send('Welcome to the Weather Trip API');
 });
 app.use('/api/trip', tripRouter);
+
+// connect to MongoDB using Mongoose
+mongoose.connect(process.env.MONGODB_URI)
+
+
 
 // start server
 // use PORT from environment variable or default to 5000 (localhost:5000)
