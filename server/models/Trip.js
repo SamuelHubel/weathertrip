@@ -1,0 +1,30 @@
+import mongoose from 'mongoose';
+// data model for a trip
+// stores start, end, route, and weather points to be rechecked when replotting a trip from the log
+const tripSchema = new mongoose.Schema({
+  start: {
+    location: String,
+    lat: Number,
+    lon: Number,
+  },
+  end: {
+    location: String,
+    lat: Number,
+    lon: Number,
+  },
+  route: {
+    distance: Number,
+    duration: Number,
+    geometry: Object,
+    weatherPoints: Array,
+  },
+
+  createdAt: {
+    type: Date,
+    default: Date.now,
+  },
+});
+
+const Trip = mongoose.model('Trip', tripSchema);
+
+export default Trip;

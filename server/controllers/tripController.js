@@ -4,6 +4,7 @@
 import geocodingService from '../services/geocodingService.js';
 import getRoute from '../services/routingService.js';
 import getWeather from '../services/weatherService.js';
+import Trip from '../models/Trip.js';
 
 const getTrip = async (req, res) => {
     try {
@@ -45,8 +46,30 @@ const getTrip = async (req, res) => {
             const weatherData = await getWeather(lat, lon);
             weather.push(weatherData);
         }
+        
 
-
+        // trip object to be saved to database
+        const tripData = new Trip({
+            start: {
+                location: start, // save the raw location string for display in the trip log
+                lat: startLocation.lat,
+                lon: startLocation.lon
+            },
+            end: {
+                location: end, // save the raw location string for display in the trip log
+                lat: endLocation.lat, 
+                lon: endLocation.lon
+            },
+            route: {
+                distance: route.distance,
+                duration: route.duration,
+                geometry: route.geometry,
+                weatherPoints: route.weatherPoints,
+            },
+        });
+        // save trip to database
+        await tripData.save();
+        console.log(`Saving ${startLocation} to ${endLocation} to database`);
 
         // return trip info
         // returns 
@@ -56,6 +79,7 @@ const getTrip = async (req, res) => {
         // weather for each point retrieved from 
         res.json({
             start: {
+                
                 lat: startLocation.lat,
                 lon: startLocation.lon
             },
@@ -73,9 +97,9 @@ const getTrip = async (req, res) => {
         });
 
     } 
-    catch (error) {
-        console.error('Trip error:', error);
-        res.status(500).json({ error: 'Failed to process trip' });
+   catch (error) {
+    console.log('CATCH ERROR:', error.message);
+    res.status(500).json({ error: 'Failed to process trip' });
     }
 }
 

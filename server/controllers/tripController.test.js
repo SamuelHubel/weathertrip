@@ -1,5 +1,8 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 
+import geocodingService from '../services/geocodingService.js';
+import getRoute from '../services/routingService.js';
+import getTrip from './tripController.js';
 // Mock dependencies before importing the controller
 vi.mock('../services/geocodingService.js', () => ({
     default: {
@@ -10,10 +13,14 @@ vi.mock('../services/geocodingService.js', () => ({
 vi.mock('../services/routingService.js', () => ({
     default: vi.fn(),
 }));
+// mock database model to prevent actual database interactions during tests
+vi.mock('../models/Trip.js', () => {
+    function MockTrip() {
+        this.save = vi.fn().mockResolvedValue({});
+    }
+    return { default: MockTrip };
+});
 
-import geocodingService from '../services/geocodingService.js';
-import getRoute from '../services/routingService.js';
-import getTrip from './tripController.js';
 
 // Helper to create a mock Express req/res pair
 const mockReqRes = (body = {}) => {
