@@ -13,9 +13,6 @@ const tripReadLimiter = rateLimit({
 });
 
 tripRouter.post('/', getTrip);
-// tripRouter.get('/', (req, res) => {
-//   res.json({message: 'Get all trips - this is a placeholder'});
-// });
 
 tripRouter.get('/', tripReadLimiter, getLoggedTrips);
 
