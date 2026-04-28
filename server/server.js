@@ -3,7 +3,7 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import tripRouter from './routes/tripRoutes.js';
 import mongoose from 'mongoose';
-
+import authRouter from './routes/authRoutes.js';
 
 dotenv.config();
 
@@ -15,6 +15,7 @@ app.get('/', (req, res) => {
   res.send('Welcome to the Weather Trip API');
 });
 app.use('/api/trip', tripRouter);
+app.use('/api/auth', authRouter);
 
 // connect to MongoDB using Mongoose
 mongoose.connect(process.env.MONGODB_URI)

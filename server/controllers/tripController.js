@@ -5,6 +5,8 @@ import geocodingService from '../services/geocodingService.js';
 import getRoute from '../services/routingService.js';
 import getWeather from '../services/weatherService.js';
 import Trip from '../models/Trip.js';
+import optionalAuth from '../middleware/authMiddleware.js'; // for saving to user trip history if logged in
+
 
 const getTrip = async (req, res) => {
     try {
@@ -46,31 +48,34 @@ const getTrip = async (req, res) => {
             const weatherData = await getWeather(lat, lon);
             weather.push(weatherData);
         }
-        
+        // if the user is logged in, save the trip to their trip history
+        if (req.user) {        
+            // trip object to be saved to database
+            const tripData = new Trip({
+                user: req.user.id, // reference to the User model
+                start: {
+                    location: start, // save the raw location string for display in the trip log
+                    lat: startLocation.lat,
+                    lon: startLocation.lon
+                },
+                end: {
+                    location: end, // save the raw location string for display in the trip log
+                    lat: endLocation.lat, 
+                    lon: endLocation.lon
+                },
+                route: {
+                    distance: route.distance,
+                    duration: route.duration,
+                    geometry: route.geometry,
+                    weatherPoints: route.weatherPoints,
+                },
+            });
 
-        // trip object to be saved to database
-        const tripData = new Trip({
-            start: {
-                location: start, // save the raw location string for display in the trip log
-                lat: startLocation.lat,
-                lon: startLocation.lon
-            },
-            end: {
-                location: end, // save the raw location string for display in the trip log
-                lat: endLocation.lat, 
-                lon: endLocation.lon
-            },
-            route: {
-                distance: route.distance,
-                duration: route.duration,
-                geometry: route.geometry,
-                weatherPoints: route.weatherPoints,
-            },
-        });
-        // save trip to database
-        await tripData.save();
-        console.log(`Saving ${startLocation} to ${endLocation} to database`);
-
+            await tripData.save();
+            console.log(`Saving ${startLocation} to ${endLocation} to database`);
+        } else {
+            console.log('No user logged in, skipping trip save to database');
+        }
         // return trip info
         // returns 
         // start: {lat lon}
