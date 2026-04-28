@@ -3,7 +3,13 @@ import Trip from '../models/Trip.js';
 
 const getLoggedTrips = async (req, res) => {
     try {
-        const loggedTrips = await Trip.find().sort({ createdAt: -1 }); // sort by most recent descending order
+        // If no user is logged in, return empty array instead of crashing
+        if (!req.user) {
+            return res.json([]);
+        }
+
+        const loggedTrips = await Trip.find({ userId: req.user.id })
+                                      .sort({ createdAt: -1 });
         res.json(loggedTrips);
     } catch (error) {
         console.error('Error fetching logged trips:', error);
