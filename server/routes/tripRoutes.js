@@ -15,7 +15,7 @@ const tripReadLimiter = rateLimit({
 
 tripRouter.post('/', optionalAuth, getTrip);
 
-tripRouter.get('/', tripReadLimiter, getLoggedTrips);
+tripRouter.get('/', tripReadLimiter, optionalAuth, getLoggedTrips);
 
 
 

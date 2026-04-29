@@ -19,6 +19,7 @@
   position: sticky;
   top: 0;
   z-index: 100;
+  /* remove isolation: isolate */
 }
 
 .app-header::after {
@@ -28,8 +29,8 @@
   height: 1px;
   background: linear-gradient(90deg, transparent, var(--cyan-dim), transparent);
   opacity: 0.4;
+  pointer-events: none; /* add this */
 }
-
 .header-logo {
   font-family: 'Barlow Condensed', sans-serif;
   font-weight: 900;
@@ -70,6 +71,30 @@
   background: var(--green);
   box-shadow: 0 0 8px var(--green);
   animation: pulse 2.5s ease-in-out infinite;
+}
+
+/*        Login            */
+.header-auth {
+  margin-left: auto;
+}
+
+.btn-auth {
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--text-secondary);
+  font-family: 'Barlow Condensed', sans-serif;
+  font-weight: 700;
+  font-size: 12px;
+  letter-spacing: 0.15em;
+  padding: 6px 16px;
+  border-radius: var(--radius);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-auth:hover {
+  border-color: var(--cyan-dim);
+  color: var(--cyan);
 }
 
 @keyframes pulse {

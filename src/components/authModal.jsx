@@ -25,7 +25,7 @@ const AuthModal = ({ onSuccess, onDismiss }) => {
             setLoading(false);
 
         };
-
+    }
         return (
         <div className="modal-backdrop" onClick={onDismiss}>
         <div className="modal-box" onClick={e => e.stopPropagation()}>
@@ -88,6 +88,6 @@ const AuthModal = ({ onSuccess, onDismiss }) => {
         </div>
     );
     }
-}
+
 
 export default AuthModal;

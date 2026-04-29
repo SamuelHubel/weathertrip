@@ -52,7 +52,7 @@ const getTrip = async (req, res) => {
         if (req.user) {        
             // trip object to be saved to database
             const tripData = new Trip({
-                user: req.user.id, // reference to the User model
+                userId: req.user.id, // reference to the User model
                 start: {
                     location: start, // save the raw location string for display in the trip log
                     lat: startLocation.lat,
@@ -72,7 +72,7 @@ const getTrip = async (req, res) => {
             });
 
             await tripData.save();
-            console.log(`Saving ${startLocation} to ${endLocation} to database`);
+            console.log(`Saving ${start} to ${end} to database for user ${req.user.id}`);
         } else {
             console.log('No user logged in, skipping trip save to database');
         }

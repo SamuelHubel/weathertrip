@@ -28,17 +28,16 @@ const fetchTrip = async (startLocation, endLocation) => {
     }
 };
 
-const fetchTripLog = async () => {
+const fetchTripLog = async (tokenOverride) => {
     try {
-
-        if (!getToken()) {
+        const token = tokenOverride || getToken();
+        if (!token) {
             return [];
         }
-        // send GET request to server to fetch logged trips
-        const response = await axios.get('http://localhost:5000/api/trip',
-            {headers: authHeader()}
-        );
-        return response.data; // returns array of logged trips
+        const response = await axios.get('http://localhost:5000/api/trip', {
+            headers: { Authorization: `Bearer ${token}` }
+        });
+        return response.data;
     } catch (error) {
         console.error('Error fetching logged trips:', error);
         return [];

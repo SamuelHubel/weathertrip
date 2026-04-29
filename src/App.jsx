@@ -7,7 +7,7 @@ import WeatherEvents from './components/WeatherEvents.jsx';
 import { useState, useEffect } from 'react';
 // allows for login stuff
 import { getToken } from './services/authService.js'; 
-
+import AuthModal from './components/authModal.jsx';
 
 function App() {
   const [trip, setTrip] = useState(null);
@@ -55,15 +55,49 @@ function App() {
         });
   }, []);
   
+
+  // set user and save pending trip if there is one
+  const handleLoginSuccess = (userData) => {
+    setUser(userData);
+    setShowLogin(false);
+    fetchTripLog(userData.token).then(data => {
+        if (data) setTripLog(data);
+    });
+    // if there's a pending trip that was planned before logging in, add it to the log now that we're authenticated
+    if (pendingTrip) {
+      setPendingTrip(null);
+      addTrip(pendingTrip);
+    }
+  };
+
+  const handleLogout = () => {
+    setUser(null);
+    setTripLog([]);
+    setTrip(null);
+  };
+  console.log('showLogin:', showLogin);
+
   return (
     <div className="app">
       {/* ── Header ── */}
       <header className="app-header">
-        <div className="header-logo">
-          Weather.Trip
-        </div>
-        <div className="header-tag">ROUTE WEATHER SYSTEM</div>
-      </header>
+          <div className="header-logo">Weather.Trip</div>
+          <div className="header-tag">ROUTE WEATHER SYSTEM</div>
+
+          <div className="header-auth">
+            {user
+              ? <button className="btn-auth" onClick={handleLogout}>[ SIGN OUT ]</button>
+              : <button className="btn-auth" onClick={() => setShowLogin(true)}>[ SIGN IN ]</button>
+            }
+          </div>
+        </header>
+      {/* Login Modal */}
+      {showLogin && (
+        <AuthModal
+          onSuccess={handleLoginSuccess}
+          onDismiss={() => setShowLogin(false)}
+          />
+      )}
 
       {/* ── Trip Input Bar ── */}
       <TripInput addTrip={addTrip} />
