@@ -6,7 +6,7 @@ import fetchTrip, { fetchTripLog } from './services/tripService';
 import WeatherEvents from './components/WeatherEvents.jsx';
 import { useState, useEffect } from 'react';
 // allows for login stuff
-import { getToken } from './services/authService.js'; 
+import { getToken, logout } from './services/authService.js'; 
 import AuthModal from './components/authModal.jsx';
 
 function App() {
@@ -71,6 +71,7 @@ function App() {
   };
 
   const handleLogout = () => {
+    logout();
     setUser(null);
     setTripLog([]);
     setTrip(null);
