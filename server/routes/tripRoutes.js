@@ -13,7 +13,7 @@ const tripReadLimiter = rateLimit({
   legacyHeaders: false,
 });
 
-tripRouter.post('/', optionalAuth, getTrip);
+tripRouter.post('/', tripReadLimiter, optionalAuth, getTrip);
 
 tripRouter.get('/', tripReadLimiter, optionalAuth, getLoggedTrips);
 
