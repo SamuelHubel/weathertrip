@@ -1,8 +1,12 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import axios from 'axios';
 import fetchTrip from './tripService';
+import { getToken } from './authService';
 
 vi.mock('axios');
+vi.mock('./authService', () => ({
+    getToken: vi.fn().mockReturnValue(null),
+}));
 
 const mockTripResponse = {
     data: {
@@ -18,6 +22,7 @@ const mockTripResponse = {
 
 beforeEach(() => {
     vi.clearAllMocks();
+    getToken.mockReturnValue(null); // default to no token for tests, can override in specific tests if needed
 });
 
 describe('fetchTrip', () => {
@@ -36,8 +41,10 @@ describe('fetchTrip', () => {
 
         expect(axios.post).toHaveBeenCalledWith(
             'http://localhost:5000/api/trip',
-            { start: 'Denver, CO', end: 'Salt Lake City, UT' }
+            { start: 'Denver, CO', end: 'Salt Lake City, UT' },
+            { headers: {} }
         );
+        
     });
 
     it('returns null when the request fails', async () => {
@@ -63,7 +70,8 @@ describe('fetchTrip', () => {
 
         expect(axios.post).toHaveBeenCalledWith(
             'http://localhost:5000/api/trip',
-            { start: '  Denver, CO  ', end: '  Salt Lake City, UT  ' }
+            { start: '  Denver, CO  ', end: '  Salt Lake City, UT  ' },
+            {headers: {} }
         );
     });
 

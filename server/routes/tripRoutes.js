@@ -2,6 +2,7 @@ import express from 'express';
 import rateLimit from 'express-rate-limit';
 import  getTrip  from '../controllers/tripController.js';
 import getLoggedTrips from '../controllers/logController.js';
+import optionalAuth from '../middleware/authMiddleware.js';
 
 const tripRouter = express.Router();
 
@@ -12,11 +13,10 @@ const tripReadLimiter = rateLimit({
   legacyHeaders: false,
 });
 
-tripRouter.post('/', getTrip);
-// tripRouter.get('/', (req, res) => {
-//   res.json({message: 'Get all trips - this is a placeholder'});
-// });
+tripRouter.post('/', tripReadLimiter, optionalAuth, getTrip);
 
-tripRouter.get('/', tripReadLimiter, getLoggedTrips);
+tripRouter.get('/', tripReadLimiter, optionalAuth, getLoggedTrips);
+
+
 
 export default tripRouter;
