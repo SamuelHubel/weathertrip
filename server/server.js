@@ -4,12 +4,40 @@ import dotenv from 'dotenv';
 import tripRouter from './routes/tripRoutes.js';
 import mongoose from 'mongoose';
 import authRouter from './routes/authRoutes.js';
+import { defaultAllowedOrigins } from 'vite';
 
 dotenv.config();
 
+// Allow requests from your Amplify frontend (set FRONTEND_URL env var in Beanstalk)
+const allowedOrigins = [
+  process.env.FRONTEND_URL,         // e.g. https://main.xxxxxx.amplifyapp.com
+  'http://localhost:3000',           // local dev
+].filter(Boolean);
+
+
+
 const app = express();
-app.use(cors());
+app.use(cors({
+  origin: (origin, callback) => {
+    // allow curl/Postman (no origin) and whitelisted origins
+    if (!origin || allowedOrigins.includes(origin)) 
+      return callback(null, true);
+
+    callback(new Error(`CORS blocked: ${origin}`));
+  },
+
+  credentials: true,
+
+}));
+
 app.use(express.json());
+
+// health check route
+app.get('/', (req, res) => {
+  res.json({ status: 'ok', service: 'WeatherTrip API' });
+});
+
+
 // basic route to test server is running
 app.get('/', (req, res) => {
   res.send('Welcome to the Weather Trip API');
