@@ -3,6 +3,8 @@
 import axios from 'axios';
 import {getToken} from './authService.js'; // for attaching token to authenticated requests
 
+// use either the env var for API URL or default to localhost for development
+const BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
 
 const authHeader = () => {
     const token = getToken();
@@ -14,7 +16,7 @@ const authHeader = () => {
 const fetchTrip = async (startLocation, endLocation) => {
     try {
         // send POST request to server with start and end locations
-        const response = await axios.post('http://localhost:5000/api/trip', 
+        const response = await axios.post(`${BASE_URL}/api/trip`, 
             // setting start and end to the raw location strings instead of geocoded lat/lon, since server will handle geocoding
             { start: startLocation, end: endLocation,}, 
             { headers: authHeader()}
@@ -34,7 +36,7 @@ const fetchTripLog = async (tokenOverride) => {
         if (!token) {
             return [];
         }
-        const response = await axios.get('http://localhost:5000/api/trip', {
+        const response = await axios.get(`${BASE_URL}/api/trip`, {
             headers: { Authorization: `Bearer ${token}` }
         });
         return response.data;
