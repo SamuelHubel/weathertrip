@@ -4,7 +4,7 @@ import dotenv from 'dotenv';
 import tripRouter from './routes/tripRoutes.js';
 import mongoose from 'mongoose';
 import authRouter from './routes/authRoutes.js';
-import { defaultAllowedOrigins } from 'vite';
+
 
 dotenv.config();
 
