@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import './tripMap.css';
 import { MapContainer, TileLayer, Polyline, Marker, Popup } from 'react-leaflet';
 
+
 function formatDistance(meters) {
   if (!meters) return '—';
   const miles = meters / 1609.34;
@@ -74,7 +75,7 @@ function TripMap({ trip }) {
           >
             <TileLayer
               attribution='&copy; <a href="https://www.stadiamaps.com/" target="_blank">Stadia Maps</a> &copy; <a href="https://openmaptiles.org/" target="_blank">OpenMapTiles</a> &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-              url="https://tiles.stadiamaps.com/tiles/alidade_smooth_dark/{z}/{x}/{y}{r}.png"
+              url={`https://tiles.stadiamaps.com/tiles/alidade_smooth_dark/{z}/{x}/{y}{r}.png?api_key=${import.meta.env.VITE_STADIA_API_KEY}`}
             />
 
             {trip?.route?.geometry && (
