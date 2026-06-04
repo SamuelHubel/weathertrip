@@ -1,6 +1,9 @@
 import React, { useState } from 'react';
 import './tripMap.css';
 import { MapContainer, TileLayer, Polyline, Marker, Popup } from 'react-leaflet';
+import L from 'leaflet';
+
+
 
 
 function formatDistance(meters) {
@@ -15,6 +18,17 @@ function formatDuration(seconds) {
   const m = Math.floor((seconds % 3600) / 60);
   return h > 0 ? `${h}h ${m}m` : `${m}m`;
 }
+// start and end markers for the route
+const startIcon = L.divIcon({
+  className: 'start-icon',
+  html: '🟢',
+});
+
+const endIcon = L.divIcon({
+  className: 'end-icon',
+  html: '🔴',
+});
+
 
 // markers for weather points
 const weatherIcons = {
@@ -88,13 +102,14 @@ function TripMap({ trip }) {
             )}
 
             {trip?.start?.lat && (
-              <Marker position={[trip.start.lat, trip.start.lon]}>
+              <Marker position={[trip.start.lat, trip.start.lon]} icon={startIcon}>
                 <Popup>ORIGIN</Popup>
+                
               </Marker>
             )}
 
             {trip?.end?.lat && (
-              <Marker position={[trip.end.lat, trip.end.lon]}>
+              <Marker position={[trip.end.lat, trip.end.lon]} icon={endIcon}>
                 <Popup>DESTINATION</Popup>
               </Marker>
             )}
@@ -137,10 +152,6 @@ function TripMap({ trip }) {
           <div className="map-stat">
             <span className="map-stat-label">Est. Drive</span>
             <span className="map-stat-value">{formatDuration(trip?.route?.duration)}</span>
-          </div>
-          <div className="map-stat">
-            <span className="map-stat-label">Weather Points</span>
-            <span className="map-stat-value">Coming soon...</span>
           </div>
         </div>
       </div>

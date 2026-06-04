@@ -109,10 +109,6 @@ describe('TripMap — stat bar formatting', () => {
     expect(screen.getByText('45m')).toBeInTheDocument();
   });
 
-  it('shows coming-soon placeholder for weather points', () => {
-    render(<TripMap trip={mockTrip} />);
-    expect(screen.getByText(/coming soon/i)).toBeInTheDocument();
-  });
 });
 
 describe('TripMap — panel collapse toggle', () => {
