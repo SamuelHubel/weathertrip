@@ -63,3 +63,26 @@ body::before {
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
 ::-webkit-scrollbar-thumb:hover { background: var(--border-glow); }
+
+/* ─── Responsive Design Tokens ──────────────────────────────── */
+@media (max-width: 768px) {
+  :root {
+    --header-h: 56px;
+    font-size: 13px;
+  }
+
+  body {
+    font-size: 13px;
+  }
+}
+
+@media (max-width: 480px) {
+  :root {
+    --header-h: 48px;
+    font-size: 12px;
+  }
+
+  body {
+    font-size: 12px;
+  }
+}

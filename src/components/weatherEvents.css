@@ -84,3 +84,62 @@
   color: var(--text-muted);
   letter-spacing: 0.1em;
 }
+
+/* ─── Responsive Weather Events ─────────────────────────────── */
+@media (max-width: 768px) {
+  .weather-event-item {
+    padding: 10px 12px;
+    gap: 10px;
+  }
+
+  .weather-event-icon {
+    font-size: 18px;
+  }
+
+  .weather-event-headline {
+    font-size: 12px;
+  }
+
+  .weather-event-location {
+    font-size: 9px;
+  }
+
+  .weather-event-severity {
+    font-size: 8px;
+    padding: 2px 5px;
+  }
+
+  .weather-events-empty {
+    padding: 24px 12px;
+    font-size: 10px;
+  }
+}
+
+@media (max-width: 480px) {
+  .weather-event-item {
+    padding: 8px 10px;
+    gap: 8px;
+  }
+
+  .weather-event-icon {
+    font-size: 16px;
+  }
+
+  .weather-event-headline {
+    font-size: 11px;
+  }
+
+  .weather-event-location {
+    font-size: 8px;
+  }
+
+  .weather-event-severity {
+    font-size: 7px;
+    padding: 1px 4px;
+  }
+
+  .weather-events-empty {
+    padding: 16px 10px;
+    font-size: 9px;
+  }
+}

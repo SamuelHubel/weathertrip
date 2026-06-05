@@ -121,3 +121,74 @@
   background: transparent;
   border: none;
 }
+
+/* ─── Responsive Map ────────────────────────────────────────── */
+@media (max-width: 1024px) {
+  .map-wrapper {
+    height: 400px;
+  }
+
+  .map-stat-bar {
+    gap: 16px;
+    padding: 8px 12px;
+  }
+
+  .map-stat-value {
+    font-size: 12px;
+  }
+}
+
+@media (max-width: 768px) {
+  .map-wrapper {
+    height: 350px;
+  }
+
+  .map-stat-bar {
+    flex-wrap: wrap;
+    gap: 12px;
+    padding: 8px 12px;
+  }
+
+  .map-stat-label {
+    font-size: 8px;
+  }
+
+  .map-stat-value {
+    font-size: 11px;
+  }
+
+  .weather-icon,
+  .start-icon,
+  .end-icon {
+    font-size: 18px;
+  }
+}
+
+@media (max-width: 480px) {
+  .map-wrapper {
+    height: 280px;
+  }
+
+  .map-stat-bar {
+    gap: 8px;
+    padding: 6px 10px;
+  }
+
+  .map-stat {
+    gap: 1px;
+  }
+
+  .map-stat-label {
+    font-size: 7px;
+  }
+
+  .map-stat-value {
+    font-size: 10px;
+  }
+
+  .weather-icon,
+  .start-icon,
+  .end-icon {
+    font-size: 16px;
+  }
+}

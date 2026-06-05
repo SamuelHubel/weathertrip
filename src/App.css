@@ -123,7 +123,72 @@
 
 .bottom-row {
   display: grid;
-  grid-template-columns: 1fr;
+  grid-template-rows: 1fr;
+}
+
+/* ─── Responsive Layout ─────────────────────────────────────── */
+@media (max-width: 1024px) {
+  .app-body {
+    padding: 16px 16px;
+  }
+
+  .main-row {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+}
+
+@media (max-width: 768px) {
+  .app-header {
+    padding: 0 16px;
+  }
+
+  .header-logo {
+    font-size: 18px;
+  }
+
+  .header-tag {
+    display: none;
+  }
+
+  .app-body {
+    padding: 12px 12px;
+    gap: 12px;
+  }
+
+  .main-row {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .bottom-row {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 480px) {
+  .app-header {
+    padding: 0 12px;
+    height: 50px;
+    gap: 8px;
+  }
+
+  .header-logo {
+    font-size: 14px;
+  }
+
+  .header-status {
+    display: none;
+  }
+
+  .app-body {
+    padding: 8px;
+    gap: 8px;
+  }
+
+  .main-row {
+    gap: 8px;
+  }
 }
 
 /* ─── Shared Panel Base ─────────────────────────────────────── */
@@ -191,4 +256,50 @@
 .panel-body.open {
   max-height: 2000px;
   opacity: 1;
+}
+
+/* ─── Responsive Panel Styles ───────────────────────────────── */
+@media (max-width: 768px) {
+  .panel-icon {
+    font-size: 12px;
+  }
+
+  .panel-title {
+    font-size: 11px;
+  }
+
+  .panel-toggle {
+    font-size: 9px;
+  }
+
+  .panel-header {
+    padding: 9px 12px;
+  }
+}
+
+@media (max-width: 480px) {
+  .panel-icon {
+    font-size: 11px;
+  }
+
+  .panel-title {
+    font-size: 10px;
+  }
+
+  .panel-toggle {
+    font-size: 8px;
+  }
+
+  .panel-header {
+    padding: 8px 10px;
+  }
+
+  /* Limit panel body height on mobile for better scrolling */
+  .panel-body.open {
+    max-height: 400px;
+  }
+
+  .map-panel .panel-body.open {
+    max-height: none;
+  }
 }
