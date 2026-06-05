@@ -67,3 +67,52 @@
   color: var(--text-muted);
   letter-spacing: 0.1em;
 }
+
+/* ─── Responsive Trip Log ───────────────────────────────────── */
+@media (max-width: 768px) {
+  .trip-log-item {
+    padding: 10px 12px;
+    gap: 4px;
+  }
+
+  .trip-log-route {
+    font-size: 12px;
+  }
+
+  .trip-log-arrow {
+    font-size: 10px;
+  }
+
+  .trip-log-badge {
+    font-size: 9px;
+  }
+
+  .trip-log-empty {
+    padding: 24px 12px;
+    font-size: 10px;
+  }
+}
+
+@media (max-width: 480px) {
+  .trip-log-item {
+    padding: 8px 10px;
+    gap: 3px;
+  }
+
+  .trip-log-route {
+    font-size: 11px;
+  }
+
+  .trip-log-arrow {
+    font-size: 9px;
+  }
+
+  .trip-log-badge {
+    font-size: 8px;
+  }
+
+  .trip-log-empty {
+    padding: 16px 10px;
+    font-size: 9px;
+  }
+}
