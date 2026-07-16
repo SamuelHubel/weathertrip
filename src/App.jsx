@@ -115,7 +115,7 @@ function App() {
 
         {/* Bottom: Notable Weather Events */}
         <div className="bottom-row">
-          <WeatherEvents />
+          <WeatherEvents trip={trip} />
         </div>
       </main>
     </div>
