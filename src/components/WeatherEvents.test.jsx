@@ -45,6 +45,27 @@ describe('WeatherEvents', () => {
     expect(screen.getByText(/no notable weather events were detected/i)).toBeInTheDocument();
   });
 
+  it('does not render medium-severity events in the list', () => {
+    const trip = {
+      route: { geometry: [[39.74, -104.99], [40.76, -111.89]] },
+      weather: [
+        {
+          location: { latitude: 39.74, longitude: -104.99 },
+          temperature: 12,
+          windspeed: 13,
+          rain: 1,
+          snowfall: 0,
+          weathercode: 51,
+        },
+      ],
+    };
+
+    render(<WeatherEvents trip={trip} />);
+
+    expect(screen.queryByText(/rain showers ahead/i)).not.toBeInTheDocument();
+    expect(screen.getByText(/no notable weather events were detected/i)).toBeInTheDocument();
+  });
+
   it('renders a notable weather event when a weather point meets event thresholds', () => {
     render(<WeatherEvents trip={weatherTrip} />);
 

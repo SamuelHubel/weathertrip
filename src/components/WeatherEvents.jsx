@@ -91,13 +91,12 @@ function buildEvents(weatherPoints) {
       const isThunder = [95, 96, 99].includes(code);
       const isFog = [45, 48].includes(code);
 
-      const hasEvent = isThunder || rain > 0 || snow > 0 || wind >= 12 || isFog;
-      if (!hasEvent) {
+      const severity = getSeverity(point);
+      if (severity !== 'high') {
         return null;
       }
 
-      const severity = getSeverity(point);
-      const label = severity === 'high' ? 'HIGH' : severity === 'med' ? 'MEDIUM' : 'LOW';
+      const label = 'HIGH';
       const headline = getHeadline(point);
       const icon = getIcon(point);
       const description = `${point.temperature ?? '—'}°C · Wind ${wind.toFixed(0)} m/s · Rain ${rain.toFixed(1)} mm · Snow ${snow.toFixed(1)} cm`;
@@ -114,10 +113,7 @@ function buildEvents(weatherPoints) {
       };
     })
     .filter(Boolean)
-    .sort((a, b) => {
-      const weight = severityWeights[b.severity] - severityWeights[a.severity];
-      return weight || a.index - b.index;
-    });
+    .sort((a, b) => a.index - b.index);
 }
 
 function WeatherEvents({ trip }) {
