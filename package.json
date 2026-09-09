@@ -14,7 +14,7 @@
     "react-dom": "^19.2.4",
     "react-leaflet": "^5.0.0",
     "react-scripts": "^0.0.0",
-    "vitest": "^4.1.2",
+    "vitest": "^4.1.11",
     "web-vitals": "^2.1.4"
   },
   "scripts": {
