@@ -16,6 +16,7 @@ const apiPoint = (latitude, longitude) => ({
     weather_code: 3,
     precipitation: 0.2,
     rain: 0.1,
+    showers: 0.3,
     snowfall: 0.0,
   },
 });
@@ -37,7 +38,7 @@ describe('getWeather', () => {
     expect(params.get('wind_speed_unit')).toBe('ms');
     expect(axios.get.mock.calls[0][1].timeout).toBe(10000);
     expect(params.getAll('current')).toEqual([
-      'temperature_2m', 'wind_speed_10m', 'weather_code', 'precipitation', 'rain', 'snowfall',
+      'temperature_2m', 'wind_speed_10m', 'weather_code', 'precipitation', 'rain', 'showers', 'snowfall',
     ]);
   });
 
@@ -52,7 +53,7 @@ describe('getWeather', () => {
       windspeed: 18.3,
       weathercode: 3,
       precipitation: 0.2,
-      rain: 0.1,
+      rain: 0.4,
       snowfall: 0.0,
     });
     expect(result[1].location).toEqual({ latitude: 40.8, longitude: -111.9 });

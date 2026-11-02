@@ -22,6 +22,7 @@ const getWeather = async (points) => {
                 ['current', 'weather_code'],
                 ['current', 'precipitation'],
                 ['current', 'rain'],
+                ['current', 'showers'],
                 ['current', 'snowfall'],
                 ['wind_speed_unit', 'ms'],
             ]),
@@ -34,7 +35,8 @@ const getWeather = async (points) => {
             windspeed: point.current?.wind_speed_10m,
             weathercode: point.current?.weather_code,
             precipitation: point.current?.precipitation,
-            rain: point.current?.rain,
+            // Open-Meteo reports showers separately, and a downpour can be all showers
+            rain: point.current && (point.current.rain ?? 0) + (point.current.showers ?? 0),
             snowfall: point.current?.snowfall,
         }));
     } catch (error) {
