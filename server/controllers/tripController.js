@@ -10,7 +10,7 @@ import optionalAuth from '../middleware/authMiddleware.js'; // for saving to use
 
 const getTrip = async (req, res) => {
     try {
-        const { start, end } = req.body;
+        const { start, end } = req.body ?? {};
         console.log('Start:', start, 'End:', end);
         
         if (!start || !end) {
