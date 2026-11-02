@@ -42,12 +42,7 @@ const getTrip = async (req, res) => {
         // precipitation (mm) for current hour
         // rain (mm) for current hour
         // snowfall (cm) for current hour
-        const weather = [];
-        for (const [lat, lon] of route.weatherPoints) {
-            console.log(`Fetching weather for point: ${lat}, ${lon}`);
-            const weatherData = await getWeather(lat, lon);
-            weather.push(weatherData);
-        }
+        const weather = await getWeather(route.weatherPoints);
         // if the user is logged in, save the trip to their trip history
         if (req.user && req.body.save !== false) {
             // trip object to be saved to database
@@ -98,7 +93,8 @@ const getTrip = async (req, res) => {
                 geometry: route.geometry,            
             },
             // weather data for each sampled point along the route
-            weather: weather.filter(Boolean) // a failed lookup returns null, which the map cannot draw
+            // null when it could not be loaded, so the frontend does not report an all-clear
+            weather: weather
         });
 
     } 

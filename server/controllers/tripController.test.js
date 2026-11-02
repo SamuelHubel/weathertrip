@@ -162,6 +162,7 @@ describe('getTrip', () => {
                 .mockResolvedValueOnce(MOCK_START_LOCATION)
                 .mockResolvedValueOnce(MOCK_END_LOCATION);
             getRoute.mockResolvedValueOnce(MOCK_ROUTE);
+            getWeather.mockResolvedValue([]);
         });
 
         it('responds with correctly shaped trip data', async () => {
@@ -198,13 +199,20 @@ describe('getTrip', () => {
             expect(mockSave).not.toHaveBeenCalled();
         });
 
-        it('leaves failed weather points out of the response', async () => {
-            const point = { location: { latitude: 1, longitude: 2 } };
-            getWeather.mockResolvedValueOnce(null).mockResolvedValueOnce(point);
+        it('requests weather for all sampled points at once', async () => {
             const { req, res } = mockReqRes({ start: 'New York', end: 'Los Angeles' });
             await getTrip(req, res);
 
-            expect(res.json.mock.calls[0][0].weather).toEqual([point]);
+            expect(getWeather).toHaveBeenCalledTimes(1);
+            expect(getWeather).toHaveBeenCalledWith(MOCK_ROUTE.weatherPoints);
+        });
+
+        it('returns weather as null when it could not be loaded', async () => {
+            getWeather.mockResolvedValue(null);
+            const { req, res } = mockReqRes({ start: 'New York', end: 'Los Angeles' });
+            await getTrip(req, res);
+
+            expect(res.json.mock.calls[0][0].weather).toBeNull();
         });
 
         it('does not call res.status on success', async () => {
