@@ -81,6 +81,15 @@ describe('authController', () => {
         expect(res.status).toHaveBeenCalledWith(500);
     });
 
+    it('rejects a short password or an invalid email at sign-up', async () => {
+        for (const body of [{ email: 'a@b.co', password: '1234567' }, { email: 'a', password: 'password' }]) {
+            const res = mockRes();
+            await register({ body }, res);
+            expect(res.status).toHaveBeenCalledWith(400);
+        }
+        expect(User.create).not.toHaveBeenCalled();
+    });
+
     it('rejects a request with no JSON body', async () => {
         const res = mockRes();
 

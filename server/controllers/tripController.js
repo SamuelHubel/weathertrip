@@ -18,6 +18,10 @@ const getTrip = async (req, res) => {
             return res.status(400).json({ error: 'Missing start or end location' });
         }
         
+        if ([start, end].some((place) => typeof place !== 'string' || place.length > 200)) {
+            return res.status(400).json({ error: 'Invalid start or end location' });
+        }
+
         // geocode start and end locations
         const startLocation = await geocodingService.geocodeLocation(start);
         const endLocation = await geocodingService.geocodeLocation(end);

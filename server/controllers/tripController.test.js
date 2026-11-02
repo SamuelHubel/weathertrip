@@ -82,6 +82,17 @@ describe('getTrip', () => {
             expect(res.json).toHaveBeenCalledWith({ error: 'Missing start or end location' });
         });
 
+        it('returns 400 for a location that is not a string or is too long', async () => {
+            for (const start of [{ a: 1 }, 'x'.repeat(201)]) {
+                const { req, res } = mockReqRes({ start, end: 'Los Angeles' });
+                await getTrip(req, res);
+
+                expect(res.status).toHaveBeenCalledWith(400);
+                expect(res.json).toHaveBeenCalledWith({ error: 'Invalid start or end location' });
+            }
+            expect(geocodingService.geocodeLocation).not.toHaveBeenCalled();
+        });
+
         it('does not call geocoding when validation fails', async () => {
             const { req, res } = mockReqRes({ start: 'New York' });
             await getTrip(req, res);

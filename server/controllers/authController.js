@@ -17,8 +17,9 @@ export const register = async (req, res) => {
       return res.status(400).json({ error: 'Email and password required' });
 
     const normalizedEmail = email.trim().toLowerCase();
-    if (!normalizedEmail || !password)
-      return res.status(400).json({ error: 'Email and password required' });
+    // only sign-up checks these, so existing accounts with short passwords can still log in
+    if (!normalizedEmail.includes('@') || password.length < 8)
+      return res.status(400).json({ error: 'Enter a valid email and a password of at least 8 characters' });
     // check if email is already in use
     const existing = await User.findOne({ email: normalizedEmail });
     if (existing)
