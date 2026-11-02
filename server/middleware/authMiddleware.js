@@ -1,5 +1,5 @@
 // this file handles the user vs guest authentication for the app
-// attaches a user object to the request if a valid token is provided, otherwise leaves it as guest
+// attaches a user object if a valid token is provided, treats no token as a guest, and rejects a bad token
 
 import jwt from 'jsonwebtoken';
 
@@ -9,8 +9,8 @@ const optionalAuth = (req, res, next) => {
         try {
             req.user = jwt.verify(header.substring(7), process.env.JWT_SECRET);
         } catch (err) {
-            // Ignore JWT verification errors
-            // treat user as guest if token is invalid or expired
+            // a sent token that fails means an expired session, not a guest
+            return res.status(401).json({ error: 'Session expired' });
         }
     }   
     next();

@@ -5,6 +5,7 @@ import TripLog from './components/TripLog.jsx';
 import fetchTrip, { fetchTripLog } from './services/tripService';
 import WeatherEvents from './components/WeatherEvents.jsx';
 import { useState, useEffect } from 'react';
+import axios from 'axios';
 // allows for login stuff
 import { getToken, logout } from './services/authService.js'; 
 import AuthModal from './components/authModal.jsx';
@@ -27,6 +28,20 @@ function App() {
     if (token) setUser({ token }); 
   }, []);
 
+
+  // an expired session signs the user out and asks them to log in again
+  useEffect(() => {
+    const interceptor = axios.interceptors.response.use(undefined, (error) => {
+      if (error.response?.status === 401 && getToken()) {
+        logout();
+        setUser(null);
+        setTripLog([]);
+        setShowLogin(true);
+      }
+      return Promise.reject(error);
+    });
+    return () => axios.interceptors.response.eject(interceptor);
+  }, []);
 
   const addTrip = (tripData) => {
 
