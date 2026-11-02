@@ -47,20 +47,17 @@ describe('fetchTrip', () => {
         
     });
 
-    it('returns null when the request fails', async () => {
+    it('passes request failures to the caller', async () => {
         axios.post.mockRejectedValue(new Error('Network error'));
 
-        const result = await fetchTrip('Denver, CO', 'Salt Lake City, UT');
-
-        expect(result).toBeNull();
+        await expect(fetchTrip('Denver, CO', 'Salt Lake City, UT')).rejects.toThrow('Network error');
     });
 
-    it('returns null when the server returns an error status', async () => {
-        axios.post.mockRejectedValue({ response: { status: 500, data: { error: 'Internal server error' } } });
+    it('passes server errors to the caller', async () => {
+        const error = { response: { status: 500, data: { error: 'Internal server error' } } };
+        axios.post.mockRejectedValue(error);
 
-        const result = await fetchTrip('Denver, CO', 'Salt Lake City, UT');
-
-        expect(result).toBeNull();
+        await expect(fetchTrip('Denver, CO', 'Salt Lake City, UT')).rejects.toBe(error);
     });
 
     it('calls the API with trimmed location strings as-is', async () => {

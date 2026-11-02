@@ -14,20 +14,16 @@ const authHeader = () => {
 
 
 const fetchTrip = async (startLocation, endLocation, extraBody = {}) => {
-    try {
-        // send POST request to server with start and end locations
-        const response = await axios.post(`${BASE_URL}/api/trip`, 
-            // setting start and end to the raw location strings instead of geocoded lat/lon, since server will handle geocoding
-            { start: startLocation, end: endLocation, ...extraBody }, 
-            { headers: authHeader()}
+    // send POST request to server with start and end locations
+    // errors reach the caller, so it can show the user what went wrong
+    const response = await axios.post(`${BASE_URL}/api/trip`,
+        // setting start and end to the raw location strings instead of geocoded lat/lon, since server will handle geocoding
+        { start: startLocation, end: endLocation, ...extraBody },
+        { headers: authHeader() }
     );
-        // returns the trip data
-        // locations, route, weather
-        return response.data;
-    } catch (error) {
-        console.error('Error fetching trip data:', error);
-        return null;
-    }
+    // returns the trip data
+    // locations, route, weather
+    return response.data;
 };
 
 const fetchTripLog = async (tokenOverride) => {

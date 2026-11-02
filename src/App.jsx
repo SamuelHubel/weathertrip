@@ -61,7 +61,7 @@ function App() {
   
   // saved trips have no weather, so replotting fetches it live without saving a duplicate
   const replotTrip = async (entry) => {
-      const data = await fetchTrip(entry.start.location, entry.end.location, { save: false });
+      const data = await fetchTrip(entry.start.location, entry.end.location, { save: false }).catch(() => null);
       setTrip(data ?? entry);
   };
   // on initial load, fetch the trip log from the server to display in the sidebar
@@ -83,9 +83,9 @@ function App() {
     if (pendingTrip) {
       const { start, end } = pendingTrip;
       setPendingTrip(null);
-      fetchTrip(start, end).then(data => {
-        if (data) addTrip(data, start, end);
-      });
+      fetchTrip(start, end)
+        .then(data => addTrip(data, start, end))
+        .catch(error => console.error('Error saving pending trip:', error));
     }
   };
 

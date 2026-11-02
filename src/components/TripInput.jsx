@@ -17,15 +17,11 @@ function TripInput({ addTrip }) {
 
     try {
       const tripData = await fetchTrip(start, end);
-      if (tripData) {
-        addTrip(tripData, start.trim(), end.trim());
-        setStart('');
-        setEnd('');
-      } else {
-        setError('ERR: Route not found — check locations and retry');
-      }
+      addTrip(tripData, start.trim(), end.trim());
+      setStart('');
+      setEnd('');
     } catch (err) {
-      setError(`ERR: ${err.message || 'Failed to connect to routing service'}`);
+      setError(`ERR: ${err.response?.data?.error || 'Failed to connect to routing service'}`);
     } finally {
       setLoading(false);
     }
