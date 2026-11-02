@@ -72,12 +72,12 @@ function WeatherEvents({ trip }) {
 
   return (
     <div className="panel weather-events-panel">
-      <div className="panel-header" onClick={() => setOpen(o => !o)}>
+      <button type="button" className="panel-header" aria-expanded={open} onClick={() => setOpen(o => !o)}>
         <span className="panel-title">Notable Weather Events</span>
         <span className={`panel-toggle${open ? ' open' : ''}`}>▼</span>
-      </div>
+      </button>
 
-      <div className={`panel-body${open ? ' open' : ''}`}>
+      <div className={`panel-body${open ? ' open' : ''}`} inert={!open}>
         {!trip && (
           <div className="weather-events-empty">
             Enter a route to surface weather hazards along your drive.

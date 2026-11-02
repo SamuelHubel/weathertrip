@@ -204,9 +204,14 @@
   display: flex;
   align-items: center;
   gap: 10px;
+  width: 100%;
   padding: 11px 16px;
   background: var(--bg-panel-alt);
+  border: none;
   border-bottom: 1px solid var(--border);
+  color: inherit;
+  font: inherit;
+  text-align: left;
   cursor: pointer;
   user-select: none;
   transition: background 0.2s;

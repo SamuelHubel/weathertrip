@@ -34,7 +34,7 @@ const AuthModal = ({ onSuccess, onDismiss }) => {
             <span className="modal-title">
                 {mode === 'login' ? 'Sign In' : 'Create Account'}
             </span>
-            <button className="modal-close" onClick={onDismiss}>✕</button>
+            <button className="modal-close" aria-label="Close" onClick={onDismiss}>✕</button>
             </div>
 
             <p className="modal-subtitle">
@@ -45,8 +45,9 @@ const AuthModal = ({ onSuccess, onDismiss }) => {
 
             <form onSubmit={handleSubmit}>
             <div className="modal-field">
-                <label className="modal-label">Email</label>
+                <label className="modal-label" htmlFor="auth-email">Email</label>
                 <input
+                id="auth-email"
                 className="modal-input"
                 type="email"
                 value={email}
@@ -57,8 +58,9 @@ const AuthModal = ({ onSuccess, onDismiss }) => {
                 />
             </div>
             <div className="modal-field">
-                <label className="modal-label">Password</label>
+                <label className="modal-label" htmlFor="auth-password">Password</label>
                 <input
+                id="auth-password"
                 className="modal-input"
                 type="password"
                 value={password}

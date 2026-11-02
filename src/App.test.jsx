@@ -59,9 +59,9 @@ test('a guest trip is saved after signing in', async () => {
     fireEvent.click(screen.getByText('[ PLOT ROUTE ]'));
 
     await screen.findByText('Sign in to save your trips.');
-    fireEvent.change(screen.getByPlaceholderText('you@example.com'), { target: { value: 'a@b.co' } });
-    fireEvent.change(screen.getByPlaceholderText('••••••••'), { target: { value: 'password' } });
-    fireEvent.submit(screen.getByPlaceholderText('you@example.com').closest('form'));
+    fireEvent.change(screen.getByLabelText('Email'), { target: { value: 'a@b.co' } });
+    fireEvent.change(screen.getByLabelText('Password'), { target: { value: 'password' } });
+    fireEvent.submit(screen.getByLabelText('Email').closest('form'));
 
     await waitFor(() => expect(posts).toHaveLength(2));
     expect(posts[1].body).toEqual({ start: 'Denver', end: 'Boulder' });

@@ -14,7 +14,7 @@ function TripLog({ tripLog, onReplot }) {
   return (
     <div className="panel trip-log-panel">
       {/* Panel Header */}
-      <div className="panel-header" onClick={() => setOpen(o => !o)}>
+      <button type="button" className="panel-header" aria-expanded={open} onClick={() => setOpen(o => !o)}>
         <span className="panel-title">Trip Log</span>
         {tripLog.length > 0 && (
           <span style={{
@@ -27,17 +27,17 @@ function TripLog({ tripLog, onReplot }) {
           </span>
         )}
         <span className={`panel-toggle${open ? ' open' : ''}`}>▼</span>
-      </div>
+      </button>
 
       {/* Panel Body */}
-      <div className={`panel-body${open ? ' open' : ''}`}>
+      <div className={`panel-body${open ? ' open' : ''}`} inert={!open}>
        {tripLog.length === 0 
     ? <p>No trips yet</p>
     : tripLog.map((entry) => (
-        <div key={entry._id} onClick={() => onReplot(entry)}>
-            <p>{entry.start.location} → {entry.end.location}</p>
-            <p>{new Date(entry.createdAt).toLocaleDateString()}</p>
-        </div>
+        <button type="button" className="trip-log-item" key={entry._id} onClick={() => onReplot(entry)}>
+            <span className="trip-log-route">{entry.start.location} → {entry.end.location}</span>
+            <span className="trip-log-badge">{new Date(entry.createdAt).toLocaleDateString()}</span>
+        </button>
     ))
 }
       </div>
