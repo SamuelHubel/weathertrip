@@ -71,6 +71,7 @@ it('builds correct URL with query params', async () => {
     expect(params.toString()).toContain('current=temperature_2m');
     expect(params.toString()).toContain('current=wind_speed_10m');
     expect(params.toString()).toContain('current=weather_code');
+    expect(params.toString()).toContain('wind_speed_unit=ms');
     expect(params.toString()).toContain('hourly=precipitation');
     expect(params.toString()).toContain('hourly=rain');
     expect(params.toString()).toContain('hourly=snowfall');

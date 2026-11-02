@@ -24,6 +24,7 @@ const getWeather = async (lat, lon) => {
         ['current', 'temperature_2m'],
         ['current', 'wind_speed_10m'],
         ['current', 'weather_code'],
+        ['wind_speed_unit', 'ms'],
         ['hourly', 'precipitation'],
         ['hourly', 'rain'],
         ['hourly', 'snowfall'],
