@@ -36,7 +36,7 @@ const getWeather = async (points) => {
             weathercode: point.current?.weather_code,
             precipitation: point.current?.precipitation,
             // Open-Meteo reports showers separately, and a downpour can be all showers
-            rain: point.current && (point.current.rain ?? 0) + (point.current.showers ?? 0),
+            rain: point.current && Number(((point.current.rain ?? 0) + (point.current.showers ?? 0)).toFixed(1)),
             snowfall: point.current?.snowfall,
         }));
     } catch (error) {
