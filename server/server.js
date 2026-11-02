@@ -42,7 +42,9 @@ app.use('/api/trip', tripRouter);
 app.use('/api/auth', authRouter);
 
 // connect to MongoDB using Mongoose
+// shortcut: no retry after a failed first connect, restart the server once the database is back
 mongoose.connect(process.env.MONGODB_URI)
+  .catch((error) => console.error('MongoDB connection failed:', error.message));
 
 
 
