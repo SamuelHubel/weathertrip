@@ -120,7 +120,8 @@ function WeatherEvents({ trip }) {
   const [open, setOpen] = useState(false);
   const events = useMemo(() => buildEvents(trip?.weather), [trip?.weather]);
 
-  const hasRoute = Boolean(trip?.route?.geometry || trip?.route?.weatherPoints?.length);
+  // only claim the route is clear if weather was actually fetched for it
+  const hasWeather = Array.isArray(trip?.weather);
 
   return (
     <div className="panel weather-events-panel">
@@ -138,9 +139,9 @@ function WeatherEvents({ trip }) {
 
         {trip && !events.length && (
           <div className="weather-events-empty">
-            {hasRoute
+            {hasWeather
               ? 'No notable weather events were detected along this route right now. Check the map for weather points and watch for changing conditions.'
-              : 'This route has not been collected yet. Plan a trip to gather weather points for the route.'}
+              : 'Weather could not be loaded for this route. Try plotting it again.'}
           </div>
         )}
 

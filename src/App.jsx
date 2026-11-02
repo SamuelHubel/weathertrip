@@ -44,9 +44,10 @@ function App() {
 
   };
   
-  // function to replot a trip from the log when clicked — for now just sets the current trip to the selected log entry's data, but will eventually also update the weather events and other info based on the selected trip
-  const replotTrip = (entry) => {
-      setTrip(entry);
+  // saved trips have no weather, so replotting fetches it live without saving a duplicate
+  const replotTrip = async (entry) => {
+      const data = await fetchTrip(entry.start.location, entry.end.location, { save: false });
+      setTrip(data ?? entry);
   };
   // on initial load, fetch the trip log from the server to display in the sidebar
   useEffect(() => {

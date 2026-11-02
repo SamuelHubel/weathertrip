@@ -13,12 +13,12 @@ const authHeader = () => {
 
 
 
-const fetchTrip = async (startLocation, endLocation) => {
+const fetchTrip = async (startLocation, endLocation, extraBody = {}) => {
     try {
         // send POST request to server with start and end locations
         const response = await axios.post(`${BASE_URL}/api/trip`, 
             // setting start and end to the raw location strings instead of geocoded lat/lon, since server will handle geocoding
-            { start: startLocation, end: endLocation,}, 
+            { start: startLocation, end: endLocation, ...extraBody }, 
             { headers: authHeader()}
     );
         // returns the trip data

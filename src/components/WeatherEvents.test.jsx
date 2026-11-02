@@ -19,6 +19,12 @@ const weatherTrip = {
 };
 
 describe('WeatherEvents', () => {
+  it('does not report an all-clear when the trip has no weather data', () => {
+    render(<WeatherEvents trip={{ route: { geometry: [[1, 2]] } }} />);
+    expect(screen.queryByText(/No notable weather events/i)).not.toBeInTheDocument();
+    expect(screen.getByText(/Weather could not be loaded/i)).toBeInTheDocument();
+  });
+
   it('renders a prompt when no route has been entered', () => {
     render(<WeatherEvents trip={null} />);
 

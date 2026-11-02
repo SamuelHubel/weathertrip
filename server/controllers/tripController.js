@@ -49,7 +49,7 @@ const getTrip = async (req, res) => {
             weather.push(weatherData);
         }
         // if the user is logged in, save the trip to their trip history
-        if (req.user) {        
+        if (req.user && req.body.save !== false) {
             // trip object to be saved to database
             const tripData = new Trip({
                 userId: req.user.id, // reference to the User model

@@ -5,6 +5,7 @@ import getRoute from '../services/routingService.js';
 import getWeather from '../services/weatherService.js';
 import getTrip from './tripController.js';
 // Mock dependencies before importing the controller
+const mockSave = vi.hoisted(() => vi.fn().mockResolvedValue({}));
 vi.mock('../services/geocodingService.js', () => ({
     default: {
         geocodeLocation: vi.fn(),
@@ -21,7 +22,7 @@ vi.mock('../services/weatherService.js', () => ({
 // mock database model to prevent actual database interactions during tests
 vi.mock('../models/Trip.js', () => {
     function MockTrip() {
-        this.save = vi.fn().mockResolvedValue({});
+        this.save = mockSave;
     }
     return { default: MockTrip };
 });
@@ -180,6 +181,21 @@ describe('getTrip', () => {
                 // test expects that there is some array of weather data, but doesn't check the contents since that's tested in weatherService.test.js
                 weather: expect.any(Array), 
             });
+        });
+
+        it('saves a signed-in trip, but not a replay', async () => {
+            const { req, res } = mockReqRes({ start: 'New York', end: 'Los Angeles' });
+            await getTrip({ ...req, user: { id: 'u1' } }, res);
+            expect(mockSave).toHaveBeenCalledTimes(1);
+
+            mockSave.mockClear();
+            geocodingService.geocodeLocation
+                .mockResolvedValueOnce(MOCK_START_LOCATION)
+                .mockResolvedValueOnce(MOCK_END_LOCATION);
+            getRoute.mockResolvedValueOnce(MOCK_ROUTE);
+            const replay = mockReqRes({ start: 'New York', end: 'Los Angeles', save: false });
+            await getTrip({ ...replay.req, user: { id: 'u1' } }, replay.res);
+            expect(mockSave).not.toHaveBeenCalled();
         });
 
         it('leaves failed weather points out of the response', async () => {
