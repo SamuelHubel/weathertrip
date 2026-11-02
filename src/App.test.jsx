@@ -38,3 +38,32 @@ test('an expired session signs the user out and opens the login box', async () =
     expect(localStorage.getItem('wt_token')).toBeNull();
     await waitFor(() => expect(screen.queryByText('[ SIGN OUT ]')).not.toBeInTheDocument());
 });
+
+test('a guest trip is saved after signing in', async () => {
+    const posts = [];
+    axios.defaults.adapter = async (config) => {
+        if (config.url.endsWith('/api/auth/login')) {
+            return respond(config, 200, { token: 'fresh', email: 'a@b.co' });
+        }
+        if (config.method === 'post') {
+            posts.push({ body: JSON.parse(config.data), auth: config.headers.get('Authorization') });
+            return respond(config, 200, { route: {}, weather: [] });
+        }
+        return respond(config, 200, []);
+    };
+
+    render(<App />);
+    const [start, end] = screen.getAllByRole('textbox');
+    fireEvent.change(start, { target: { value: 'Denver' } });
+    fireEvent.change(end, { target: { value: 'Boulder' } });
+    fireEvent.click(screen.getByText('[ PLOT ROUTE ]'));
+
+    await screen.findByText('Sign in to save your trips.');
+    fireEvent.change(screen.getByPlaceholderText('you@example.com'), { target: { value: 'a@b.co' } });
+    fireEvent.change(screen.getByPlaceholderText('••••••••'), { target: { value: 'password' } });
+    fireEvent.submit(screen.getByPlaceholderText('you@example.com').closest('form'));
+
+    await waitFor(() => expect(posts).toHaveLength(2));
+    expect(posts[1].body).toEqual({ start: 'Denver', end: 'Boulder' });
+    expect(posts[1].auth).toBe('Bearer fresh');
+});

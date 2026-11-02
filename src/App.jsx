@@ -16,8 +16,8 @@ function App() {
 
   // user state to track if a user is logged in and store their token for authenticated requests
   const [user, setUser] = useState(null);
-  // pending trip state to hold trip data while waiting for user to log in before adding to log, 
-  // so we don't lose the trip data if they decide to log in after planning a trip
+  // pending trip state to hold the guest's start and end while waiting for them to log in,
+  // so the trip can be saved if they decide to log in after planning it
   const [pendingTrip, setPendingTrip] = useState(null); 
   // state to control whether the login modal (menu) is shown
   const [showLogin, setShowLogin] = useState(false);
@@ -43,7 +43,7 @@ function App() {
     return () => axios.interceptors.response.eject(interceptor);
   }, []);
 
-  const addTrip = (tripData) => {
+  const addTrip = (tripData, start, end) => {
 
     setTrip(tripData);
     // after adding a new trip, also update the trip log by fetching the latest logged trips from the server
@@ -53,7 +53,7 @@ function App() {
 
     // save the trip to pending and show login if not
     if (!getToken()) {
-      setPendingTrip(tripData);
+      setPendingTrip({ start, end });
       setShowLogin(true);
     }
 
@@ -79,10 +79,13 @@ function App() {
     fetchTripLog(userData.token).then(data => {
         if (data) setTripLog(data);
     });
-    // if there's a pending trip that was planned before logging in, add it to the log now that we're authenticated
+    // the server only saves on a signed-in request, so plan the guest's trip again now
     if (pendingTrip) {
+      const { start, end } = pendingTrip;
       setPendingTrip(null);
-      addTrip(pendingTrip);
+      fetchTrip(start, end).then(data => {
+        if (data) addTrip(data, start, end);
+      });
     }
   };
 
