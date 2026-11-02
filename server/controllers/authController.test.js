@@ -1,5 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 
+import bcrypt from 'bcryptjs';
+import jwt from 'jsonwebtoken';
 import User from '../models/User.js';
 import { register, login } from './authController.js';
 
@@ -39,6 +41,35 @@ describe('authController', () => {
         await register({ body: { email: 'a@b.co', password: 'password' } }, res);
 
         expect(res.status).toHaveBeenCalledWith(500);
+    });
+
+    it('logs in with the right password and returns a valid token', async () => {
+        User.findOne.mockResolvedValue({ _id: 'u1', email: 'a@b.co', password: 'hash' });
+        bcrypt.compare.mockResolvedValue(true);
+        const res = mockRes();
+
+        await login({ body: { email: ' A@B.co ', password: 'password' } }, res);
+
+        expect(User.findOne).toHaveBeenCalledWith({ email: 'a@b.co' });
+        const { token, email } = res.json.mock.calls[0][0];
+        expect(email).toBe('a@b.co');
+        expect(jwt.verify(token, process.env.JWT_SECRET).id).toBe('u1');
+    });
+
+    it('gives the same error for a wrong password and an unknown email', async () => {
+        User.findOne.mockResolvedValueOnce({ _id: 'u1', email: 'a@b.co', password: 'hash' });
+        bcrypt.compare.mockResolvedValue(false);
+        const wrongPassword = mockRes();
+        await login({ body: { email: 'a@b.co', password: 'nope' } }, wrongPassword);
+
+        User.findOne.mockResolvedValueOnce(null);
+        const unknownEmail = mockRes();
+        await login({ body: { email: 'x@y.co', password: 'nope' } }, unknownEmail);
+
+        for (const res of [wrongPassword, unknownEmail]) {
+            expect(res.status).toHaveBeenCalledWith(401);
+            expect(res.json).toHaveBeenCalledWith({ error: 'Invalid credentials' });
+        }
     });
 
     it('returns 500 from login when the database fails', async () => {
