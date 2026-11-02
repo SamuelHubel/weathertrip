@@ -2,6 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 
 import geocodingService from '../services/geocodingService.js';
 import getRoute from '../services/routingService.js';
+import getWeather from '../services/weatherService.js';
 import getTrip from './tripController.js';
 // Mock dependencies before importing the controller
 vi.mock('../services/geocodingService.js', () => ({
@@ -11,6 +12,10 @@ vi.mock('../services/geocodingService.js', () => ({
 }));
 
 vi.mock('../services/routingService.js', () => ({
+    default: vi.fn(),
+}));
+
+vi.mock('../services/weatherService.js', () => ({
     default: vi.fn(),
 }));
 // mock database model to prevent actual database interactions during tests
@@ -175,6 +180,15 @@ describe('getTrip', () => {
                 // test expects that there is some array of weather data, but doesn't check the contents since that's tested in weatherService.test.js
                 weather: expect.any(Array), 
             });
+        });
+
+        it('leaves failed weather points out of the response', async () => {
+            const point = { location: { latitude: 1, longitude: 2 } };
+            getWeather.mockResolvedValueOnce(null).mockResolvedValueOnce(point);
+            const { req, res } = mockReqRes({ start: 'New York', end: 'Los Angeles' });
+            await getTrip(req, res);
+
+            expect(res.json.mock.calls[0][0].weather).toEqual([point]);
         });
 
         it('does not call res.status on success', async () => {

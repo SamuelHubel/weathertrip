@@ -98,7 +98,7 @@ const getTrip = async (req, res) => {
                 geometry: route.geometry,            
             },
             // weather data for each sampled point along the route
-            weather: weather
+            weather: weather.filter(Boolean) // a failed lookup returns null, which the map cannot draw
         });
 
     } 
