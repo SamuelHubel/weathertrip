@@ -35,6 +35,7 @@ describe('getWeather', () => {
     expect(params.get('latitude')).toBe('39.7392,40.7608');
     expect(params.get('longitude')).toBe('-104.9903,-111.8910');
     expect(params.get('wind_speed_unit')).toBe('ms');
+    expect(axios.get.mock.calls[0][1].timeout).toBe(10000);
     expect(params.getAll('current')).toEqual([
       'temperature_2m', 'wind_speed_10m', 'weather_code', 'precipitation', 'rain', 'snowfall',
     ]);

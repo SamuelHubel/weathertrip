@@ -25,6 +25,7 @@ const getWeather = async (points) => {
                 ['current', 'snowfall'],
                 ['wind_speed_unit', 'ms'],
             ]),
+            timeout: 10000,
         });
         // Open-Meteo returns a list for several points but a single object for one
         return [].concat(data).map((point) => ({

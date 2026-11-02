@@ -16,7 +16,8 @@ const getRoute = async (start, end) => {
       params: {
         overview: 'full',
         geometries: 'geojson'
-      }
+      },
+      timeout: 10000
     });
     
     const route = response.data.routes[0];

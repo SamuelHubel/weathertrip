@@ -16,7 +16,8 @@ const geocodingService = {
         },
         headers: {
           'User-Agent': 'WeatherTripApp/1.0 (road-trip-weather-app)'
-        }
+        },
+        timeout: 10000
       });
 
       if (!response.data || response.data.length === 0) {
