@@ -1,7 +1,5 @@
 import axios from 'axios';
-import dotenv from 'dotenv';
 
-dotenv.config();
 
 // Take location string and return geocoded location with lat and lon
 // from Nominatim API
@@ -16,7 +14,8 @@ const geocodingService = {
         },
         headers: {
           'User-Agent': 'WeatherTripApp/1.0 (road-trip-weather-app)'
-        }
+        },
+        timeout: 10000
       });
 
       if (!response.data || response.data.length === 0) {

@@ -1,49 +1,47 @@
 // module to get weather data from openmeteo API
-// takes lat/lon as input and returns current weather info
-// will be used a lot as we ping weather for some points along the route
-// every 50 miles or so, and also for start and end locations
+// takes the points sampled along a route and returns current weather info for each one
 import axios from 'axios';
 
-
-
-// function to get weather data for a provided lat/lon from Open-Meteo API
-// returns an object with current weather info and hourly precipitation, rain, snowfall for available hours
-// will be called for each sampled point along the route
-const getWeather = async (lat, lon) => {
+// one request covers every point, so a long trip does not make a call per point
+// points is an array of [lat, lon] pairs
+// returns an array with one weather object per point, or null if the weather could not be loaded
+const getWeather = async (points) => {
     // check to make sure lat/lon are valid numbers before making API call
-    if (lat == null || lon == null || isNaN(lat) || isNaN(lon)) {
-        console.error(`Invalid coordinates: lat=${lat}, lon=${lon}`);
+    if (!points?.length || points.some(([lat, lon]) => lat == null || lon == null || isNaN(lat) || isNaN(lon))) {
+        console.error('Invalid coordinates:', points);
         return null;
     }
 
     try {
         const { data } = await axios.get("https://api.open-meteo.com/v1/forecast", {
             params: new URLSearchParams([
-        ['latitude', lat],
-        ['longitude', lon],
-        ['current', 'temperature_2m'],
-        ['current', 'wind_speed_10m'],
-        ['current', 'weather_code'],
-        ['hourly', 'precipitation'],
-        ['hourly', 'rain'],
-        ['hourly', 'snowfall'],
-        ['forecast_days', '1'],
-        ])
-    });
-   // console.log('RAW DATA:', JSON.stringify(data, null, 2));
-     return {
-        location: { latitude: data.latitude, longitude: data.longitude },
-        temperature: data.current?.temperature_2m,
-        windspeed: data.current?.wind_speed_10m,
-        weathercode: data.current?.weather_code,
-        precipitation: data.hourly?.precipitation?.[0],
-        rain: data.hourly?.rain?.[0],
-        snowfall: data.hourly?.snowfall?.[0],
-    };
-
+                ['latitude', points.map(([lat]) => Number(lat).toFixed(4)).join(',')],
+                ['longitude', points.map(([, lon]) => Number(lon).toFixed(4)).join(',')],
+                ['current', 'temperature_2m'],
+                ['current', 'wind_speed_10m'],
+                ['current', 'weather_code'],
+                ['current', 'precipitation'],
+                ['current', 'rain'],
+                ['current', 'showers'],
+                ['current', 'snowfall'],
+                ['wind_speed_unit', 'ms'],
+            ]),
+            timeout: 10000,
+        });
+        // Open-Meteo returns a list for several points but a single object for one
+        return [].concat(data).map((point) => ({
+            location: { latitude: point.latitude, longitude: point.longitude },
+            temperature: point.current?.temperature_2m,
+            windspeed: point.current?.wind_speed_10m,
+            weathercode: point.current?.weather_code,
+            precipitation: point.current?.precipitation,
+            // Open-Meteo reports showers separately, and a downpour can be all showers
+            rain: point.current && Number(((point.current.rain ?? 0) + (point.current.showers ?? 0)).toFixed(1)),
+            snowfall: point.current?.snowfall,
+        }));
     } catch (error) {
         console.error('Weather error:', error.message);
-        console.error('Weather details:', error.response?.data); 
+        console.error('Weather details:', error.response?.data);
         return null;
     }
 };

@@ -8,10 +8,10 @@ import authRouter from './routes/authRoutes.js';
 
 dotenv.config();
 
-// Allow requests from your Amplify frontend (set FRONTEND_URL env var in Beanstalk)
+
 const allowedOrigins = [
-  process.env.FRONTEND_URL,         // e.g. https://main.xxxxxx.amplifyapp.com
-  'http://localhost:3000',           // local dev
+  process.env.FRONTEND_URL,         
+  'http://localhost:3000',           
 ].filter(Boolean);
 
 
@@ -38,15 +38,13 @@ app.get('/', (req, res) => {
 });
 
 
-// basic route to test server is running
-app.get('/', (req, res) => {
-  res.send('Welcome to the Weather Trip API');
-});
 app.use('/api/trip', tripRouter);
 app.use('/api/auth', authRouter);
 
 // connect to MongoDB using Mongoose
+// shortcut: no retry after a failed first connect, restart the server once the database is back
 mongoose.connect(process.env.MONGODB_URI)
+  .catch((error) => console.error('MongoDB connection failed:', error.message));
 
 
 

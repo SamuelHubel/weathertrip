@@ -57,4 +57,3 @@ jobs:
         env:
           NOMINATIM_URL: http://localhost
           OSRM_URL: http://localhost
-          WEATHER_URL: http://localhost

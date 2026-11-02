@@ -1,5 +1,4 @@
 import mongoose from 'mongoose';
-import User from './User.js';
 // data model for a trip
 // stores start, end, route, and weather points to be rechecked when replotting a trip from the log
 const tripSchema = new mongoose.Schema({
@@ -33,6 +32,8 @@ const tripSchema = new mongoose.Schema({
     default: Date.now,
   },
 });
+
+tripSchema.index({ userId: 1, createdAt: -1 });
 
 const Trip = mongoose.model('Trip', tripSchema);
 

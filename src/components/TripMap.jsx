@@ -71,15 +71,15 @@ function TripMap({ trip }) {
   return (
     <div className="panel map-panel">
       {/* Panel Header */}
-      <div className="panel-header" onClick={() => setOpen(o => !o)}>
+      <button type="button" className="panel-header" aria-expanded={open} onClick={() => setOpen(o => !o)}>
         <span className="panel-icon">🗺</span>
         <span className="panel-title">Route Map</span>
         {/* able to open and close the map panel */}  
         <span className={`panel-toggle${open ? ' open' : ''}`}>▼</span>
-      </div>
+      </button>
 
       {/* Panel Body */}
-      <div className={`panel-body${open ? ' open' : ''}`}>
+      <div className={`panel-body${open ? ' open' : ''}`} inert={!open}>
         <div className="map-wrapper">
           <MapContainer
             center={[39.8, -98.6]}

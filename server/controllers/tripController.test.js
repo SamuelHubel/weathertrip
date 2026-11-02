@@ -2,8 +2,10 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 
 import geocodingService from '../services/geocodingService.js';
 import getRoute from '../services/routingService.js';
+import getWeather from '../services/weatherService.js';
 import getTrip from './tripController.js';
 // Mock dependencies before importing the controller
+const mockSave = vi.hoisted(() => vi.fn().mockResolvedValue({}));
 vi.mock('../services/geocodingService.js', () => ({
     default: {
         geocodeLocation: vi.fn(),
@@ -13,10 +15,14 @@ vi.mock('../services/geocodingService.js', () => ({
 vi.mock('../services/routingService.js', () => ({
     default: vi.fn(),
 }));
+
+vi.mock('../services/weatherService.js', () => ({
+    default: vi.fn(),
+}));
 // mock database model to prevent actual database interactions during tests
 vi.mock('../models/Trip.js', () => {
     function MockTrip() {
-        this.save = vi.fn().mockResolvedValue({});
+        this.save = mockSave;
     }
     return { default: MockTrip };
 });
@@ -74,6 +80,17 @@ describe('getTrip', () => {
 
             expect(res.status).toHaveBeenCalledWith(400);
             expect(res.json).toHaveBeenCalledWith({ error: 'Missing start or end location' });
+        });
+
+        it('returns 400 for a location that is not a string or is too long', async () => {
+            for (const start of [{ a: 1 }, 'x'.repeat(201)]) {
+                const { req, res } = mockReqRes({ start, end: 'Los Angeles' });
+                await getTrip(req, res);
+
+                expect(res.status).toHaveBeenCalledWith(400);
+                expect(res.json).toHaveBeenCalledWith({ error: 'Invalid start or end location' });
+            }
+            expect(geocodingService.geocodeLocation).not.toHaveBeenCalled();
         });
 
         it('does not call geocoding when validation fails', async () => {
@@ -156,6 +173,7 @@ describe('getTrip', () => {
                 .mockResolvedValueOnce(MOCK_START_LOCATION)
                 .mockResolvedValueOnce(MOCK_END_LOCATION);
             getRoute.mockResolvedValueOnce(MOCK_ROUTE);
+            getWeather.mockResolvedValue([]);
         });
 
         it('responds with correctly shaped trip data', async () => {
@@ -175,6 +193,37 @@ describe('getTrip', () => {
                 // test expects that there is some array of weather data, but doesn't check the contents since that's tested in weatherService.test.js
                 weather: expect.any(Array), 
             });
+        });
+
+        it('saves a signed-in trip, but not a replay', async () => {
+            const { req, res } = mockReqRes({ start: 'New York', end: 'Los Angeles' });
+            await getTrip({ ...req, user: { id: 'u1' } }, res);
+            expect(mockSave).toHaveBeenCalledTimes(1);
+
+            mockSave.mockClear();
+            geocodingService.geocodeLocation
+                .mockResolvedValueOnce(MOCK_START_LOCATION)
+                .mockResolvedValueOnce(MOCK_END_LOCATION);
+            getRoute.mockResolvedValueOnce(MOCK_ROUTE);
+            const replay = mockReqRes({ start: 'New York', end: 'Los Angeles', save: false });
+            await getTrip({ ...replay.req, user: { id: 'u1' } }, replay.res);
+            expect(mockSave).not.toHaveBeenCalled();
+        });
+
+        it('requests weather for all sampled points at once', async () => {
+            const { req, res } = mockReqRes({ start: 'New York', end: 'Los Angeles' });
+            await getTrip(req, res);
+
+            expect(getWeather).toHaveBeenCalledTimes(1);
+            expect(getWeather).toHaveBeenCalledWith(MOCK_ROUTE.weatherPoints);
+        });
+
+        it('returns weather as null when it could not be loaded', async () => {
+            getWeather.mockResolvedValue(null);
+            const { req, res } = mockReqRes({ start: 'New York', end: 'Los Angeles' });
+            await getTrip(req, res);
+
+            expect(res.json.mock.calls[0][0].weather).toBeNull();
         });
 
         it('does not call res.status on success', async () => {

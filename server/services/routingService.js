@@ -1,7 +1,5 @@
 import axios from 'axios';
-import dotenv from 'dotenv';
 import sampleRoute from './routeSamplingService.js';
-dotenv.config();
 
 // take start and end geocoded locations and return route from OSRM API
 // returns raw geometry from OSRM API, which is a list of lat/lon pairs
@@ -16,7 +14,8 @@ const getRoute = async (start, end) => {
       params: {
         overview: 'full',
         geometries: 'geojson'
-      }
+      },
+      timeout: 10000
     });
     
     const route = response.data.routes[0];

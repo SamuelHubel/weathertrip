@@ -5,72 +5,36 @@ const weatherIcons = {
   thunder: '⛈️',
   snow: '🌨️',
   rain: '🌧️',
-  fog: '🌫️',
   wind: '💨',
-  default: '☔',
 };
 
-const severityWeights = {
-  high: 3,
-  med: 2,
-  low: 1,
-};
-
-function getSeverity(point) {
-  const rain = Number(point.rain ?? point.precipitation ?? 0);
-  const snow = Number(point.snowfall ?? 0);
-  const wind = Number(point.windspeed ?? 0);
-  const code = Number(point.weathercode ?? -1);
-
-  const isThunder = [95, 96, 99].includes(code);
-  const isFog = [45, 48].includes(code);
-
-  if (isThunder || rain >= 10 || snow >= 5 || wind >= 18) {
-    return 'high';
-  }
-
-  if (rain >= 3 || snow >= 1 || wind >= 12 || isFog) {
-    return 'med';
-  }
-
-  return 'low';
+function readConditions(point) {
+  return {
+    rain: Number(point.rain ?? point.precipitation ?? 0),
+    snow: Number(point.snowfall ?? 0),
+    wind: Number(point.windspeed ?? 0),
+    isThunder: [95, 96, 99].includes(Number(point.weathercode)),
+  };
 }
 
-function getHeadline(point) {
-  const rain = Number(point.rain ?? point.precipitation ?? 0);
-  const snow = Number(point.snowfall ?? 0);
-  const wind = Number(point.windspeed ?? 0);
-  const code = Number(point.weathercode ?? -1);
+function isHighSeverity({ rain, snow, wind, isThunder }) {
+  return isThunder || rain >= 10 || snow >= 5 || wind >= 18;
+}
 
-  const isThunder = [95, 96, 99].includes(code);
-  const isFog = [45, 48].includes(code);
-
+function getHeadline({ rain, snow, isThunder }) {
   if (isThunder) return 'Thunderstorm risk';
   if (snow >= 5) return 'Heavy snow expected';
   if (rain >= 10) return 'Heavy rain expected';
   if (snow >= 1) return 'Snow showers possible';
   if (rain >= 3) return 'Rain showers ahead';
-  if (wind >= 12) return 'Strong winds along route';
-  if (isFog) return 'Foggy conditions';
-  if (rain > 0) return 'Light rain on the route';
-
-  return 'Notable route conditions';
+  return 'Strong winds along route';
 }
 
-function getIcon(point) {
-  const rain = Number(point.rain ?? point.precipitation ?? 0);
-  const snow = Number(point.snowfall ?? 0);
-  const wind = Number(point.windspeed ?? 0);
-  const code = Number(point.weathercode ?? -1);
-  const isThunder = [95, 96, 99].includes(code);
-  const isFog = [45, 48].includes(code);
-
+function getIcon({ rain, snow, isThunder }) {
   if (isThunder) return weatherIcons.thunder;
   if (snow > 0) return weatherIcons.snow;
   if (rain > 0) return weatherIcons.rain;
-  if (wind >= 12) return weatherIcons.wind;
-  if (isFog) return weatherIcons.fog;
-  return weatherIcons.default;
+  return weatherIcons.wind;
 }
 
 function buildEvents(weatherPoints) {
@@ -78,58 +42,42 @@ function buildEvents(weatherPoints) {
     return [];
   }
 
-  return weatherPoints
-    .map((point, index) => {
-      if (!point || !point.location) {
-        return null;
-      }
+  return weatherPoints.flatMap((point, index) => {
+    if (!point?.location) {
+      return [];
+    }
 
-      const rain = Number(point.rain ?? point.precipitation ?? 0);
-      const snow = Number(point.snowfall ?? 0);
-      const wind = Number(point.windspeed ?? 0);
-      const code = Number(point.weathercode ?? -1);
-      const isThunder = [95, 96, 99].includes(code);
-      const isFog = [45, 48].includes(code);
+    const conditions = readConditions(point);
+    if (!isHighSeverity(conditions)) {
+      return [];
+    }
 
-      const severity = getSeverity(point);
-      if (severity !== 'high') {
-        return null;
-      }
-
-      const label = 'HIGH';
-      const headline = getHeadline(point);
-      const icon = getIcon(point);
-      const description = `${point.temperature ?? '—'}°C · Wind ${wind.toFixed(0)} m/s · Rain ${rain.toFixed(1)} mm · Snow ${snow.toFixed(1)} cm`;
-      const locationText = `${point.location.latitude?.toFixed(2) ?? '—'}, ${point.location.longitude?.toFixed(2) ?? '—'}`;
-
-      return {
-        index,
-        icon,
-        headline,
-        locationText,
-        description,
-        severity,
-        label,
-      };
-    })
-    .filter(Boolean)
-    .sort((a, b) => a.index - b.index);
+    const { rain, snow, wind } = conditions;
+    return [{
+      index,
+      icon: getIcon(conditions),
+      headline: getHeadline(conditions),
+      locationText: `${point.location.latitude?.toFixed(2) ?? '—'}, ${point.location.longitude?.toFixed(2) ?? '—'}`,
+      description: `${point.temperature ?? '—'}°C · Wind ${wind.toFixed(0)} m/s · Rain ${rain.toFixed(1)} mm · Snow ${snow.toFixed(1)} cm`,
+    }];
+  });
 }
 
 function WeatherEvents({ trip }) {
   const [open, setOpen] = useState(false);
   const events = useMemo(() => buildEvents(trip?.weather), [trip?.weather]);
 
-  const hasRoute = Boolean(trip?.route?.geometry || trip?.route?.weatherPoints?.length);
+  // only claim the route is clear if weather was actually fetched for it
+  const hasWeather = Array.isArray(trip?.weather);
 
   return (
     <div className="panel weather-events-panel">
-      <div className="panel-header" onClick={() => setOpen(o => !o)}>
+      <button type="button" className="panel-header" aria-expanded={open} onClick={() => setOpen(o => !o)}>
         <span className="panel-title">Notable Weather Events</span>
         <span className={`panel-toggle${open ? ' open' : ''}`}>▼</span>
-      </div>
+      </button>
 
-      <div className={`panel-body${open ? ' open' : ''}`}>
+      <div className={`panel-body${open ? ' open' : ''}`} inert={!open}>
         {!trip && (
           <div className="weather-events-empty">
             Enter a route to surface weather hazards along your drive.
@@ -138,9 +86,9 @@ function WeatherEvents({ trip }) {
 
         {trip && !events.length && (
           <div className="weather-events-empty">
-            {hasRoute
+            {hasWeather
               ? 'No notable weather events were detected along this route right now. Check the map for weather points and watch for changing conditions.'
-              : 'This route has not been collected yet. Plan a trip to gather weather points for the route.'}
+              : 'Weather could not be loaded for this route. Try plotting it again.'}
           </div>
         )}
 
@@ -152,7 +100,7 @@ function WeatherEvents({ trip }) {
                 <div className="weather-event-content">
                   <div className="weather-event-headline">{event.headline}</div>
                   <div className="weather-event-location">{event.locationText}</div>
-                  <div className={`weather-event-severity severity-${event.severity}`}>{event.label}</div>
+                  <div className="weather-event-severity severity-high">HIGH</div>
                   <div>{event.description}</div>
                 </div>
               </div>
