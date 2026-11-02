@@ -34,6 +34,8 @@ const tripSchema = new mongoose.Schema({
   },
 });
 
+tripSchema.index({ userId: 1, createdAt: -1 });
+
 const Trip = mongoose.model('Trip', tripSchema);
 
 export default Trip;
