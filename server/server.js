@@ -38,10 +38,6 @@ app.get('/', (req, res) => {
 });
 
 
-// basic route to test server is running
-app.get('/', (req, res) => {
-  res.send('Welcome to the Weather Trip API');
-});
 app.use('/api/trip', tripRouter);
 app.use('/api/auth', authRouter);
 

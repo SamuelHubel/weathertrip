@@ -5,7 +5,6 @@ import geocodingService from '../services/geocodingService.js';
 import getRoute from '../services/routingService.js';
 import getWeather from '../services/weatherService.js';
 import Trip from '../models/Trip.js';
-import optionalAuth from '../middleware/authMiddleware.js'; // for saving to user trip history if logged in
 
 
 const getTrip = async (req, res) => {

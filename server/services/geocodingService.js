@@ -1,7 +1,5 @@
 import axios from 'axios';
-import dotenv from 'dotenv';
 
-dotenv.config();
 
 // Take location string and return geocoded location with lat and lon
 // from Nominatim API

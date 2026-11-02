@@ -4,7 +4,7 @@ import axios from 'axios';
 import {getToken} from './authService.js'; // for attaching token to authenticated requests
 
 // use either the env var for API URL or default to localhost for development
-const BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
+const BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
 const authHeader = () => {
     const token = getToken();
