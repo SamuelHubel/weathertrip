@@ -7,7 +7,7 @@ import axios from 'axios';
 
 
 // function to get weather data for a provided lat/lon from Open-Meteo API
-// returns an object with current weather info and hourly precipitation, rain, snowfall for available hours
+// returns an object with current weather info, including precipitation, rain and snowfall
 // will be called for each sampled point along the route
 const getWeather = async (lat, lon) => {
     // check to make sure lat/lon are valid numbers before making API call
@@ -25,10 +25,9 @@ const getWeather = async (lat, lon) => {
         ['current', 'wind_speed_10m'],
         ['current', 'weather_code'],
         ['wind_speed_unit', 'ms'],
-        ['hourly', 'precipitation'],
-        ['hourly', 'rain'],
-        ['hourly', 'snowfall'],
-        ['forecast_days', '1'],
+        ['current', 'precipitation'],
+        ['current', 'rain'],
+        ['current', 'snowfall'],
         ])
     });
    // console.log('RAW DATA:', JSON.stringify(data, null, 2));
@@ -37,9 +36,9 @@ const getWeather = async (lat, lon) => {
         temperature: data.current?.temperature_2m,
         windspeed: data.current?.wind_speed_10m,
         weathercode: data.current?.weather_code,
-        precipitation: data.hourly?.precipitation?.[0],
-        rain: data.hourly?.rain?.[0],
-        snowfall: data.hourly?.snowfall?.[0],
+        precipitation: data.current?.precipitation,
+        rain: data.current?.rain,
+        snowfall: data.current?.snowfall,
     };
 
     } catch (error) {

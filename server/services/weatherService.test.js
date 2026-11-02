@@ -19,12 +19,9 @@ const mockApiResponse = {
       wind_speed_10m: 18.3,
       weather_code: 3,
       time: '2026-04-03T14:00',
-    },
-    hourly: {
-      time: ['2026-04-03T14:00'],
-      precipitation: [0.2],
-      rain: [0.1],
-      snowfall: [0.0],
+      precipitation: 0.2,
+      rain: 0.1,
+      snowfall: 0.0,
     },
   },
 };
@@ -72,9 +69,9 @@ it('builds correct URL with query params', async () => {
     expect(params.toString()).toContain('current=wind_speed_10m');
     expect(params.toString()).toContain('current=weather_code');
     expect(params.toString()).toContain('wind_speed_unit=ms');
-    expect(params.toString()).toContain('hourly=precipitation');
-    expect(params.toString()).toContain('hourly=rain');
-    expect(params.toString()).toContain('hourly=snowfall');
+    expect(params.toString()).toContain('current=precipitation');
+    expect(params.toString()).toContain('current=rain');
+    expect(params.toString()).toContain('current=snowfall');
 });
 
   it('uses WEATHER_URL env variable', async () => {
@@ -85,7 +82,7 @@ it('builds correct URL with query params', async () => {
     expect(calledUrl).toContain('api.open-meteo.com');
   });
 
-  it('extracts correct hourly values (index 0)', async () => {
+  it('extracts current rain, snow and precipitation', async () => {
     axios.get.mockResolvedValue(mockApiResponse);
     const result = await getWeather(LAT, LON);
 
@@ -98,7 +95,7 @@ it('builds correct URL with query params', async () => {
 // ── Edge cases ──────────────────────────────────────────────────────────────
 
 describe('getWeather — edge cases', () => {
-  it('handles missing hourly data gracefully', async () => {
+  it('handles missing precipitation data gracefully', async () => {
     axios.get.mockResolvedValue({
       data: {
         latitude: LAT,
@@ -108,7 +105,6 @@ describe('getWeather — edge cases', () => {
           wind_speed_10m: 5,
           weather_code: 1,
         },
-        hourly: {},
       },
     });
 
@@ -124,11 +120,6 @@ describe('getWeather — edge cases', () => {
       data: {
         latitude: LAT,
         longitude: LON,
-        hourly: {
-          precipitation: [0.5],
-          rain: [0.3],
-          snowfall: [0.2],
-        },
       },
     });
 
