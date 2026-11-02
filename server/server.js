@@ -8,10 +8,10 @@ import authRouter from './routes/authRoutes.js';
 
 dotenv.config();
 
-// Allow requests from your Amplify frontend (set FRONTEND_URL env var in Beanstalk)
+
 const allowedOrigins = [
-  process.env.FRONTEND_URL,         // e.g. https://main.xxxxxx.amplifyapp.com
-  'http://localhost:3000',           // local dev
+  process.env.FRONTEND_URL,         
+  'http://localhost:3000',           
 ].filter(Boolean);
 
 
