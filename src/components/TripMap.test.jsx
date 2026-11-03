@@ -188,7 +188,8 @@ describe('TripMap — weather point names', () => {
   it('falls back to "Weather Point N" when the lookup fails', async () => {
     vi.stubGlobal('fetch', vi.fn().mockRejectedValue(new Error('offline')));
     render(<TripMap trip={tripWithPoint(40.1, -106.5)} />);
-    expect(await screen.findByText('Weather Point 1')).toBeInTheDocument();
+    // waits out the 1 req/s gap left by the previous lookup
+    expect(await screen.findByText('Weather Point 1', {}, { timeout: 3000 })).toBeInTheDocument();
     vi.unstubAllGlobals();
   });
 });

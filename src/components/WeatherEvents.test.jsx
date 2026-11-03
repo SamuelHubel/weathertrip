@@ -1,5 +1,5 @@
 import { render, screen } from '@testing-library/react';
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import WeatherEvents from './WeatherEvents';
 
 const weatherTrip = {
@@ -19,6 +19,19 @@ const weatherTrip = {
 };
 
 describe('WeatherEvents', () => {
+  // place-name lookups hit Nominatim; keep tests offline
+  beforeEach(() => {
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue({
+      json: () => Promise.resolve({ address: { city: 'Denver', state: 'Colorado' } }),
+    }));
+  });
+  afterEach(() => vi.unstubAllGlobals());
+
+  it('shows the place name for an event location', async () => {
+    render(<WeatherEvents trip={weatherTrip} />);
+    expect(await screen.findByText('Denver, Colorado')).toBeInTheDocument();
+  });
+
   it('does not report an all-clear when the trip has no weather data', () => {
     render(<WeatherEvents trip={{ route: { geometry: [[1, 2]] } }} />);
     expect(screen.queryByText(/No notable weather events/i)).not.toBeInTheDocument();

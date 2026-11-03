@@ -1,5 +1,6 @@
 import React, { useMemo, useState } from 'react';
 import './weatherEvents.css';
+import PointName from './PointName';
 
 const weatherIcons = {
   thunder: '⛈️',
@@ -81,6 +82,8 @@ function buildEvents(weatherPoints, now) {
         icon: getIcon(conditions),
         headline,
         timeText: fromText === toText ? fromText : `${fromText} → ${toText}`,
+        lat: point.location.latitude,
+        lon: point.location.longitude,
         locationText: `${point.location.latitude?.toFixed(2) ?? '—'}, ${point.location.longitude?.toFixed(2) ?? '—'}`,
         description: `${entry.temperature ?? point.temperature ?? '—'}°C · Wind ${wind.toFixed(0)} m/s · Rain ${rain.toFixed(1)} mm · Snow ${snow.toFixed(1)} cm`,
       };
@@ -125,7 +128,9 @@ function WeatherEvents({ trip }) {
                 <div className="weather-event-content">
                   <div className="weather-event-headline">{event.headline}</div>
                   <div className="weather-event-time">{event.timeText}</div>
-                  <div className="weather-event-location">{event.locationText}</div>
+                  <div className="weather-event-location">
+                    <PointName lat={event.lat} lon={event.lon} fallback={event.locationText} />
+                  </div>
                   <div className="weather-event-severity severity-high">HIGH</div>
                   <div>{event.description}</div>
                 </div>
