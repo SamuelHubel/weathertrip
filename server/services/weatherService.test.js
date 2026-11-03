@@ -19,6 +19,15 @@ const apiPoint = (latitude, longitude) => ({
     showers: 0.3,
     snowfall: 0.0,
   },
+  hourly: {
+    time: [1700000000, 1700003600],
+    weather_code: [95, 3],
+    precipitation: [12, 0],
+    rain: [8, 0],
+    showers: [4, 0],
+    snowfall: [0, 0],
+    wind_speed_10m: [20, 5],
+  },
 });
 
 beforeEach(() => {
@@ -40,6 +49,12 @@ describe('getWeather', () => {
     expect(params.getAll('current')).toEqual([
       'temperature_2m', 'wind_speed_10m', 'weather_code', 'precipitation', 'rain', 'showers', 'snowfall',
     ]);
+    expect(params.getAll('hourly')).toEqual([
+      'weather_code', 'precipitation', 'rain', 'showers', 'snowfall', 'wind_speed_10m',
+    ]);
+    expect(params.get('past_hours')).toBe('6');
+    expect(params.get('forecast_hours')).toBe('12');
+    expect(params.get('timeformat')).toBe('unixtime');
   });
 
   it('maps the response to one weather object per point, in order', async () => {
@@ -55,6 +70,10 @@ describe('getWeather', () => {
       precipitation: 0.2,
       rain: 0.4,
       snowfall: 0.0,
+      hourly: [
+        { time: 1700000000000, weathercode: 95, precipitation: 12, rain: 12, snowfall: 0, windspeed: 20 },
+        { time: 1700003600000, weathercode: 3, precipitation: 0, rain: 0, snowfall: 0, windspeed: 5 },
+      ],
     });
     expect(result[1].location).toEqual({ latitude: 40.8, longitude: -111.9 });
   });
@@ -73,6 +92,7 @@ describe('getWeather', () => {
 
     expect(point.temperature).toBeUndefined();
     expect(point.rain).toBeUndefined();
+    expect(point.hourly).toEqual([]);
   });
 
   it('returns null for invalid coordinates or no points', async () => {

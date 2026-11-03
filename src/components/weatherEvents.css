@@ -41,7 +41,8 @@
   line-height: 1.3;
 }
 
-.weather-event-location {
+.weather-event-location,
+.weather-event-time {
   font-family: 'Share Tech Mono', monospace;
   font-size: 10px;
   color: var(--text-muted);
@@ -100,7 +101,8 @@
     font-size: 12px;
   }
 
-  .weather-event-location {
+  .weather-event-location,
+  .weather-event-time {
     font-size: 9px;
   }
 
@@ -129,7 +131,8 @@
     font-size: 11px;
   }
 
-  .weather-event-location {
+  .weather-event-location,
+  .weather-event-time {
     font-size: 8px;
   }
 

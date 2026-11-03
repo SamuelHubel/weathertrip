@@ -25,6 +25,12 @@ const getWeather = async (points) => {
                 ['current', 'showers'],
                 ['current', 'snowfall'],
                 ['wind_speed_unit', 'ms'],
+                // hourly window so the client can flag severe weather from the recent past and near future
+                ...['weather_code', 'precipitation', 'rain', 'showers', 'snowfall', 'wind_speed_10m'].map((field) => ['hourly', field]),
+                ['past_hours', '6'],
+                ['forecast_hours', '12'],
+                // epoch seconds, so the client needs no timezone handling
+                ['timeformat', 'unixtime'],
             ]),
             timeout: 10000,
         });
@@ -38,6 +44,15 @@ const getWeather = async (points) => {
             // Open-Meteo reports showers separately, and a downpour can be all showers
             rain: point.current && Number(((point.current.rain ?? 0) + (point.current.showers ?? 0)).toFixed(1)),
             snowfall: point.current?.snowfall,
+            // same field names as the current conditions, one entry per hour
+            hourly: (point.hourly?.time ?? []).map((time, i) => ({
+                time: time * 1000,
+                weathercode: point.hourly.weather_code?.[i],
+                precipitation: point.hourly.precipitation?.[i],
+                rain: Number(((point.hourly.rain?.[i] ?? 0) + (point.hourly.showers?.[i] ?? 0)).toFixed(1)),
+                snowfall: point.hourly.snowfall?.[i],
+                windspeed: point.hourly.wind_speed_10m?.[i],
+            })),
         }));
     } catch (error) {
         console.error('Weather error:', error.message);

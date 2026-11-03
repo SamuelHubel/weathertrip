@@ -37,7 +37,16 @@ function getIcon({ rain, snow, isThunder }) {
   return weatherIcons.wind;
 }
 
-function buildEvents(weatherPoints) {
+const HOUR = 3600000;
+
+// relative label for a timestamp: "now", "in 3h" or "2h ago"
+function relHours(ms, now) {
+  const hours = Math.round((ms - now) / HOUR);
+  if (hours === 0) return 'now';
+  return hours > 0 ? `in ${hours}h` : `${-hours}h ago`;
+}
+
+function buildEvents(weatherPoints, now) {
   if (!Array.isArray(weatherPoints)) {
     return [];
   }
@@ -47,25 +56,41 @@ function buildEvents(weatherPoints) {
       return [];
     }
 
-    const conditions = readConditions(point);
-    if (!isHighSeverity(conditions)) {
-      return [];
+    // current conditions first, then the hourly window (6h back, 12h ahead); one event per hazard type per point
+    const groups = new Map();
+    for (const entry of [{ ...point, time: now }, ...(point.hourly ?? [])]) {
+      const conditions = readConditions(entry);
+      if (!isHighSeverity(conditions)) continue;
+      const headline = getHeadline(conditions);
+      const group = groups.get(headline);
+      if (group) {
+        group.from = Math.min(group.from, entry.time);
+        group.to = Math.max(group.to, entry.time);
+      } else {
+        groups.set(headline, { headline, from: entry.time, to: entry.time, entry, conditions });
+      }
     }
 
-    const { rain, snow, wind } = conditions;
-    return [{
-      index,
-      icon: getIcon(conditions),
-      headline: getHeadline(conditions),
-      locationText: `${point.location.latitude?.toFixed(2) ?? '—'}, ${point.location.longitude?.toFixed(2) ?? '—'}`,
-      description: `${point.temperature ?? '—'}°C · Wind ${wind.toFixed(0)} m/s · Rain ${rain.toFixed(1)} mm · Snow ${snow.toFixed(1)} cm`,
-    }];
-  });
+    return [...groups.values()].map(({ headline, from, to, entry, conditions }) => {
+      const { rain, snow, wind } = conditions;
+      const fromText = relHours(from, now);
+      const toText = relHours(to, now);
+      return {
+        index,
+        from,
+        icon: getIcon(conditions),
+        headline,
+        timeText: fromText === toText ? fromText : `${fromText} → ${toText}`,
+        locationText: `${point.location.latitude?.toFixed(2) ?? '—'}, ${point.location.longitude?.toFixed(2) ?? '—'}`,
+        description: `${entry.temperature ?? point.temperature ?? '—'}°C · Wind ${wind.toFixed(0)} m/s · Rain ${rain.toFixed(1)} mm · Snow ${snow.toFixed(1)} cm`,
+      };
+    });
+  }).sort((a, b) => a.from - b.from);
 }
 
 function WeatherEvents({ trip }) {
   const [open, setOpen] = useState(false);
-  const events = useMemo(() => buildEvents(trip?.weather), [trip?.weather]);
+  const events = useMemo(() => buildEvents(trip?.weather, Date.now()), [trip?.weather]);
 
   // only claim the route is clear if weather was actually fetched for it
   const hasWeather = Array.isArray(trip?.weather);
@@ -99,6 +124,7 @@ function WeatherEvents({ trip }) {
                 <div className="weather-event-icon">{event.icon}</div>
                 <div className="weather-event-content">
                   <div className="weather-event-headline">{event.headline}</div>
+                  <div className="weather-event-time">{event.timeText}</div>
                   <div className="weather-event-location">{event.locationText}</div>
                   <div className="weather-event-severity severity-high">HIGH</div>
                   <div>{event.description}</div>
