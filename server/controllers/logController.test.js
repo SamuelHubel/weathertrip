@@ -15,7 +15,7 @@ describe('getLoggedTrips', () => {
 
     beforeEach(() => {
         vi.clearAllMocks();
-        query = { select: vi.fn().mockReturnThis(), sort: vi.fn().mockReturnThis(), limit: vi.fn() };
+        query = { sort: vi.fn().mockReturnThis(), limit: vi.fn() };
         Trip.find.mockReturnValue(query);
     });
 
@@ -28,14 +28,14 @@ describe('getLoggedTrips', () => {
         expect(Trip.find).not.toHaveBeenCalled();
     });
 
-    it("returns only the user's own trips, without route points, capped at 50", async () => {
+    it("returns only the user's own trips, newest first, capped at 50", async () => {
         query.limit.mockResolvedValue([{ _id: 't1' }]);
         const res = mockRes();
 
         await getLoggedTrips({ user: { id: 'u1' } }, res);
 
         expect(Trip.find).toHaveBeenCalledWith({ userId: 'u1' });
-        expect(query.select).toHaveBeenCalledWith('-route.geometry -route.weatherPoints');
+        expect(query.sort).toHaveBeenCalledWith({ createdAt: -1 });
         expect(query.limit).toHaveBeenCalledWith(50);
         expect(res.json).toHaveBeenCalledWith([{ _id: 't1' }]);
     });

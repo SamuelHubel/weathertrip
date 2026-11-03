@@ -210,6 +210,15 @@ describe('getTrip', () => {
             expect(mockSave).not.toHaveBeenCalled();
         });
 
+        it('still answers when saving the trip fails', async () => {
+            mockSave.mockRejectedValueOnce(new Error('buffering timed out'));
+            const { req, res } = mockReqRes({ start: 'New York', end: 'Los Angeles' });
+            await getTrip({ ...req, user: { id: 'u1' } }, res);
+
+            expect(res.status).not.toHaveBeenCalled();
+            expect(res.json.mock.calls[0][0].route.geometry).toEqual(MOCK_ROUTE.geometry);
+        });
+
         it('requests weather for all sampled points at once', async () => {
             const { req, res } = mockReqRes({ start: 'New York', end: 'Los Angeles' });
             await getTrip(req, res);

@@ -9,9 +9,7 @@ const getLoggedTrips = async (req, res) => {
             return res.json([]);
         }
         console.log('fetching trips for user:', req.user.id);
-        // the log only shows names and dates, and replaying a trip fetches the route again
         const loggedTrips = await Trip.find({ userId: req.user.id })
-                                      .select('-route.geometry -route.weatherPoints')
                                       .sort({ createdAt: -1 })
                                       .limit(50);
         console.log('found trips:', loggedTrips.length);

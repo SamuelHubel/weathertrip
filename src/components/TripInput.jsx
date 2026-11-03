@@ -16,7 +16,7 @@ function TripInput({ addTrip }) {
     setError(null);
 
     try {
-      const tripData = await fetchTrip(start, end);
+      const tripData = await fetchTrip(start.trim(), end.trim());
       addTrip(tripData, start.trim(), end.trim());
       setStart('');
       setEnd('');

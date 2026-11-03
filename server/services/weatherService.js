@@ -26,7 +26,7 @@ const getWeather = async (points) => {
                 ['current', 'snowfall'],
                 ['wind_speed_unit', 'ms'],
                 // hourly window so the client can flag severe weather from the recent past and near future
-                ...['weather_code', 'precipitation', 'rain', 'showers', 'snowfall', 'wind_speed_10m'].map((field) => ['hourly', field]),
+                ...['temperature_2m', 'weather_code', 'precipitation', 'rain', 'showers', 'snowfall', 'wind_speed_10m'].map((field) => ['hourly', field]),
                 ['past_hours', '6'],
                 ['forecast_hours', '12'],
                 // epoch seconds, so the client needs no timezone handling
@@ -47,6 +47,7 @@ const getWeather = async (points) => {
             // same field names as the current conditions, one entry per hour
             hourly: (point.hourly?.time ?? []).map((time, i) => ({
                 time: time * 1000,
+                temperature: point.hourly.temperature_2m?.[i],
                 weathercode: point.hourly.weather_code?.[i],
                 precipitation: point.hourly.precipitation?.[i],
                 rain: Number(((point.hourly.rain?.[i] ?? 0) + (point.hourly.showers?.[i] ?? 0)).toFixed(1)),

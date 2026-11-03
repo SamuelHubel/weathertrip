@@ -21,6 +21,7 @@ const apiPoint = (latitude, longitude) => ({
   },
   hourly: {
     time: [1700000000, 1700003600],
+    temperature_2m: [-2, 4],
     weather_code: [95, 3],
     precipitation: [12, 0],
     rain: [8, 0],
@@ -50,7 +51,7 @@ describe('getWeather', () => {
       'temperature_2m', 'wind_speed_10m', 'weather_code', 'precipitation', 'rain', 'showers', 'snowfall',
     ]);
     expect(params.getAll('hourly')).toEqual([
-      'weather_code', 'precipitation', 'rain', 'showers', 'snowfall', 'wind_speed_10m',
+      'temperature_2m', 'weather_code', 'precipitation', 'rain', 'showers', 'snowfall', 'wind_speed_10m',
     ]);
     expect(params.get('past_hours')).toBe('6');
     expect(params.get('forecast_hours')).toBe('12');
@@ -71,8 +72,8 @@ describe('getWeather', () => {
       rain: 0.4,
       snowfall: 0.0,
       hourly: [
-        { time: 1700000000000, weathercode: 95, precipitation: 12, rain: 12, snowfall: 0, windspeed: 20 },
-        { time: 1700003600000, weathercode: 3, precipitation: 0, rain: 0, snowfall: 0, windspeed: 5 },
+        { time: 1700000000000, temperature: -2, weathercode: 95, precipitation: 12, rain: 12, snowfall: 0, windspeed: 20 },
+        { time: 1700003600000, temperature: 4, weathercode: 3, precipitation: 0, rain: 0, snowfall: 0, windspeed: 5 },
       ],
     });
     expect(result[1].location).toEqual({ latitude: 40.8, longitude: -111.9 });

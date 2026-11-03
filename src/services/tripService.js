@@ -44,4 +44,4 @@ const fetchTripLog = async (tokenOverride) => {
 
 
 export default fetchTrip;
-export { fetchTripLog, authHeader };
+export { fetchTripLog };

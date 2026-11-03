@@ -1,6 +1,6 @@
 import mongoose from 'mongoose';
 // data model for a trip
-// stores start, end, route, and weather points to be rechecked when replotting a trip from the log
+// stores start, end and route length; replotting a trip from the log fetches the route and weather again
 const tripSchema = new mongoose.Schema({
   // reference to the user who created the trip
   // this allows us to associate trips with users and retrieve a user's trip history
@@ -23,8 +23,6 @@ const tripSchema = new mongoose.Schema({
   route: {
     distance: Number,
     duration: Number,
-    geometry: Object,
-    weatherPoints: Array,
   },
 
   createdAt: {

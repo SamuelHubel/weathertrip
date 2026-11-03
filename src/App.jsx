@@ -95,7 +95,6 @@ function App() {
     setTripLog([]);
     setTrip(null);
   };
-  console.log('showLogin:', showLogin);
 
   return (
     <div className="app">

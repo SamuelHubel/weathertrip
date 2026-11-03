@@ -16,16 +16,6 @@ function TripLog({ tripLog, onReplot }) {
       {/* Panel Header */}
       <button type="button" className="panel-header" aria-expanded={open} onClick={() => setOpen(o => !o)}>
         <span className="panel-title">Trip Log</span>
-        {tripLog.length > 0 && (
-          <span style={{
-            fontFamily: 'Share Tech Mono, monospace',
-            fontSize: '10px',
-            color: 'var(--cyan)',
-            marginRight: '8px',
-          }}>
-            
-          </span>
-        )}
         <span className={`panel-toggle${open ? ' open' : ''}`}>▼</span>
       </button>
 

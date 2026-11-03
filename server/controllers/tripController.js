@@ -61,16 +61,20 @@ const getTrip = async (req, res) => {
                     lat: endLocation.lat, 
                     lon: endLocation.lon
                 },
+                // the route line is not stored: replaying a trip fetches it again
                 route: {
                     distance: route.distance,
                     duration: route.duration,
-                    geometry: route.geometry,
-                    weatherPoints: route.weatherPoints,
                 },
             });
 
-            await tripData.save();
-            console.log(`Saving ${start} to ${end} to database for user ${req.user.id}`);
+            // a failed save must not throw away the trip the user is waiting for
+            try {
+                await tripData.save();
+                console.log(`Saved ${start} to ${end} for user ${req.user.id}`);
+            } catch (error) {
+                console.error('Trip save failed:', error.message);
+            }
         } else {
             console.log('No user logged in, skipping trip save to database');
         }

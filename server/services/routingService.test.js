@@ -143,37 +143,23 @@ describe('getRoute', () => {
     // ── Error handling ────────────────────────────────────────────────────────
 
     describe('error handling', () => {
-        it('returns null when axios.get throws a network error', async () => {
+        it('throws on a network error, so the caller does not report "no route"', async () => {
             axios.get.mockRejectedValueOnce(new Error('ECONNREFUSED'));
 
-            const result = await getRoute(START, END);
+            await expect(getRoute(START, END)).rejects.toThrow('ECONNREFUSED');
+        });
 
-            expect(result).toBeNull();
+        it('returns null when OSRM answers 400 (no route between the points)', async () => {
+            const noRoute = Object.assign(new Error('Request failed with status code 400'), { response: { status: 400 } });
+            axios.get.mockRejectedValueOnce(noRoute);
+
+            expect(await getRoute(START, END)).toBeNull();
         });
 
         it('returns null when the OSRM response has no routes', async () => {
             axios.get.mockResolvedValueOnce({ data: { routes: [] } });
 
-            const result = await getRoute(START, END);
-
-            // Accessing routes[0] will be undefined → destructuring throws
-            expect(result).toBeNull();
-        });
-
-        it('returns null when axios.get rejects with a timeout', async () => {
-            const timeoutError = new Error('timeout of 5000ms exceeded');
-            timeoutError.code = 'ECONNABORTED';
-            axios.get.mockRejectedValueOnce(timeoutError);
-
-            const result = await getRoute(START, END);
-
-            expect(result).toBeNull();
-        });
-
-        it('does not throw — always resolves', async () => {
-            axios.get.mockRejectedValueOnce(new Error('Unexpected failure'));
-
-            await expect(getRoute(START, END)).resolves.not.toThrow();
+            expect(await getRoute(START, END)).toBeNull();
         });
     });
 });

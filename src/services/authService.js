@@ -27,5 +27,3 @@ export const logout = () => localStorage.removeItem('wt_token');
 //
 export const getToken = () => localStorage.getItem('wt_token');
 
-const authService = { login, register, logout, getToken };
-export default authService;
