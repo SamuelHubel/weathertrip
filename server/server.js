@@ -17,6 +17,8 @@ const allowedOrigins = [
 
 
 const app = express();
+// behind Render's proxy: without this, rate limits see every user as one IP
+app.set('trust proxy', 1);
 app.use(cors({
   origin: (origin, callback) => {
     // allow curl/Postman (no origin) and whitelisted origins
