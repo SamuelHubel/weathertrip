@@ -107,7 +107,12 @@ const getTrip = async (req, res) => {
 
     } 
    catch (error) {
-    console.log('CATCH ERROR:', error.message);
+    // name the upstream service, so a 429 or timeout says which provider failed
+    console.error('CATCH ERROR:', error.message, error.config?.url ?? '');
+    // public OSRM/Nominatim throttle shared host IPs; tell the user to retry rather than report a bug
+    if (error.response?.status === 429) {
+        return res.status(503).json({ error: 'Map services are busy, try again in a minute' });
+    }
     res.status(500).json({ error: 'Failed to process trip' });
     }
 }

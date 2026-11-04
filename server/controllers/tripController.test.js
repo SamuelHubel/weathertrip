@@ -296,5 +296,16 @@ describe('getTrip', () => {
             expect(res.status).toHaveBeenCalledWith(500);
             expect(res.json).toHaveBeenCalledWith({ error: 'Failed to process trip' });
         });
+
+        it('returns 503 when an upstream API rate-limits us', async () => {
+            geocodingService.geocodeLocation.mockRejectedValueOnce(
+                Object.assign(new Error('Request failed with status code 429'), { response: { status: 429 } })
+            );
+
+            const { req, res } = mockReqRes({ start: 'New York', end: 'Los Angeles' });
+            await getTrip(req, res);
+
+            expect(res.status).toHaveBeenCalledWith(503);
+        });
     });
 });
