@@ -1,37 +1,22 @@
-import React, { useState } from 'react';
+import React from 'react';
 import './tripLog.css';
 
-
-
-
-
+// recent trips as chips; renders nothing until there is something to show
 function TripLog({ tripLog, onReplot }) {
-  const [open, setOpen] = useState(false);
+  if (!tripLog?.length) return null;
 
-
-  
-  // using panel to allow opening and closing
   return (
-    <div className="panel trip-log-panel">
-      {/* Panel Header */}
-      <button type="button" className="panel-header" aria-expanded={open} onClick={() => setOpen(o => !o)}>
-        <span className="panel-title">Trip Log</span>
-        <span className={`panel-toggle${open ? ' open' : ''}`}>▼</span>
-      </button>
-
-      {/* Panel Body */}
-      <div className={`panel-body${open ? ' open' : ''}`} inert={!open}>
-       {tripLog.length === 0 
-    ? <p>No trips yet</p>
-    : tripLog.map((entry) => (
-        <button type="button" className="trip-log-item" key={entry._id} onClick={() => onReplot(entry)}>
-            <span className="trip-log-route">{entry.start.location} → {entry.end.location}</span>
-            <span className="trip-log-badge">{new Date(entry.createdAt).toLocaleDateString()}</span>
-        </button>
-    ))
-}
+    <section className="trip-log" aria-label="Recent trips">
+      <h2 className="trip-log-title">Recent trips</h2>
+      <div className="trip-log-list">
+        {tripLog.map((entry) => (
+          <button type="button" className="trip-chip" key={entry._id} onClick={() => onReplot(entry)}>
+            <span className="trip-chip-route">{entry.start.location} → {entry.end.location}</span>
+            <span className="trip-chip-date">{new Date(entry.createdAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}</span>
+          </button>
+        ))}
       </div>
-    </div>
+    </section>
   );
 }
 

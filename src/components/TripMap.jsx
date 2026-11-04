@@ -1,165 +1,95 @@
-import React, { useState } from 'react';
+import React, { useEffect } from 'react';
 import './tripMap.css';
 import PointName from './PointName';
-import { MapContainer, TileLayer, Polyline, Marker, Popup } from 'react-leaflet';
+import { MapContainer, TileLayer, Polyline, Marker, Popup, ZoomControl, useMap } from 'react-leaflet';
 import L from 'leaflet';
+import { weatherIcons } from '../sky';
+import { toF, toMph, mmToIn, cmToIn } from '../units';
 
+const startIcon = L.divIcon({ className: 'pin pin-start', iconSize: [16, 16] });
+const endIcon = L.divIcon({ className: 'pin pin-end', iconSize: [16, 16] });
 
+const PHONE = '(max-width: 700px)';
 
-
-function formatDistance(meters) {
-  if (!meters) return '—';
-  const miles = meters / 1609.34;
-  return `${miles.toFixed(0)} mi`;
+// frame a newly plotted route clear of the floating panels
+function FitRoute({ geometry }) {
+  const map = useMap();
+  useEffect(() => {
+    if (!geometry?.length) return;
+    const phone = window.matchMedia?.(PHONE).matches;
+    map.fitBounds(geometry, phone
+      ? { paddingTopLeft: [20, 90], paddingBottomRight: [20, 180] }
+      : { paddingTopLeft: [400, 60], paddingBottomRight: [420, 60] });
+  }, [map, geometry]);
+  return null;
 }
 
-function formatDuration(seconds) {
-  if (!seconds) return '—';
-  const h = Math.floor(seconds / 3600);
-  const m = Math.floor((seconds % 3600) / 60);
-  return h > 0 ? `${h}h ${m}m` : `${m}m`;
+function FlyTo({ lat, lon }) {
+  const map = useMap();
+  useEffect(() => {
+    if (lat != null && lon != null) map.flyTo([lat, lon], Math.max(map.getZoom(), 8), { duration: 0.8 });
+  }, [map, lat, lon]);
+  return null;
 }
-// start and end markers for the route
-const startIcon = L.divIcon({
-  className: 'start-icon',
-  html: '🟢',
-});
 
-const endIcon = L.divIcon({
-  className: 'end-icon',
-  html: '🔴',
-});
-
-
-// markers for weather points
-const weatherIcons = {
-  0: '☀️',   // Clear sky
-  1: '🌤️',   // Mainly clear
-  2: '⛅',    // Partly cloudy
-  3: '☁️',    // Overcast
-  45: '🌫️',   // Fog
-  48: '🌫️',   // Depositing rime fog
-  51: '🌦️',   // Drizzle: Light
-  53: '🌦️',   // Drizzle: Moderate
-  55: '🌦️',   // Drizzle: Dense
-  56: '🌧️',   // Freezing Drizzle: Light
-  57: '🌧️',   // Freezing Drizzle: Dense
-  61: '🌧️',   // Rain: Slight
-  63: '🌧️',   // Rain: Moderate
-  65: '🌧️',   // Rain: Heavy
-  66: '🌨️',   // Freezing Rain: Light
-  67: '🌨️',   // Freezing Rain: Heavy
-  71: '🌨️',   // Snow fall: Slight
-  73: '🌨️',   // Snow fall: Moderate
-  75: '🌨️',   // Snow fall: Heavy
-  77: '🌨️',   // Snow grains
-  80: '🌧️',   // Rain showers: Slight
-  81: '🌧️',   // Rain showers: Moderate
-  82: '🌧️',   // Rain showers: Violent
-  85: '🌨️',   // Snow showers slight
-  86: '🌨️',   // Snow showers heavy
-  95: '⛈️',   // Thunderstorm: Slight or moderate 
-  96: '⛈️',   // Thunderstorm with slight hail
-  99: '⛈️',   // Thunderstorm with heavy hail
-  // thunderstorm with hail only available in forecast for central Europe
-};
-
-function TripMap({ trip }) {
-  const [open, setOpen] = useState(true);
+function TripMap({ trip, time, selected, onSelect }) {
+  const tiles = time === 'night' ? 'alidade_smooth_dark' : 'alidade_smooth';
+  const focus = selected != null ? trip?.weather?.[selected]?.location : null;
 
   return (
-    <div className="panel map-panel">
-      {/* Panel Header */}
-      <button type="button" className="panel-header" aria-expanded={open} onClick={() => setOpen(o => !o)}>
-        <span className="panel-icon">🗺</span>
-        <span className="panel-title">Route Map</span>
-        {/* able to open and close the map panel */}  
-        <span className={`panel-toggle${open ? ' open' : ''}`}>▼</span>
-      </button>
+    <div className="map-wrapper">
+      <MapContainer center={[39.8, -98.6]} zoom={4} zoomControl={false} style={{ height: '100%', width: '100%' }}>
+        <TileLayer
+          key={tiles}
+          attribution='&copy; <a href="https://www.stadiamaps.com/" target="_blank">Stadia Maps</a> &copy; <a href="https://openmaptiles.org/" target="_blank">OpenMapTiles</a> &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+          url={`https://tiles.stadiamaps.com/tiles/${tiles}/{z}/{x}/{y}{r}.png?api_key=${import.meta.env.VITE_STADIA_API_KEY}`}
+        />
 
-      {/* Panel Body */}
-      <div className={`panel-body${open ? ' open' : ''}`} inert={!open}>
-        <div className="map-wrapper">
-          <MapContainer
-            center={[39.8, -98.6]}
-            zoom={4}
-            style={{ height: '100%', width: '100%' }}
-            zoomControl={true}
+        <ZoomControl position="bottomleft" />
+        <FitRoute geometry={trip?.route?.geometry} />
+        <FlyTo lat={focus?.latitude} lon={focus?.longitude} />
+
+        {trip?.route?.geometry && (
+          <Polyline positions={trip.route.geometry} pathOptions={{ className: 'route-line', weight: 5 }} />
+        )}
+
+        {trip?.start?.lat && (
+          <Marker position={[trip.start.lat, trip.start.lon]} icon={startIcon}>
+            <Popup>Origin</Popup>
+          </Marker>
+        )}
+
+        {trip?.end?.lat && (
+          <Marker position={[trip.end.lat, trip.end.lon]} icon={endIcon}>
+            <Popup>Destination</Popup>
+          </Marker>
+        )}
+
+        {trip?.weather?.map((point, idx) => point?.location && (
+          <Marker
+            key={idx}
+            position={[point.location.latitude, point.location.longitude]}
+            eventHandlers={{ click: () => onSelect?.(idx) }}
+            icon={L.divIcon({
+              className: `weather-icon${selected === idx ? ' selected' : ''}`,
+              iconSize: [34, 34],
+              html: weatherIcons[point.weathercode] || '❓',
+            })}
           >
-            <TileLayer
-              attribution='&copy; <a href="https://www.stadiamaps.com/" target="_blank">Stadia Maps</a> &copy; <a href="https://openmaptiles.org/" target="_blank">OpenMapTiles</a> &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-              url={`https://tiles.stadiamaps.com/tiles/alidade_smooth_dark/{z}/{x}/{y}{r}.png?api_key=${import.meta.env.VITE_STADIA_API_KEY}`}
-            />
-
-            {trip?.route?.geometry && (
-              <Polyline
-                positions={trip.route.geometry}
-                color="#00d4ff"
-                weight={3}
-                opacity={0.85}
-              />
-            )}
-
-            {trip?.start?.lat && (
-              <Marker position={[trip.start.lat, trip.start.lon]} icon={startIcon}>
-                <Popup>ORIGIN</Popup>
-                
-              </Marker>
-            )}
-
-            {trip?.end?.lat && (
-              <Marker position={[trip.end.lat, trip.end.lon]} icon={endIcon}>
-                <Popup>DESTINATION</Popup>
-              </Marker>
-            )}
-            {/* Weather points along the route */}
-            {trip?.weather?.map((point, idx) => (
-              <Marker
-                key={idx}
-                position={[point.location.latitude, point.location.longitude]}
-                icon={L.divIcon({
-                  className: 'weather-icon',
-                  html: weatherIcons[point.weathercode] || '❓',
-                })}
-              >
-                <Popup>
-                  <div><strong>
-                    <PointName
-                      lat={point.location.latitude}
-                      lon={point.location.longitude}
-                      fallback={`Weather Point ${idx + 1}`}
-                    />
-                  </strong></div>
-                  <div>Temp: {point.temperature}°C</div>
-                  <div>Wind: {point.windspeed} m/s</div>
-                  <div>Rain: {point.rain} mm</div>
-                  <div>Snow: {point.snowfall} cm</div>
-                </Popup>
-              </Marker>
-            ))}
-          </MapContainer>
-
-          {/* Empty state overlay */}
-          {!trip && (
-            <div className="map-empty-state">
-              <div className="map-empty-icon">⊕</div>
-              <div className="map-empty-text">Enter a route to begin</div>
-            </div>
-          )}
-        </div>
-
-        {/* Stat bar */}
-        <div className="map-stat-bar">
-          <div className="map-stat">
-            <span className="map-stat-label">Distance</span>
-            <span className="map-stat-value">{formatDistance(trip?.route?.distance)}</span>
-          </div>
-          <div className="map-stat">
-            <span className="map-stat-label">Est. Drive</span>
-            <span className="map-stat-value">{formatDuration(trip?.route?.duration)}</span>
-          </div>
-        </div>
-      </div>
+            <Popup>
+              <div><strong>
+                <PointName
+                  lat={point.location.latitude}
+                  lon={point.location.longitude}
+                  fallback={`Stop ${idx + 1}`}
+                />
+              </strong></div>
+              <div>{toF(point.temperature)} · Wind {toMph(point.windspeed)}</div>
+              <div>Rain {mmToIn(point.rain)} · Snow {cmToIn(point.snowfall)}</div>
+            </Popup>
+          </Marker>
+        ))}
+      </MapContainer>
     </div>
   );
 }

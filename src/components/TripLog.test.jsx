@@ -25,17 +25,8 @@ describe('TripLog', () => {
     expect(onReplot).toHaveBeenCalledWith(entry);
   });
 
-  it('keeps the keyboard out of the panel until it is opened', () => {
-    render(<TripLog tripLog={[entry]} onReplot={vi.fn()} />);
-    const header = screen.getByRole('button', { name: /Trip Log/ });
-    const body = screen.getByRole('button', { name: /Denver → Boulder/ }).closest('.panel-body');
-
-    expect(header).toHaveAttribute('aria-expanded', 'false');
-    expect(body).toHaveAttribute('inert');
-
-    fireEvent.click(header);
-
-    expect(header).toHaveAttribute('aria-expanded', 'true');
-    expect(body).not.toHaveAttribute('inert');
+  it('renders nothing when there are no trips', () => {
+    const { container } = render(<TripLog tripLog={[]} onReplot={vi.fn()} />);
+    expect(container).toBeEmptyDOMElement();
   });
 });
