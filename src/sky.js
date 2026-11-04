@@ -39,8 +39,17 @@ export function conditionOf(point) {
   return 'clear';
 }
 
-// shortcut: uses the viewer's clock, not each point's sun position; upgrade if time-of-arrival forecasts land
-export function timeOfDay(date) {
+const HOUR = 3600000;
+
+// time of day at a place: from its sunrise/sunset (epoch ms) when the server sent them
+export function timeOfDay(date, sun) {
+  if (sun?.sunrise && sun?.sunset) {
+    const t = date.getTime();
+    if (Math.abs(t - sun.sunrise) < HOUR) return 'dawn';
+    if (Math.abs(t - sun.sunset) < HOUR) return 'dusk';
+    return t > sun.sunrise && t < sun.sunset ? 'day' : 'night';
+  }
+  // shortcut: no sun data (saved trip replotted offline, polar day/night) falls back to the viewer's clock
   const h = date.getHours();
   if (h >= 5 && h < 8) return 'dawn';
   if (h >= 8 && h < 17) return 'day';
@@ -48,11 +57,11 @@ export function timeOfDay(date) {
   return 'night';
 }
 
-// sky for the UI theme: the worst condition among the given points, plus time of day
-export function getSky(points, now = new Date()) {
+// sky for the UI theme: the worst condition among the given points, plus the time of day at timePoint
+export function getSky(points, now = new Date(), timePoint = null) {
   const condition = (Array.isArray(points) ? points : [])
     .filter(Boolean)
     .map(conditionOf)
     .reduce((worst, c) => (RANK.indexOf(c) > RANK.indexOf(worst) ? c : worst), 'clear');
-  return { condition, time: timeOfDay(now) };
+  return { condition, time: timeOfDay(now, timePoint?.sun) };
 }

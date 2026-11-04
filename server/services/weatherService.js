@@ -29,6 +29,11 @@ const getWeather = async (points) => {
                 ...['temperature_2m', 'weather_code', 'precipitation', 'rain', 'showers', 'snowfall', 'wind_speed_10m'].map((field) => ['hourly', field]),
                 ['past_hours', '6'],
                 ['forecast_hours', '12'],
+                // today's sunrise/sunset at each point, so the client can draw that spot's sky
+                ['daily', 'sunrise'],
+                ['daily', 'sunset'],
+                // "today" is each point's local day; times stay epoch below
+                ['timezone', 'auto'],
                 // epoch seconds, so the client needs no timezone handling
                 ['timeformat', 'unixtime'],
             ]),
@@ -44,6 +49,10 @@ const getWeather = async (points) => {
             // Open-Meteo reports showers separately, and a downpour can be all showers
             rain: point.current && Number(((point.current.rain ?? 0) + (point.current.showers ?? 0)).toFixed(1)),
             snowfall: point.current?.snowfall,
+            // epoch ms; null where the sun doesn't rise or set today (polar day/night)
+            sun: point.daily?.sunrise?.[0] && point.daily?.sunset?.[0]
+                ? { sunrise: point.daily.sunrise[0] * 1000, sunset: point.daily.sunset[0] * 1000 }
+                : null,
             // same field names as the current conditions, one entry per hour
             hourly: (point.hourly?.time ?? []).map((time, i) => ({
                 time: time * 1000,

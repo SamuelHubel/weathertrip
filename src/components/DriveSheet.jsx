@@ -1,7 +1,7 @@
 import React, { useMemo, useState } from 'react';
 import './driveSheet.css';
 import PointName from './PointName';
-import { weatherIcons, readConditions, isHighSeverity } from '../sky';
+import { weatherIcons, readConditions, isHighSeverity, conditionOf, timeOfDay } from '../sky';
 import { toF, toMph, mmToIn, cmToIn, formatDistance, formatDuration } from '../units';
 
 function getHeadline({ rain, snow, isThunder }) {
@@ -78,7 +78,7 @@ const pointName = (point, i) => (
   />
 );
 
-function DriveSheet({ trip, label, selected, onSelect }) {
+function DriveSheet({ trip, label, condition = 'clear', time, now = new Date(), selected, onSelect }) {
   // only matters on phones, where the sheet peeks from the bottom
   const [expanded, setExpanded] = useState(false);
   const events = useMemo(() => buildEvents(trip?.weather, Date.now()), [trip?.weather]);
@@ -90,29 +90,38 @@ function DriveSheet({ trip, label, selected, onSelect }) {
 
   // only claim the route is clear if weather was actually fetched for it
   const points = Array.isArray(trip?.weather) ? trip.weather : null;
-  const first = events[0];
+  // lead with a hazard that matches the header's scene, so a storm tile doesn't headline snow
+  const first = events.find((e) => conditionOf(points[e.index]) === condition) ?? events[0];
 
   return (
     <aside className={`drive-sheet glass${expanded ? ' expanded' : ''}`} aria-label="Your drive">
       <button
         type="button"
-        className="drive-summary"
+        className="drive-summary wx-tile"
+        data-wx={condition}
+        data-sky-time={time}
         aria-expanded={expanded}
         onClick={() => { setExpanded((e) => !e); onSelect(null); }}
       >
         <span className="drive-eyebrow">Your drive</span>
+        <span className="drive-verdict">
+          {first && (
+            <>
+              <span className="drive-verdict-icon" aria-hidden="true">{first.icon}</span>
+              <span>
+                <strong className="drive-verdict-headline">{first.headline}</strong>
+                <span className="drive-verdict-where">near {pointName(points[first.index], first.index)} · {first.timeText}</span>
+              </span>
+            </>
+          )}
+          {!first && points && 'No notable weather along this route right now.'}
+          {!points && 'Weather could not be loaded for this route. Try plotting it again.'}
+        </span>
         {label && <span className="drive-route">{label}</span>}
         <span className="drive-stats">
           <span>{formatDistance(trip?.route?.distance)}</span>
           <span aria-hidden="true">·</span>
           <span>{formatDuration(trip?.route?.duration)}</span>
-        </span>
-        <span className={`drive-verdict${first ? ' risky' : ''}`}>
-          {first && (
-            <>{first.icon} <strong>{first.headline}</strong> near {pointName(points[first.index], first.index)} · {first.timeText}</>
-          )}
-          {!first && points && 'No notable weather along this route right now.'}
-          {!points && 'Weather could not be loaded for this route. Try plotting it again.'}
         </span>
       </button>
 
@@ -126,7 +135,9 @@ function DriveSheet({ trip, label, selected, onSelect }) {
               <li key={i}>
                 <button
                   type="button"
-                  className={`stop${hazards.length ? ' flagged' : ''}${isSelected ? ' selected' : ''}`}
+                  className={`stop wx-tile${hazards.length ? ' flagged' : ''}${isSelected ? ' selected' : ''}`}
+                  data-wx={conditionOf(point)}
+                  data-sky-time={timeOfDay(now, point.sun)}
                   aria-pressed={isSelected}
                   onClick={() => onSelect(isSelected ? null : i)}
                 >
@@ -136,7 +147,7 @@ function DriveSheet({ trip, label, selected, onSelect }) {
                     <span className="stop-detail">Wind {toMph(point.windspeed)}</span>
                     {hazards.map((h) => (
                       <span className="stop-hazard" key={h.headline}>
-                        <strong>{h.headline}</strong> <span className="stop-when">{h.timeText}</span>
+                        <span className="stop-hazard-title"><span aria-hidden="true">⚠ </span><strong>{h.headline}</strong> <span className="stop-when">{h.timeText}</span></span>
                         <span className="stop-hazard-detail">{h.description}</span>
                       </span>
                     ))}

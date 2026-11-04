@@ -31,9 +31,12 @@ test('renders the brand and the empty-state prompt', () => {
 });
 
 test('selecting a stop re-skies the app to that point', async () => {
+    const H = 3600000;
+    const now = Date.now();
+    // origin in daylight, the far stop already past sunset
     const weather = [
-        { location: { latitude: 39.7, longitude: -105 }, weathercode: 0, temperature: 20, windspeed: 2 },
-        { location: { latitude: 40.5, longitude: -108 }, weathercode: 95, temperature: 15, windspeed: 8 },
+        { location: { latitude: 39.7, longitude: -105 }, weathercode: 0, temperature: 20, windspeed: 2, sun: { sunrise: now - 5 * H, sunset: now + 5 * H } },
+        { location: { latitude: 40.5, longitude: -108 }, weathercode: 95, temperature: 15, windspeed: 8, sun: { sunrise: now - 14 * H, sunset: now - 3 * H } },
     ];
     vi.stubGlobal('fetch', vi.fn().mockRejectedValue(new Error('offline')));
     axios.defaults.adapter = async (config) =>
@@ -48,13 +51,18 @@ test('selecting a stop re-skies the app to that point', async () => {
 
     await screen.findByRole('complementary', { name: 'Your drive' });
     expect(app).toHaveAttribute('data-sky-condition', 'storm');
+    expect(app).toHaveAttribute('data-sky-time', 'day');
 
     const stops = within(screen.getByRole('list', { name: 'Stops' })).getAllByRole('button');
     fireEvent.click(stops[0]);
     expect(app).toHaveAttribute('data-sky-condition', 'clear');
+    expect(screen.getByRole('button', { name: /your drive/i })).toHaveAttribute('data-wx', 'clear');
 
     fireEvent.click(stops[0]);
     expect(app).toHaveAttribute('data-sky-condition', 'storm');
+
+    fireEvent.click(stops[1]);
+    expect(app).toHaveAttribute('data-sky-time', 'night');
     vi.unstubAllGlobals();
 });
 

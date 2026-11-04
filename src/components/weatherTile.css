@@ -1,0 +1,136 @@
+/* ─── Weather tiles ───────────────────────────────────────────
+   A panel that shows its own little sky. data-wx picks the scene;
+   the time-of-day sky (inherited --sky-top/--sky-bottom) is mixed in,
+   so tiles darken at night without per-condition night rules. */
+.wx-tile {
+  --wx-mix: 72%;
+  --wx-a: #ffd38a;
+  --wx-b: #ffffff;
+  --tile-text: #14283c;
+  --tile-soft: rgba(20, 40, 60, 0.7);
+
+  /* containers must be positioned (the card is absolute; stops and header set relative) */
+  overflow: hidden;
+  isolation: isolate;
+  color: var(--tile-text);
+  background:
+    linear-gradient(160deg,
+      color-mix(in srgb, var(--wx-a) var(--wx-mix), var(--sky-top)),
+      color-mix(in srgb, var(--wx-b) var(--wx-mix), var(--sky-bottom)));
+  transition: background var(--ease), color var(--ease);
+}
+
+/* scene layers sit under the content */
+.wx-tile::before,
+.wx-tile::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+}
+
+.wx-tile[data-wx='clear']  { --wx-a: #ffcf7a; --wx-b: #fff6e0; }
+.wx-tile[data-wx='cloudy'] { --wx-a: #b4c0cf; --wx-b: #e8edf3; }
+.wx-tile[data-wx='rain']   { --wx-a: #3f5a7c; --wx-b: #7389a6; --tile-text: #f3f7fc; --tile-soft: rgba(243, 247, 252, 0.78); }
+.wx-tile[data-wx='snow']   { --wx-a: #b7cbe4; --wx-b: #eef4fb; --tile-text: #15304d; --tile-soft: rgba(21, 48, 77, 0.72); }
+.wx-tile[data-wx='storm']  { --wx-a: #262040; --wx-b: #4a3d70; --tile-text: #f4f1ff; --tile-soft: rgba(244, 241, 255, 0.75); }
+
+.wx-tile[data-sky-time='night'] {
+  --wx-mix: 34%;
+  --tile-text: #eef2fd;
+  --tile-soft: rgba(238, 242, 253, 0.72);
+}
+/* warm sun colours turn muddy when darkened, so a clear night is plain moonlit blue */
+.wx-tile[data-sky-time='night'][data-wx='clear'] { --wx-a: #34487c; --wx-b: #1e2b50; --wx-mix: 100%; }
+.wx-tile[data-sky-time='night'][data-wx='snow']::before { opacity: 0.55; }
+
+/* keep light text crisp over moving weather */
+.wx-tile[data-wx='rain'],
+.wx-tile[data-wx='storm'],
+.wx-tile[data-sky-time='night'] { text-shadow: 0 1px 2px rgba(0, 0, 0, 0.35); }
+
+/* ─── clear: a breathing sun (a moon at night) ─────────────── */
+.wx-tile[data-wx='clear']::after {
+  background: radial-gradient(circle at 88% 12%, rgba(255, 214, 110, 0.95), rgba(255, 214, 110, 0.35) 22%, transparent 48%);
+  animation: wx-breathe 8s ease-in-out infinite;
+}
+.wx-tile[data-sky-time='night'][data-wx='clear']::after {
+  background: radial-gradient(circle at 88% 14%, rgba(235, 240, 255, 0.8), rgba(235, 240, 255, 0.15) 14%, transparent 34%);
+}
+
+/* ─── cloudy: soft drifting clouds ─────────────────────────── */
+.wx-tile[data-wx='cloudy']::before {
+  inset: 0 -60%;
+  background:
+    radial-gradient(ellipse 22% 38% at 20% 30%, rgba(255, 255, 255, 0.7), transparent 70%),
+    radial-gradient(ellipse 18% 30% at 52% 70%, rgba(255, 255, 255, 0.5), transparent 70%),
+    radial-gradient(ellipse 20% 34% at 80% 35%, rgba(255, 255, 255, 0.6), transparent 70%);
+  filter: blur(4px);
+  animation: wx-drift 30s ease-in-out infinite alternate;
+}
+.wx-tile[data-sky-time='night'][data-wx='cloudy']::before { opacity: 0.35; }
+
+/* ─── rain + storm: falling streaks ────────────────────────── */
+.wx-tile[data-wx='rain']::before,
+.wx-tile[data-wx='storm']::before {
+  inset: -20%;
+  background-image:
+    linear-gradient(transparent 55%, rgba(255, 255, 255, 0.24) 55%),
+    linear-gradient(transparent 70%, rgba(255, 255, 255, 0.14) 70%);
+  background-size: 100% 24px, 100% 36px;
+  -webkit-mask-image: repeating-linear-gradient(90deg, #000 0 1px, transparent 1px 11px);
+  mask-image: repeating-linear-gradient(90deg, #000 0 1px, transparent 1px 11px);
+  transform: rotate(14deg);
+  animation: wx-rain 0.9s linear infinite;
+}
+
+/* ─── storm: an occasional lightning flash ─────────────────── */
+.wx-tile[data-wx='storm']::after {
+  background: radial-gradient(ellipse at 30% 0%, rgba(255, 255, 255, 0.85), rgba(200, 190, 255, 0.3) 60%);
+  opacity: 0;
+  animation: wx-flash 7s linear infinite;
+}
+
+/* ─── snow: two layers of flakes ───────────────────────────── */
+.wx-tile[data-wx='snow']::before {
+  background-image:
+    radial-gradient(circle, rgba(255, 255, 255, 0.95) 1.6px, transparent 2.2px),
+    radial-gradient(circle, rgba(255, 255, 255, 0.75) 1px, transparent 1.5px);
+  background-size: 28px 28px, 17px 17px;
+  background-position: 0 0, 8px 5px;
+  animation: wx-snow 14s linear infinite;
+}
+
+@keyframes wx-breathe {
+  0%, 100% { opacity: 0.85; transform: scale(1); }
+  50%      { opacity: 1;    transform: scale(1.06); }
+}
+@keyframes wx-drift {
+  from { transform: translateX(-12%); }
+  to   { transform: translateX(12%); }
+}
+/* moves a whole number of tiles for both layers, so the loop is seamless */
+@keyframes wx-rain {
+  from { background-position: 0 0, 0 0; }
+  to   { background-position: 0 72px, 0 72px; }
+}
+@keyframes wx-snow {
+  from { background-position: 0 0, 8px 5px; }
+  to   { background-position: 28px 112px, 25px 107px; }
+}
+@keyframes wx-flash {
+  0%, 86%, 89%, 93%, 100% { opacity: 0; }
+  87%  { opacity: 0.9; }
+  91%  { opacity: 0.55; }
+}
+
+/* form controls inside a tile keep their own solid look */
+.wx-tile .trip-fields,
+.wx-tile .trip-chip,
+.wx-tile .btn-primary { text-shadow: none; }
+
+@media (prefers-reduced-motion: reduce) {
+  .wx-tile::before,
+  .wx-tile::after { animation: none !important; } /* must beat the per-scene rules */
+}

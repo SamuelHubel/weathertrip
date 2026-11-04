@@ -1,4 +1,5 @@
 import './App.css';
+import './components/weatherTile.css';
 import TripMap from './components/TripMap.jsx';
 import TripInput from './components/TripInput.jsx';
 import TripLog from './components/TripLog.jsx';
@@ -119,7 +120,10 @@ function App() {
     setCardOpen(true);
   };
 
-  const sky = getSky(selected != null ? [trip?.weather?.[selected]] : trip?.weather, now);
+  // the selected stop sets condition and local time; otherwise the whole route's worst weather at the origin's time
+  // (the first sampled weather point is the origin)
+  const selectedPoint = selected != null ? trip?.weather?.[selected] : null;
+  const sky = getSky(selectedPoint ? [selectedPoint] : trip?.weather, now, selectedPoint ?? trip?.weather?.[0]);
 
   return (
     <div className="app" data-sky-condition={sky.condition} data-sky-time={sky.time}>
@@ -135,7 +139,7 @@ function App() {
         )}
       </div>
 
-      <section className={`trip-card glass${cardOpen ? '' : ' collapsed'}`}>
+      <section className={`trip-card glass wx-tile${cardOpen ? '' : ' collapsed'}`} data-wx={sky.condition} data-sky-time={sky.time}>
         <div className="trip-card-head">
           <h1 className="brand">Weather<span>.</span>Trip</h1>
           {trip && (
@@ -154,7 +158,7 @@ function App() {
         {user ? 'Sign out' : 'Sign in'}
       </button>
 
-      {trip && <DriveSheet trip={trip} label={label} selected={selected} onSelect={setSelected} />}
+      {trip && <DriveSheet trip={trip} label={label} condition={sky.condition} time={sky.time} now={now} selected={selected} onSelect={setSelected} />}
 
       {showLogin && (
         <AuthModal

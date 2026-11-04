@@ -10,16 +10,15 @@
   overflow: hidden;
 }
 
-/* ─── Summary ───────────────────────────────────────────────── */
+/* ─── Hero header tile ──────────────────────────────────────── */
 .drive-summary {
   position: relative;
+  flex: none;
   display: flex;
   flex-direction: column;
   gap: 4px;
-  padding: 18px 20px 16px;
+  padding: 18px 20px 18px;
   border: 0;
-  border-bottom: 1px solid var(--line);
-  background: transparent;
   text-align: left;
   cursor: default;
 }
@@ -27,100 +26,109 @@
 .drive-eyebrow {
   font-size: 12px;
   font-weight: 700;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: var(--accent);
-  transition: color var(--ease);
+  color: var(--tile-soft);
 }
 
-.drive-route { font-size: 19px; font-weight: 800; letter-spacing: -0.01em; }
+.drive-verdict {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 4px 0 10px;
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1.35;
+}
+
+.drive-verdict-icon {
+  font-size: 44px;
+  line-height: 1;
+  filter: drop-shadow(0 3px 6px rgba(0, 0, 0, 0.2));
+}
+
+.drive-verdict-headline {
+  display: block;
+  font-size: 24px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+}
+
+.drive-verdict-where { display: block; margin-top: 2px; color: var(--tile-soft); font-weight: 600; }
+
+.drive-route { font-size: 15px; font-weight: 700; }
 
 .drive-stats {
   display: flex;
   gap: 8px;
-  color: var(--text-soft);
+  color: var(--tile-soft);
   font-weight: 600;
   font-variant-numeric: tabular-nums;
 }
 
-.drive-verdict {
-  margin-top: 8px;
-  padding: 10px 12px;
-  border-radius: 12px;
-  font-size: 14px;
-  line-height: 1.4;
-  background: color-mix(in srgb, var(--text) 6%, transparent);
-}
-.drive-verdict.risky { background: color-mix(in srgb, var(--accent) 16%, transparent); }
-
-/* ─── Timeline ──────────────────────────────────────────────── */
+/* ─── Stop tiles ────────────────────────────────────────────── */
 .drive-timeline {
   list-style: none;
   overflow-y: auto;
-  padding: 10px 10px 14px;
-  position: relative;
-}
-
-/* the road connecting the stops */
-.drive-timeline::before {
-  content: '';
-  position: absolute;
-  top: 26px;
-  bottom: 30px;
-  left: 33px;
-  width: 2px;
-  background: var(--line);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px;
 }
 
 .stop {
   position: relative;
   width: 100%;
   display: grid;
-  grid-template-columns: 46px 1fr auto;
+  grid-template-columns: 40px 1fr auto;
   align-items: start;
-  gap: 8px;
-  padding: 9px 10px 9px 4px;
-  border: 1px solid transparent;
+  gap: 10px;
+  padding: 12px 14px 12px 10px;
+  border: 0;
   border-radius: 14px;
-  background: transparent;
   text-align: left;
-  transition: background 150ms ease, border-color 150ms ease;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
+  outline: 2px solid transparent;
+  outline-offset: -2px;
+  transition: transform 150ms ease, box-shadow 150ms ease, outline-color 150ms ease, background var(--ease);
 }
-.stop:hover { background: color-mix(in srgb, var(--text) 5%, transparent); }
-.stop.selected { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 12%, transparent); }
+.stop:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(0, 0, 0, 0.18); }
+.stop.selected {
+  outline-color: var(--accent);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.25), 0 0 0 4px color-mix(in srgb, var(--accent) 30%, transparent);
+}
+.stop:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
 
 .stop-icon {
-  justify-self: center;
-  display: grid;
-  place-items: center;
-  width: 34px;
-  height: 34px;
-  font-size: 18px;
-  border-radius: 50%;
-  background: var(--glass);
-  border: 1px solid var(--line);
+  font-size: 26px;
+  line-height: 1;
+  text-align: center;
+  padding-top: 2px;
+  filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.2));
 }
-.stop.flagged .stop-icon { border: 2px solid var(--accent); }
 
-.stop-main { display: flex; flex-direction: column; gap: 2px; min-width: 0; padding-top: 2px; }
-.stop-name { font-weight: 700; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.stop-detail { font-size: 13px; color: var(--text-soft); }
+.stop-main { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.stop-name { font-weight: 800; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.stop-detail { font-size: 13px; color: var(--tile-soft); font-weight: 600; }
 
 .stop-hazard {
-  margin-top: 6px;
-  padding: 7px 10px;
+  margin-top: 8px;
+  padding: 8px 10px;
   border-radius: 10px;
   font-size: 13px;
-  background: color-mix(in srgb, var(--accent) 15%, transparent);
-  border-left: 3px solid var(--accent);
+  background: color-mix(in srgb, var(--tile-text) 13%, transparent);
 }
-.stop-when { color: var(--text-soft); font-weight: 600; margin-left: 4px; }
-.stop-hazard-detail { display: block; margin-top: 2px; font-size: 12px; color: var(--text-soft); }
+.stop-when { color: var(--tile-soft); font-weight: 700; margin-left: 2px; }
+.stop-hazard-detail { display: block; margin-top: 3px; font-size: 12px; color: var(--tile-soft); }
 
 .stop-temp {
-  padding-top: 4px;
-  font-size: 17px;
+  font-size: 24px;
   font-weight: 800;
+  letter-spacing: -0.02em;
+  line-height: 1;
+  padding-top: 2px;
   font-variant-numeric: tabular-nums;
 }
 
@@ -132,26 +140,30 @@
     right: 0;
     bottom: 0;
     width: auto;
-    max-height: 70%;
+    max-height: 72%;
     border-radius: var(--radius) var(--radius) 0 0;
     border-bottom: 0;
   }
 
-  .drive-summary { cursor: pointer; padding-top: 22px; }
+  .drive-summary { cursor: pointer; padding-top: 24px; }
 
   /* grab handle */
-  .drive-summary::before {
+  .drive-sheet::before {
     content: '';
     position: absolute;
+    z-index: 2;
     top: 8px;
     left: 50%;
     width: 40px;
     height: 4px;
     margin-left: -20px;
     border-radius: 2px;
-    background: var(--line);
+    background: rgba(255, 255, 255, 0.6);
+    box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.08);
   }
 
+  .drive-verdict-icon { font-size: 36px; }
+  .drive-verdict-headline { font-size: 20px; }
+
   .drive-sheet:not(.expanded) .drive-timeline { display: none; }
-  .drive-sheet:not(.expanded) .drive-summary { border-bottom: 0; }
 }

@@ -101,6 +101,37 @@ describe('DriveSheet', () => {
     expect(onSelect).toHaveBeenLastCalledWith(null);
   });
 
+  it('gives each stop a weather scene and the header the sky condition', () => {
+    const trip = {
+      ...weatherTrip,
+      weather: [
+        { location: { latitude: 39.7, longitude: -105 }, weathercode: 0 },
+        { location: { latitude: 40.5, longitude: -108 }, weathercode: 95 },
+      ],
+    };
+    renderSheet(trip, { condition: 'storm' });
+    const scenes = timeline().getAllByRole('button').map((b) => b.dataset.wx);
+    expect(scenes).toEqual(['clear', 'storm']);
+    expect(screen.getByRole('button', { name: /your drive/i })).toHaveAttribute('data-wx', 'storm');
+  });
+
+  it('gives each stop its own local time of day', () => {
+    const now = new Date();
+    const H = 3600000;
+    const t = now.getTime();
+    const trip = {
+      ...weatherTrip,
+      weather: [
+        { location: { latitude: 39.7, longitude: -105 }, weathercode: 0, sun: { sunrise: t - 5 * H, sunset: t + 5 * H } },
+        { location: { latitude: 40.5, longitude: -112 }, weathercode: 0, sun: { sunrise: t - 14 * H, sunset: t - 3 * H } },
+      ],
+    };
+    renderSheet(trip, { now, time: 'day' });
+    const times = timeline().getAllByRole('button').map((b) => b.dataset.skyTime);
+    expect(times).toEqual(['day', 'night']);
+    expect(screen.getByRole('button', { name: /your drive/i })).toHaveAttribute('data-sky-time', 'day');
+  });
+
   it('clears the selection from the summary header', () => {
     const onSelect = vi.fn();
     renderSheet(weatherTrip, { onSelect, selected: 0 });
