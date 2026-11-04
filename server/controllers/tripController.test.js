@@ -21,7 +21,8 @@ vi.mock('../services/weatherService.js', () => ({
 }));
 // mock database model to prevent actual database interactions during tests
 vi.mock('../models/Trip.js', () => {
-    function MockTrip() {
+    function MockTrip(data) {
+        Object.assign(this, data);
         this.save = mockSave;
     }
     return { default: MockTrip };
@@ -208,6 +209,27 @@ describe('getTrip', () => {
             const replay = mockReqRes({ start: 'New York', end: 'Los Angeles', save: false });
             await getTrip({ ...replay.req, user: { id: 'u1' } }, replay.res);
             expect(mockSave).not.toHaveBeenCalled();
+        });
+
+        it("saves the geocoder's place names", async () => {
+            geocodingService.geocodeLocation.mockReset()
+                .mockResolvedValueOnce({ ...MOCK_START_LOCATION, name: 'Denver, Colorado' })
+                .mockResolvedValueOnce(MOCK_END_LOCATION);
+            const { req, res } = mockReqRes({ start: 'denver', end: ' omaha ' });
+            await getTrip({ ...req, user: { id: 'u1' } }, res);
+
+            const saved = mockSave.mock.contexts[0];
+            expect(saved.start.location).toBe('Denver, Colorado');
+            expect(saved.end.location).toBe('omaha'); // no name from the geocoder: keep the input
+        });
+
+        it('still answers when saving the trip fails', async () => {
+            mockSave.mockRejectedValueOnce(new Error('buffering timed out'));
+            const { req, res } = mockReqRes({ start: 'New York', end: 'Los Angeles' });
+            await getTrip({ ...req, user: { id: 'u1' } }, res);
+
+            expect(res.status).not.toHaveBeenCalled();
+            expect(res.json.mock.calls[0][0].route.geometry).toEqual(MOCK_ROUTE.geometry);
         });
 
         it('requests weather for all sampled points at once', async () => {

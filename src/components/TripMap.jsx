@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import './tripMap.css';
+import PointName from './PointName';
 import { MapContainer, TileLayer, Polyline, Marker, Popup } from 'react-leaflet';
 import L from 'leaflet';
 
@@ -61,9 +62,7 @@ const weatherIcons = {
   96: '⛈️',   // Thunderstorm with slight hail
   99: '⛈️',   // Thunderstorm with heavy hail
   // thunderstorm with hail only available in forecast for central Europe
-}; 
-
-
+};
 
 function TripMap({ trip }) {
   const [open, setOpen] = useState(true);
@@ -124,7 +123,13 @@ function TripMap({ trip }) {
                 })}
               >
                 <Popup>
-                  <div><strong>Weather Point {idx + 1}</strong></div>
+                  <div><strong>
+                    <PointName
+                      lat={point.location.latitude}
+                      lon={point.location.longitude}
+                      fallback={`Weather Point ${idx + 1}`}
+                    />
+                  </strong></div>
                   <div>Temp: {point.temperature}°C</div>
                   <div>Wind: {point.windspeed} m/s</div>
                   <div>Rain: {point.rain} mm</div>

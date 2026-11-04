@@ -7,6 +7,7 @@ import getWeather from '../services/weatherService.js';
 import Trip from '../models/Trip.js';
 
 
+
 const getTrip = async (req, res) => {
     try {
         const { start, end } = req.body ?? {};
@@ -52,25 +53,29 @@ const getTrip = async (req, res) => {
             const tripData = new Trip({
                 userId: req.user.id, // reference to the User model
                 start: {
-                    location: start, // save the raw location string for display in the trip log
+                    location: startLocation.name ?? start.trim(), // geocoder's place name, for display in the trip log
                     lat: startLocation.lat,
                     lon: startLocation.lon
                 },
                 end: {
-                    location: end, // save the raw location string for display in the trip log
+                    location: endLocation.name ?? end.trim(), // geocoder's place name, for display in the trip log
                     lat: endLocation.lat, 
                     lon: endLocation.lon
                 },
+                // the route line is not stored: replaying a trip fetches it again
                 route: {
                     distance: route.distance,
                     duration: route.duration,
-                    geometry: route.geometry,
-                    weatherPoints: route.weatherPoints,
                 },
             });
 
-            await tripData.save();
-            console.log(`Saving ${start} to ${end} to database for user ${req.user.id}`);
+            // a failed save must not throw away the trip the user is waiting for
+            try {
+                await tripData.save();
+                console.log(`Saved ${tripData.start.location} to ${tripData.end.location} for user ${req.user.id}`);
+            } catch (error) {
+                console.error('Trip save failed:', error.message);
+            }
         } else {
             console.log('No user logged in, skipping trip save to database');
         }

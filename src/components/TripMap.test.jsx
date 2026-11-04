@@ -170,3 +170,26 @@ describe('TripMap — partial/malformed trip data', () => {
     expect(() => render(<TripMap trip={noEnd} />)).not.toThrow();
   });
 });
+describe('TripMap — weather point names', () => {
+  const tripWithPoint = (latitude, longitude) => ({
+    ...mockTrip,
+    weather: [{ location: { latitude, longitude }, weathercode: 0 }],
+  });
+
+  it('shows the reverse-geocoded place name', async () => {
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue({
+      json: () => Promise.resolve({ address: { town: 'Glenwood Springs', state: 'Colorado' } }),
+    }));
+    render(<TripMap trip={tripWithPoint(39.55, -107.32)} />);
+    expect(await screen.findByText('Glenwood Springs, Colorado')).toBeInTheDocument();
+    vi.unstubAllGlobals();
+  });
+
+  it('falls back to "Weather Point N" when the lookup fails', async () => {
+    vi.stubGlobal('fetch', vi.fn().mockRejectedValue(new Error('offline')));
+    render(<TripMap trip={tripWithPoint(40.1, -106.5)} />);
+    // waits out the 1 req/s gap left by the previous lookup
+    expect(await screen.findByText('Weather Point 1', {}, { timeout: 3000 })).toBeInTheDocument();
+    vi.unstubAllGlobals();
+  });
+});
