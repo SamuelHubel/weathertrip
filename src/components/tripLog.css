@@ -4,6 +4,11 @@
   flex-direction: column;
 }
 
+.trip-log-panel .panel-body.open {
+  max-height: 320px;
+  overflow-y: auto;
+}
+
 .trip-log-list {
   display: flex;
   flex-direction: column;

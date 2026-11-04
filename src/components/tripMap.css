@@ -6,6 +6,7 @@
 .map-wrapper {
   position: relative;
   height: 520px;
+  isolation: isolate; /* keep Leaflet's z-index 400–1000 below the sticky header */
 }
 
 .map-wrapper .leaflet-container {
