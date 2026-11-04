@@ -25,5 +25,5 @@ test('shows the error the server sent', async () => {
     fireEvent.change(screen.getAllByRole('textbox')[1], { target: { value: 'Boulder' } });
     fireEvent.click(screen.getByText(/PLOT ROUTE/i));
 
-    expect(await screen.findByText('ERR: Too many requests, try again later')).toBeInTheDocument();
+    expect(await screen.findByText('Too many requests, try again later')).toBeInTheDocument();
 });

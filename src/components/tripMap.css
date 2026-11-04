@@ -1,194 +1,54 @@
-/* ─── Map Panel ─────────────────────────────────────────────── */
-.map-panel .panel-body.open {
-  max-height: none;
+.map-wrapper { position: absolute; inset: 0; }
+.map-wrapper .leaflet-container { background: var(--sky-bottom); font-family: inherit; }
+
+/* the route's weather tints the map */
+.leaflet-tile-pane { filter: var(--tile-filter, none); transition: filter var(--ease); }
+
+.route-line {
+  stroke: var(--accent);
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.35));
+  transition: stroke var(--ease);
 }
 
-.map-wrapper {
-  position: relative;
-  height: 520px;
+.pin {
+  border-radius: 50%;
+  border: 3px solid #fff;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.4);
 }
-
-.map-wrapper .leaflet-container {
-  height: 100%;
-  width: 100%;
-  background: #080e14;
-}
-
-/* Leaflet dark tile filter */
-.leaflet-tile {
-  filter: brightness(0.75) saturate(0.6) hue-rotate(185deg);
-}
-
-/* Leaflet popup dark theme */
-.leaflet-popup-content-wrapper {
-  background: var(--bg-card) !important;
-  border: 1px solid var(--border) !important;
-  border-radius: var(--radius) !important;
-  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.5) !important;
-  color: var(--text-primary) !important;
-  font-family: 'Share Tech Mono', monospace !important;
-  font-size: 11px !important;
-}
-
-.leaflet-popup-tip {
-  background: var(--bg-card) !important;
-}
-
-.leaflet-popup-close-button {
-  color: var(--text-muted) !important;
-}
-
-/* Empty state overlay */
-.map-empty-state {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 12px;
-  color: var(--text-muted);
-  pointer-events: none;
-  z-index: 1000;
-}
-
-.map-empty-icon {
-  font-size: 48px;
-  opacity: 0.3;
-}
-
-.map-empty-text {
-  font-family: 'Share Tech Mono', monospace;
-  font-size: 11px;
-  letter-spacing: 0.2em;
-  text-transform: uppercase;
-}
-
-/* ─── Stat Bar ──────────────────────────────────────────────── */
-.map-stat-bar {
-  background: var(--bg-panel-alt);
-  border-top: 1px solid var(--border);
-  padding: 10px 16px;
-  display: flex;
-  gap: 24px;
-}
-
-.map-stat {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-
-.map-stat-label {
-  font-family: 'Share Tech Mono', monospace;
-  font-size: 9px;
-  color: var(--text-muted);
-  letter-spacing: 0.2em;
-  text-transform: uppercase;
-}
-
-.map-stat-value {
-  font-family: 'Share Tech Mono', monospace;
-  font-size: 13px;
-  color: var(--cyan);
-}
-
+.pin-start { background: #2fb36d; }
+.pin-end { background: #e0464b; }
 
 .weather-icon {
-  font-size: 24px;         /* controls emoji size */
-  line-height: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: transparent;
-  border: none;
+  display: grid;
+  place-items: center;
+  font-size: 18px;
+  border-radius: 50%;
+  background: var(--glass);
+  border: 2px solid var(--line);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
+  transition: transform 150ms ease, border-color 150ms ease;
 }
+.weather-icon:hover { transform: scale(1.1); }
+.weather-icon.selected { border-color: var(--accent); transform: scale(1.25); z-index: 1000 !important; }
 
-.start-icon {
-  font-size: 24px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: transparent;
-  border: none;
+.leaflet-popup-content-wrapper,
+.leaflet-popup-tip {
+  background: var(--glass);
+  color: var(--text);
+  backdrop-filter: blur(12px);
+  box-shadow: var(--shadow);
 }
+.leaflet-popup-content-wrapper { border-radius: 14px; }
+.leaflet-popup-content { margin: 12px 16px; font-size: 13px; line-height: 1.5; }
+.leaflet-container a.leaflet-popup-close-button { color: var(--text-soft); }
 
-.end-icon {
-  font-size: 24px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: transparent;
-  border: none;
-}
+.leaflet-control-zoom.leaflet-bar { border: 1px solid var(--line); border-radius: 12px; overflow: hidden; box-shadow: var(--shadow); }
+.leaflet-container .leaflet-control-zoom a { background: var(--glass); color: var(--text); border-color: var(--line); }
+.leaflet-container .leaflet-control-attribution { background: color-mix(in srgb, var(--glass), transparent 30%) !important; color: var(--text-soft); }
+.leaflet-container .leaflet-control-attribution a { color: inherit; }
 
-/* ─── Responsive Map ────────────────────────────────────────── */
-@media (max-width: 1024px) {
-  .map-wrapper {
-    height: 400px;
-  }
-
-  .map-stat-bar {
-    gap: 16px;
-    padding: 8px 12px;
-  }
-
-  .map-stat-value {
-    font-size: 12px;
-  }
-}
-
-@media (max-width: 768px) {
-  .map-wrapper {
-    height: 350px;
-  }
-
-  .map-stat-bar {
-    flex-wrap: wrap;
-    gap: 12px;
-    padding: 8px 12px;
-  }
-
-  .map-stat-label {
-    font-size: 8px;
-  }
-
-  .map-stat-value {
-    font-size: 11px;
-  }
-
-  .weather-icon,
-  .start-icon,
-  .end-icon {
-    font-size: 18px;
-  }
-}
-
-@media (max-width: 480px) {
-  .map-wrapper {
-    height: 280px;
-  }
-
-  .map-stat-bar {
-    gap: 8px;
-    padding: 6px 10px;
-  }
-
-  .map-stat {
-    gap: 1px;
-  }
-
-  .map-stat-label {
-    font-size: 7px;
-  }
-
-  .map-stat-value {
-    font-size: 10px;
-  }
-
-  .weather-icon,
-  .start-icon,
-  .end-icon {
-    font-size: 16px;
-  }
+@media (max-width: 700px) {
+  .leaflet-control-zoom { display: none; }
 }

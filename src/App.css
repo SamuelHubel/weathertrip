@@ -1,310 +1,106 @@
-/* ─── App Shell ─────────────────────────────────────────────── */
 .app {
-  position: relative;
-  z-index: 1;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
+  position: fixed;
+  inset: 0;
+  color: var(--text);
 }
 
-/* ─── Header ────────────────────────────────────────────────── */
-.app-header {
-  height: var(--header-h);
-  background: var(--bg-deep);
-  border-bottom: 1px solid var(--border);
-  display: flex;
-  align-items: center;
-  padding: 0 24px;
-  gap: 16px;
-  position: sticky;
-  top: 0;
-  z-index: 100;
-  /* remove isolation: isolate */
-}
-
-.app-header::after {
-  content: '';
+/* ─── Sky backdrop ──────────────────────────────────────────── */
+.sky-layer {
   position: absolute;
-  bottom: 0; left: 0; right: 0;
-  height: 1px;
-  background: linear-gradient(90deg, transparent, var(--cyan-dim), transparent);
-  opacity: 0.4;
-  pointer-events: none; /* add this */
-}
-.header-logo {
-  font-family: 'Barlow Condensed', sans-serif;
-  font-weight: 900;
-  font-size: 26px;
-  letter-spacing: 0.05em;
-  color: var(--text-primary);
-  text-transform: uppercase;
+  inset: 0;
+  z-index: 500; /* over the map, under the panels */
+  pointer-events: none;
+  background:
+    linear-gradient(var(--tint), var(--tint)),
+    linear-gradient(180deg, var(--sky-top), var(--sky-bottom));
+  opacity: 0.94;
+  transition: opacity 700ms ease, background var(--ease);
+  display: grid;
+  place-items: center;
 }
 
-.header-logo span {
-  color: var(--cyan);
+.sky-layer.faded {
+  opacity: 0.9;
+  -webkit-mask-image: linear-gradient(180deg, #000, transparent 180px);
+  mask-image: linear-gradient(180deg, #000, transparent 180px);
 }
 
-.header-tag {
-  font-family: 'Share Tech Mono', monospace;
-  font-size: 10px;
-  color: var(--text-muted);
-  letter-spacing: 0.15em;
-  padding: 3px 8px;
-  border: 1px solid var(--border);
-  border-radius: 2px;
+.sky-hero { text-align: center; padding: 0 24px; margin-top: 18vh; }
+.sky-hero-title {
+  font-size: clamp(30px, 5vw, 56px);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  line-height: 1.05;
 }
+.sky-hero-sub { margin-top: 10px; font-size: 18px; color: var(--text-soft); }
 
-.header-status {
-  margin-left: auto;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-family: 'Share Tech Mono', monospace;
-  font-size: 11px;
-  color: var(--text-secondary);
-}
-
-.status-dot {
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: var(--green);
-  box-shadow: 0 0 8px var(--green);
-  animation: pulse 2.5s ease-in-out infinite;
-}
-
-/*        Login            */
-.header-auth {
-  margin-left: auto;
-}
-
-.btn-auth {
-  background: transparent;
-  border: 1px solid var(--border);
-  color: var(--text-secondary);
-  font-family: 'Barlow Condensed', sans-serif;
-  font-weight: 700;
-  font-size: 12px;
-  letter-spacing: 0.15em;
-  padding: 6px 16px;
-  border-radius: var(--radius);
-  cursor: pointer;
-  transition: all 0.2s;
-}
-
-.btn-auth:hover {
-  border-color: var(--cyan-dim);
-  color: var(--cyan);
-}
-
-@keyframes pulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.3; }
-}
-
-/* ─── Main Layout ───────────────────────────────────────────── */
-.app-body {
-  flex: 1;
+/* ─── Trip card (top-left) ──────────────────────────────────── */
+.trip-card {
+  position: absolute;
+  z-index: 1000;
+  top: 20px;
+  left: 20px;
+  width: 360px;
+  max-height: calc(100% - 100px);
   display: flex;
   flex-direction: column;
-  max-width: 1400px;
-  width: 100%;
-  margin: 0 auto;
-  padding: 20px 24px;
-  gap: 16px;
+  padding: 18px;
+  gap: 14px;
 }
 
-.main-row {
-  display: grid;
-  grid-template-columns: 1fr 340px;
-  gap: 16px;
-  align-items: start;
-}
+.trip-card-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
 
-.bottom-row {
-  display: grid;
-  grid-template-rows: 1fr;
-}
+.brand { font-size: 22px; font-weight: 800; letter-spacing: -0.02em; }
+.brand span { color: var(--accent); transition: color var(--ease); }
 
-/* ─── Responsive Layout ─────────────────────────────────────── */
-@media (max-width: 1024px) {
-  .app-body {
-    padding: 16px 16px;
-  }
+.trip-card-body { display: flex; flex-direction: column; gap: 16px; overflow-y: auto; min-height: 0; }
 
-  .main-row {
-    grid-template-columns: 1fr;
-    gap: 12px;
-  }
-}
+/* only phones collapse the card */
+.trip-card-toggle { display: none; }
 
-@media (max-width: 768px) {
-  .app-header {
-    padding: 0 16px;
-  }
-
-  .header-logo {
-    font-size: 18px;
-  }
-
-  .header-tag {
-    display: none;
-  }
-
-  .app-body {
-    padding: 12px 12px;
-    gap: 12px;
-  }
-
-  .main-row {
-    grid-template-columns: 1fr;
-    gap: 12px;
-  }
-
-  .bottom-row {
-    grid-template-columns: 1fr;
-  }
-}
-
-@media (max-width: 480px) {
-  .app-header {
-    padding: 0 12px;
-    height: 50px;
-    gap: 8px;
-  }
-
-  .header-logo {
-    font-size: 14px;
-  }
-
-  .header-status {
-    display: none;
-  }
-
-  .app-body {
-    padding: 8px;
-    gap: 8px;
-  }
-
-  .main-row {
-    gap: 8px;
-  }
-}
-
-/* ─── Shared Panel Base ─────────────────────────────────────── */
-/* Used by TripMap, TripLog, WeatherEvents */
-.panel {
-  background: var(--bg-panel);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  overflow: hidden;
-}
-
-.panel-header {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  width: 100%;
-  padding: 11px 16px;
-  background: var(--bg-panel-alt);
-  border: none;
-  border-bottom: 1px solid var(--border);
-  color: inherit;
-  font: inherit;
-  text-align: left;
-  cursor: pointer;
-  user-select: none;
-  transition: background 0.2s;
-}
-
-.panel-header:hover {
-  background: var(--bg-hover);
-}
-
-.panel-icon {
-  font-size: 14px;
-  opacity: 0.85;
-}
-
-.panel-title {
-  font-family: 'Barlow Condensed', sans-serif;
+/* ─── Auth pill (top-right) ─────────────────────────────────── */
+.btn-auth {
+  position: absolute;
+  z-index: 1000;
+  top: 20px;
+  right: 20px;
+  padding: 10px 18px;
+  border-radius: 999px;
   font-weight: 700;
-  font-size: 12px;
-  letter-spacing: 0.2em;
-  text-transform: uppercase;
-  color: var(--text-secondary);
-  flex: 1;
+  font-size: 14px;
 }
+.btn-auth:hover { background: color-mix(in srgb, var(--glass), var(--accent) 16%); }
 
-.panel-toggle {
-  font-family: 'Share Tech Mono', monospace;
-  font-size: 10px;
-  color: var(--text-muted);
-  transition: transform 0.25s, color 0.2s;
-}
-
-.panel-header:hover .panel-toggle {
-  color: var(--cyan);
-}
-
-.panel-toggle.open {
-  transform: rotate(180deg);
-}
-
-.panel-body {
-  overflow: hidden;
-  transition: max-height 0.35s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.25s;
-  max-height: 0;
-  opacity: 0;
-}
-
-.panel-body.open {
-  max-height: 2000px;
-  opacity: 1;
-}
-
-/* ─── Responsive Panel Styles ───────────────────────────────── */
-@media (max-width: 768px) {
-  .panel-icon {
-    font-size: 12px;
+/* ─── Phones ────────────────────────────────────────────────── */
+@media (max-width: 700px) {
+  .trip-card {
+    top: 10px;
+    left: 10px;
+    right: 10px;
+    width: auto;
+    padding: 14px;
+    max-height: calc(100% - 20px);
   }
 
-  .panel-title {
-    font-size: 11px;
+  /* leave room for the sign-in pill */
+  .trip-card-head { padding-right: 96px; }
+
+  .btn-auth { top: 18px; right: 18px; padding: 8px 14px; font-size: 13px; }
+
+  .trip-card-toggle {
+    display: block;
+    border: 1px solid var(--line);
+    background: transparent;
+    border-radius: 999px;
+    padding: 5px 12px;
+    font-size: 13px;
+    font-weight: 700;
+    max-width: 55vw;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 
-  .panel-toggle {
-    font-size: 9px;
-  }
-
-  .panel-header {
-    padding: 9px 12px;
-  }
-}
-
-@media (max-width: 480px) {
-  .panel-icon {
-    font-size: 11px;
-  }
-
-  .panel-title {
-    font-size: 10px;
-  }
-
-  .panel-toggle {
-    font-size: 8px;
-  }
-
-  .panel-header {
-    padding: 8px 10px;
-  }
-
-  /* Limit panel body height on mobile for better scrolling */
-  .panel-body.open {
-    max-height: 400px;
-  }
-
-  .map-panel .panel-body.open {
-    max-height: none;
-  }
+  .trip-card.collapsed .trip-card-body { display: none; }
+  .sky-hero { margin-top: 0; }
 }

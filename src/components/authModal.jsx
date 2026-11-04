@@ -74,7 +74,7 @@ const AuthModal = ({ onSuccess, onDismiss }) => {
             {error && <div className="modal-error">{error}</div>}
 
             <button className="modal-submit" type="submit" disabled={loading}>
-                {loading ? '[ WORKING... ]' : mode === 'login' ? '[ SIGN IN ]' : '[ CREATE ACCOUNT ]'}
+                {loading ? 'Working…' : mode === 'login' ? 'Sign in' : 'Create account'}
             </button>
             </form>
 

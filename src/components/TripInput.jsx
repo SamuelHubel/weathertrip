@@ -21,54 +21,51 @@ function TripInput({ addTrip }) {
       setStart('');
       setEnd('');
     } catch (err) {
-      setError(`ERR: ${err.response?.data?.error || 'Failed to connect to routing service'}`);
+      setError(err.response?.data?.error || "Couldn't reach the routing service. Check your connection and try again.");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="trip-input-bar">
-      <form onSubmit={handleSubmit}>
-        <div className="trip-input-inner">
-          <span className="input-label">Route</span>
+    <form className="trip-input" onSubmit={handleSubmit}>
+      <div className="trip-fields">
+        <label className="trip-field">
+          <span className="trip-dot start" aria-hidden="true" />
+          <span className="visually-hidden">Origin</span>
+          <input
+            type="text"
+            placeholder="From (e.g. Denver, CO)"
+            value={start}
+            onChange={(e) => setStart(e.target.value)}
+            disabled={loading}
+            autoComplete="off"
+          />
+        </label>
+        <label className="trip-field">
+          <span className="trip-dot end" aria-hidden="true" />
+          <span className="visually-hidden">Destination</span>
+          <input
+            type="text"
+            placeholder="To (e.g. Salt Lake City, UT)"
+            value={end}
+            onChange={(e) => setEnd(e.target.value)}
+            disabled={loading}
+            autoComplete="off"
+          />
+        </label>
+      </div>
 
-          <div className="input-group">
-            <input
-              className="location-input"
-              type="text"
-              placeholder="Origin  (e.g. Denver, CO)"
-              value={start}
-              onChange={(e) => setStart(e.target.value)}
-              disabled={loading}
-              autoComplete="off"
-            />
-            <span className="input-arrow">→</span>
-            <input
-              className="location-input"
-              type="text"
-              placeholder="Destination  (e.g. Salt Lake City, UT)"
-              value={end}
-              onChange={(e) => setEnd(e.target.value)}
-              disabled={loading}
-              autoComplete="off"
-            />
-          </div>
+      <button
+        className="btn-primary"
+        type="submit"
+        disabled={loading || !start.trim() || !end.trim()}
+      >
+        {loading ? 'Checking the skies…' : 'Plot route'}
+      </button>
 
-          <button
-            className={`btn-plot${loading ? ' loading' : ''}`}
-            type="submit"
-            disabled={loading || !start.trim() || !end.trim()}
-          >
-            {loading ? '[ ROUTING... ]' : '[ PLOT ROUTE ]'}
-          </button>
-        </div>
-
-        {error && (
-          <div className="input-error">{error}</div>
-        )}
-      </form>
-    </div>
+      {error && <div className="trip-error" role="alert">{error}</div>}
+    </form>
   );
 }
 

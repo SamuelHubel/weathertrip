@@ -1,10 +1,12 @@
 import './App.css';
+import './components/weatherTile.css';
 import TripMap from './components/TripMap.jsx';
 import TripInput from './components/TripInput.jsx';
 import TripLog from './components/TripLog.jsx';
 import fetchTrip, { fetchTripLog } from './services/tripService';
-import WeatherEvents from './components/WeatherEvents.jsx';
+import DriveSheet from './components/DriveSheet.jsx';
 import { useState, useEffect } from 'react';
+import { getSky } from './sky';
 import axios from 'axios';
 // allows for login stuff
 import { getToken, logout } from './services/authService.js'; 
@@ -12,6 +14,18 @@ import AuthModal from './components/authModal.jsx';
 
 function App() {
   const [trip, setTrip] = useState(null);
+  // "Denver → Boulder"; the trip response carries coordinates only
+  const [label, setLabel] = useState('');
+  // index of the weather point the user picked; it drives the sky and the map focus
+  const [selected, setSelected] = useState(null);
+  // phones collapse the search card once a route is showing
+  const [cardOpen, setCardOpen] = useState(true);
+  // re-read the clock every few minutes so the sky follows dusk/night
+  const [now, setNow] = useState(() => new Date());
+  useEffect(() => {
+    const id = setInterval(() => setNow(new Date()), 5 * 60 * 1000);
+    return () => clearInterval(id);
+  }, []);
   const [tripLog, setTripLog] = useState([]);
 
   // user state to track if a user is logged in and store their token for authenticated requests
@@ -43,9 +57,16 @@ function App() {
     return () => axios.interceptors.response.eject(interceptor);
   }, []);
 
+  const showTrip = (tripData, start, end) => {
+    setTrip(tripData);
+    setLabel(`${start} → ${end}`);
+    setSelected(null);
+    setCardOpen(false);
+  };
+
   const addTrip = (tripData, start, end) => {
 
-    setTrip(tripData);
+    showTrip(tripData, start, end);
     // after adding a new trip, also update the trip log by fetching the latest logged trips from the server
     fetchTripLog().then(data => {
         if (data) setTripLog(data);
@@ -62,7 +83,7 @@ function App() {
   // saved trips have no weather, so replotting fetches it live without saving a duplicate
   const replotTrip = async (entry) => {
       const data = await fetchTrip(entry.start.location, entry.end.location, { save: false }).catch(() => null);
-      setTrip(data ?? entry);
+      showTrip(data ?? entry, entry.start.location, entry.end.location);
   };
   // on initial load, fetch the trip log from the server to display in the sidebar
   useEffect(() => {
@@ -94,48 +115,57 @@ function App() {
     setUser(null);
     setTripLog([]);
     setTrip(null);
+    setLabel('');
+    setSelected(null);
+    setCardOpen(true);
   };
 
-  return (
-    <div className="app">
-      {/* ── Header ── */}
-      <header className="app-header">
-          <div className="header-logo">Weather.Trip</div>
-          <div className="header-tag">ROUTE WEATHER SYSTEM</div>
+  // the selected stop sets condition and local time; otherwise the whole route's worst weather at the origin's time
+  // (the first sampled weather point is the origin)
+  const selectedPoint = selected != null ? trip?.weather?.[selected] : null;
+  const sky = getSky(selectedPoint ? [selectedPoint] : trip?.weather, now, selectedPoint ?? trip?.weather?.[0]);
 
-          <div className="header-auth">
-            {user
-              ? <button className="btn-auth" onClick={handleLogout}>[ SIGN OUT ]</button>
-              : <button className="btn-auth" onClick={() => setShowLogin(true)}>[ SIGN IN ]</button>
-            }
+  return (
+    <div className="app" data-sky-condition={sky.condition} data-sky-time={sky.time}>
+      <TripMap trip={trip} time={sky.time} selected={selected} onSelect={setSelected} />
+
+      {/* full sky before a route, a faint wash over the map after */}
+      <div className={`sky-layer${trip ? ' faded' : ''}`}>
+        {!trip && (
+          <div className="sky-hero">
+            <p className="sky-hero-title">Where are you driving?</p>
+            <p className="sky-hero-sub">See the weather all along the way.</p>
           </div>
-        </header>
-      {/* Login Modal */}
+        )}
+      </div>
+
+      <section className={`trip-card glass wx-tile${cardOpen ? '' : ' collapsed'}`} data-wx={sky.condition} data-sky-time={sky.time}>
+        <div className="trip-card-head">
+          <h1 className="brand">Weather<span>.</span>Trip</h1>
+          {trip && (
+            <button type="button" className="trip-card-toggle" aria-expanded={cardOpen} onClick={() => setCardOpen(o => !o)}>
+              {cardOpen ? 'Hide' : label || 'New route'}
+            </button>
+          )}
+        </div>
+        <div className="trip-card-body">
+          <TripInput addTrip={addTrip} />
+          <TripLog tripLog={tripLog} onReplot={replotTrip} />
+        </div>
+      </section>
+
+      <button type="button" className="btn-auth glass" onClick={user ? handleLogout : () => setShowLogin(true)}>
+        {user ? 'Sign out' : 'Sign in'}
+      </button>
+
+      {trip && <DriveSheet trip={trip} label={label} condition={sky.condition} time={sky.time} now={now} selected={selected} onSelect={setSelected} />}
+
       {showLogin && (
         <AuthModal
           onSuccess={handleLoginSuccess}
           onDismiss={() => setShowLogin(false)}
           />
       )}
-
-      {/* ── Trip Input Bar ── */}
-      <TripInput addTrip={addTrip} />
-
-      {/* ── Main Content ── */}
-      <main className="app-body">
-        <div className="main-row">
-          {/* Left: Map */}
-          <TripMap trip={trip} />
-
-          {/* Right: Trip Log */}
-          <TripLog tripLog={tripLog} onReplot={replotTrip} />
-        </div>
-
-        {/* Bottom: Notable Weather Events */}
-        <div className="bottom-row">
-          <WeatherEvents trip={trip} />
-        </div>
-      </main>
     </div>
   );
 }

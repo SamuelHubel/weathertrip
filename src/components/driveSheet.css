@@ -1,0 +1,169 @@
+.drive-sheet {
+  position: absolute;
+  z-index: 1000;
+  top: 76px;
+  right: 20px;
+  width: 380px;
+  max-height: calc(100% - 100px);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* ─── Hero header tile ──────────────────────────────────────── */
+.drive-summary {
+  position: relative;
+  flex: none;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 18px 20px 18px;
+  border: 0;
+  text-align: left;
+  cursor: default;
+}
+
+.drive-eyebrow {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--tile-soft);
+}
+
+.drive-verdict {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 4px 0 10px;
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1.35;
+}
+
+.drive-verdict-icon {
+  font-size: 44px;
+  line-height: 1;
+  filter: drop-shadow(0 3px 6px rgba(0, 0, 0, 0.2));
+}
+
+.drive-verdict-headline {
+  display: block;
+  font-size: 24px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+}
+
+.drive-verdict-where { display: block; margin-top: 2px; color: var(--tile-soft); font-weight: 600; }
+
+.drive-route { font-size: 15px; font-weight: 700; }
+
+.drive-stats {
+  display: flex;
+  gap: 8px;
+  color: var(--tile-soft);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ─── Stop tiles ────────────────────────────────────────────── */
+.drive-timeline {
+  list-style: none;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px;
+}
+
+.stop {
+  position: relative;
+  width: 100%;
+  display: grid;
+  grid-template-columns: 40px 1fr auto;
+  align-items: start;
+  gap: 10px;
+  padding: 12px 14px 12px 10px;
+  border: 0;
+  border-radius: 14px;
+  text-align: left;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
+  outline: 2px solid transparent;
+  outline-offset: -2px;
+  transition: transform 150ms ease, box-shadow 150ms ease, outline-color 150ms ease, background var(--ease);
+}
+.stop:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(0, 0, 0, 0.18); }
+.stop.selected {
+  outline-color: var(--accent);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.25), 0 0 0 4px color-mix(in srgb, var(--accent) 30%, transparent);
+}
+.stop:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+
+.stop-icon {
+  font-size: 26px;
+  line-height: 1;
+  text-align: center;
+  padding-top: 2px;
+  filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.2));
+}
+
+.stop-main { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.stop-name { font-weight: 800; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.stop-detail { font-size: 13px; color: var(--tile-soft); font-weight: 600; }
+
+.stop-hazard {
+  margin-top: 8px;
+  padding: 8px 10px;
+  border-radius: 10px;
+  font-size: 13px;
+  background: color-mix(in srgb, var(--tile-text) 13%, transparent);
+}
+.stop-when { color: var(--tile-soft); font-weight: 700; margin-left: 2px; }
+.stop-hazard-detail { display: block; margin-top: 3px; font-size: 12px; color: var(--tile-soft); }
+
+.stop-temp {
+  font-size: 24px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  line-height: 1;
+  padding-top: 2px;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ─── Phones: bottom sheet ──────────────────────────────────── */
+@media (max-width: 700px) {
+  .drive-sheet {
+    top: auto;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    width: auto;
+    max-height: 72%;
+    border-radius: var(--radius) var(--radius) 0 0;
+    border-bottom: 0;
+  }
+
+  .drive-summary { cursor: pointer; padding-top: 24px; }
+
+  /* grab handle */
+  .drive-sheet::before {
+    content: '';
+    position: absolute;
+    z-index: 2;
+    top: 8px;
+    left: 50%;
+    width: 40px;
+    height: 4px;
+    margin-left: -20px;
+    border-radius: 2px;
+    background: rgba(255, 255, 255, 0.6);
+    box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.08);
+  }
+
+  .drive-verdict-icon { font-size: 36px; }
+  .drive-verdict-headline { font-size: 20px; }
+
+  .drive-sheet:not(.expanded) .drive-timeline { display: none; }
+}
