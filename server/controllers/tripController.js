@@ -7,6 +7,7 @@ import getWeather from '../services/weatherService.js';
 import Trip from '../models/Trip.js';
 
 
+
 const getTrip = async (req, res) => {
     try {
         const { start, end } = req.body ?? {};
@@ -52,12 +53,12 @@ const getTrip = async (req, res) => {
             const tripData = new Trip({
                 userId: req.user.id, // reference to the User model
                 start: {
-                    location: start, // save the raw location string for display in the trip log
+                    location: startLocation.name ?? start.trim(), // geocoder's place name, for display in the trip log
                     lat: startLocation.lat,
                     lon: startLocation.lon
                 },
                 end: {
-                    location: end, // save the raw location string for display in the trip log
+                    location: endLocation.name ?? end.trim(), // geocoder's place name, for display in the trip log
                     lat: endLocation.lat, 
                     lon: endLocation.lon
                 },
@@ -71,7 +72,7 @@ const getTrip = async (req, res) => {
             // a failed save must not throw away the trip the user is waiting for
             try {
                 await tripData.save();
-                console.log(`Saved ${start} to ${end} for user ${req.user.id}`);
+                console.log(`Saved ${tripData.start.location} to ${tripData.end.location} for user ${req.user.id}`);
             } catch (error) {
                 console.error('Trip save failed:', error.message);
             }

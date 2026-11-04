@@ -11,7 +11,8 @@ async function search(locationString) {
   const response = await axios.get(`${process.env.NOMINATIM_URL}/search`, {
     params: {
       q: locationString,
-      format: 'json'
+      format: 'jsonv2',
+      addressdetails: 1
     },
     headers: {
       'User-Agent': 'WeatherTripApp/1.0 (road-trip-weather-app)'
@@ -25,14 +26,18 @@ async function search(locationString) {
   }
   const result = response.data[0];
   console.log(`Geocoded "${locationString}" to lat: ${result.lat}, lon: ${result.lon}`);
+  // "Denver, Colorado": short enough for the trip log, specific enough to geocode the same place on replay
+  const region = result.address?.state ?? result.address?.country;
+  const name = result.name ? [result.name, region !== result.name && region].filter(Boolean).join(', ') : undefined;
   return {
     lat: parseFloat(result.lat),
-    lon: parseFloat(result.lon)
+    lon: parseFloat(result.lon),
+    name
   };
 }
 
 // Take location string and return geocoded location with lat and lon from Nominatim API
-// Returns { lat, lon }, or null if not found; network errors throw so the caller does not blame the user's input
+// Returns { lat, lon, name }, or null if not found; network errors throw so the caller does not blame the user's input
 const geocodingService = {
   geocodeLocation(locationString) {
     const key = locationString.trim().toLowerCase();

@@ -35,3 +35,14 @@ test('a repeated place is answered from the cache', async () => {
   expect(again).toEqual({ lat: 40.76, lon: -111.89 });
   expect(axios.get).toHaveBeenCalledTimes(1);
 });
+
+test('returns a short place name with its state, or country when there is no state', async () => {
+  axios.get = vi.fn().mockResolvedValue({ data: [{ lat: '41.2', lon: '-95.9', name: 'Omaha', address: { state: 'Nebraska', country: 'United States' } }] });
+  expect((await geocodingService.geocodeLocation('omaha')).name).toBe('Omaha, Nebraska');
+
+  axios.get = vi.fn().mockResolvedValue({ data: [{ lat: '48.8', lon: '2.3', name: 'Paris', address: { country: 'France' } }] });
+  expect((await geocodingService.geocodeLocation('paris')).name).toBe('Paris, France');
+
+  axios.get = vi.fn().mockResolvedValue({ data: [{ lat: '-23.5', lon: '-46.6', name: 'São Paulo', address: { state: 'São Paulo' } }] });
+  expect((await geocodingService.geocodeLocation('sao paulo')).name).toBe('São Paulo');
+});
