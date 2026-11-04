@@ -11,8 +11,11 @@ async function search(locationString) {
   const response = await axios.get(`${process.env.NOMINATIM_URL}/search`, {
     params: {
       q: locationString,
-      format: 'jsonv2',
-      addressdetails: 1
+      // 'json', not 'jsonv2': Nominatim-compatible keyed hosts (LocationIQ) only accept 'json'
+      format: 'json',
+      addressdetails: 1,
+      // public Nominatim throttles shared host IPs; a keyed host avoids that. undefined is dropped by axios
+      key: process.env.NOMINATIM_KEY
     },
     headers: {
       'User-Agent': 'WeatherTripApp/1.0 (road-trip-weather-app)'
