@@ -59,16 +59,16 @@ function App() {
     return () => axios.interceptors.response.eject(interceptor);
   }, []);
 
-  const showTrip = (tripData, start, end) => {
+  const showTrip = (tripData, start, end, stops = []) => {
     setTrip(tripData);
-    setLabel(`${start} → ${end}`);
+    setLabel([start, ...stops, end].join(' → '));
     setSelected(null);
     setCardOpen(false);
   };
 
-  const addTrip = (tripData, start, end) => {
+  const addTrip = (tripData, start, end, stops = []) => {
 
-    showTrip(tripData, start, end);
+    showTrip(tripData, start, end, stops);
     // after adding a new trip, also update the trip log by fetching the latest logged trips from the server
     fetchTripLog().then(data => {
         if (data) setTripLog(data);
@@ -76,7 +76,7 @@ function App() {
 
     // save the trip to pending and show login if not
     if (!getToken()) {
-      setPendingTrip({ start, end });
+      setPendingTrip({ start, end, stops });
       setShowLogin(true);
     }
 
@@ -84,8 +84,9 @@ function App() {
   
   // saved trips have no weather, so replotting fetches it live without saving a duplicate
   const replotTrip = async (entry) => {
-      const data = await fetchTrip(entry.start.location, entry.end.location, { save: false }).catch(() => null);
-      showTrip(data ?? entry, entry.start.location, entry.end.location);
+      const stops = entry.stops?.map((stop) => stop.location) ?? [];
+      const data = await fetchTrip(entry.start.location, entry.end.location, { stops, save: false }).catch(() => null);
+      showTrip(data ?? entry, entry.start.location, entry.end.location, stops);
   };
   // on initial load, fetch the trip log from the server to display in the sidebar
   useEffect(() => {
@@ -104,10 +105,10 @@ function App() {
     });
     // the server only saves on a signed-in request, so plan the guest's trip again now
     if (pendingTrip) {
-      const { start, end } = pendingTrip;
+      const { start, end, stops } = pendingTrip;
       setPendingTrip(null);
-      fetchTrip(start, end)
-        .then(data => addTrip(data, start, end))
+      fetchTrip(start, end, { stops })
+        .then(data => addTrip(data, start, end, stops))
         .catch(error => console.error('Error saving pending trip:', error));
     }
   };

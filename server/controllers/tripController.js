@@ -22,6 +22,13 @@ const getTrip = async (req, res) => {
             return res.status(400).json({ error: 'Invalid start or end location' });
         }
 
+        // optional stops between start and end, in driving order
+        const { stops = [] } = req.body;
+        if (!Array.isArray(stops) || stops.length > 8 || stops.some((place) => typeof place !== 'string' || place.length > 200)) {
+            return res.status(400).json({ error: 'Invalid stop location' });
+        }
+        const stopNames = stops.map((place) => place.trim()).filter(Boolean);
+
         // geocode start and end locations
         const startLocation = await geocodingService.geocodeLocation(start);
         const endLocation = await geocodingService.geocodeLocation(end);
@@ -29,8 +36,13 @@ const getTrip = async (req, res) => {
             console.error(`Geocoding failed - start: ${startLocation}, end: ${endLocation}`);
             return res.status(400).json({ error: 'Invalid start or end location' });
         }
-        // get route from OSRM API
-        const route = await getRoute(startLocation, endLocation);
+        const stopLocations = [];
+        for (const place of stopNames) stopLocations.push(await geocodingService.geocodeLocation(place));
+        if (stopLocations.some((location) => !location)) {
+            return res.status(400).json({ error: 'Invalid stop location' });
+        }
+        // get route from OSRM API, through every stop
+        const route = await getRoute([startLocation, ...stopLocations, endLocation]);
         if (!route) {
             return res.status(400).json({ error: 'No route found' });
         }
@@ -57,6 +69,11 @@ const getTrip = async (req, res) => {
                     lat: startLocation.lat,
                     lon: startLocation.lon
                 },
+                stops: stopLocations.map((location, i) => ({
+                    location: location.name ?? stopNames[i],
+                    lat: location.lat,
+                    lon: location.lon
+                })),
                 end: {
                     location: endLocation.name ?? end.trim(), // geocoder's place name, for display in the trip log
                     lat: endLocation.lat, 
@@ -91,6 +108,7 @@ const getTrip = async (req, res) => {
                 lat: startLocation.lat,
                 lon: startLocation.lon
             },
+            stops: stopLocations.map(({ lat, lon }) => ({ lat, lon })),
             end: {
                 lat: endLocation.lat,
                 lon: endLocation.lon

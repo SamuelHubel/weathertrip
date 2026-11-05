@@ -2,9 +2,13 @@ import React, { useState } from 'react';
 import './tripInput.css';
 import fetchTrip from '../services/tripService';
 
+const MAX_STOPS = 8;
+
 function TripInput({ addTrip }) {
   const [start, setStart] = useState('');
   const [end, setEnd] = useState('');
+  // stops between start and end, in driving order; the server allows up to MAX_STOPS
+  const [stops, setStops] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
@@ -16,10 +20,12 @@ function TripInput({ addTrip }) {
     setError(null);
 
     try {
-      const tripData = await fetchTrip(start.trim(), end.trim());
-      addTrip(tripData, start.trim(), end.trim());
+      const stopNames = stops.map((stop) => stop.trim()).filter(Boolean);
+      const tripData = await fetchTrip(start.trim(), end.trim(), { stops: stopNames });
+      addTrip(tripData, start.trim(), end.trim(), stopNames);
       setStart('');
       setEnd('');
+      setStops([]);
     } catch (err) {
       setError(err.response?.data?.error || "Couldn't reach the routing service. Check your connection and try again.");
     } finally {
@@ -42,6 +48,27 @@ function TripInput({ addTrip }) {
             autoComplete="off"
           />
         </label>
+        {stops.map((stop, i) => (
+          <div className="trip-field" key={i}>
+            <span className="trip-dot stop" aria-hidden="true" />
+            <input
+              type="text"
+              aria-label={`Stop ${i + 1}`}
+              placeholder={`Stop ${i + 1}`}
+              value={stop}
+              onChange={(e) => setStops(stops.map((s, j) => (j === i ? e.target.value : s)))}
+              disabled={loading}
+              autoComplete="off"
+            />
+            <button
+              type="button"
+              className="trip-stop-remove"
+              aria-label={`Remove stop ${i + 1}`}
+              onClick={() => setStops(stops.filter((_, j) => j !== i))}
+              disabled={loading}
+            >✕</button>
+          </div>
+        ))}
         <label className="trip-field">
           <span className="trip-dot end" aria-hidden="true" />
           <span className="visually-hidden">Destination</span>
@@ -55,6 +82,12 @@ function TripInput({ addTrip }) {
           />
         </label>
       </div>
+
+      {stops.length < MAX_STOPS && (
+        <button type="button" className="trip-add-stop" onClick={() => setStops([...stops, ''])} disabled={loading}>
+          + Add stop
+        </button>
+      )}
 
       <button
         className="btn-primary"

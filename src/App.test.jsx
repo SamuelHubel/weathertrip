@@ -102,6 +102,6 @@ test('a guest trip is saved after signing in', async () => {
     fireEvent.submit(screen.getByLabelText('Email').closest('form'));
 
     await waitFor(() => expect(posts).toHaveLength(2));
-    expect(posts[1].body).toEqual({ start: 'Denver', end: 'Boulder' });
+    expect(posts[1].body).toEqual({ start: 'Denver', end: 'Boulder', stops: [] });
     expect(posts[1].auth).toBe('Bearer fresh');
 });

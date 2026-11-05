@@ -15,6 +15,12 @@ const tripSchema = new mongoose.Schema({
     lat: Number,
     lon: Number,
   },
+  // stops between start and end, in driving order
+  stops: [{
+    location: String,
+    lat: Number,
+    lon: Number,
+  }],
   end: {
     location: String,
     lat: Number,

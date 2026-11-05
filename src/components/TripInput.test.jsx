@@ -27,3 +27,25 @@ test('shows the error the server sent', async () => {
 
     expect(await screen.findByText('Too many requests, try again later')).toBeInTheDocument();
 });
+
+test('sends added stops in order and skips blank ones', async () => {
+    fetchTrip.mockResolvedValue({});
+    const addTrip = vi.fn();
+    render(<TripInput addTrip={addTrip} />);
+    fireEvent.change(screen.getByPlaceholderText(/From/), { target: { value: 'Denver' } });
+    fireEvent.change(screen.getByPlaceholderText(/To/), { target: { value: 'Salt Lake City' } });
+    fireEvent.click(screen.getByText('+ Add stop'));
+    fireEvent.click(screen.getByText('+ Add stop'));
+    fireEvent.change(screen.getByLabelText('Stop 1'), { target: { value: 'Moab' } });
+    fireEvent.click(screen.getByText(/PLOT ROUTE/i));
+
+    await vi.waitFor(() => expect(addTrip).toHaveBeenCalledWith({}, 'Denver', 'Salt Lake City', ['Moab']));
+    expect(fetchTrip).toHaveBeenCalledWith('Denver', 'Salt Lake City', { stops: ['Moab'] });
+});
+
+test('removes a stop', () => {
+    render(<TripInput addTrip={vi.fn()} />);
+    fireEvent.click(screen.getByText('+ Add stop'));
+    fireEvent.click(screen.getByLabelText('Remove stop 1'));
+    expect(screen.queryByLabelText('Stop 1')).not.toBeInTheDocument();
+});

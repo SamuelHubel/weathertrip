@@ -8,6 +8,7 @@ import { toF, toMph, mmToIn, cmToIn } from '../units';
 
 const startIcon = L.divIcon({ className: 'pin pin-start', iconSize: [16, 16] });
 const endIcon = L.divIcon({ className: 'pin pin-end', iconSize: [16, 16] });
+const stopIcon = L.divIcon({ className: 'pin pin-stop', iconSize: [14, 14] });
 
 const PHONE = '(max-width: 700px)';
 
@@ -59,6 +60,12 @@ function TripMap({ trip, time, selected, onSelect }) {
           </Marker>
         )}
 
+        {trip?.stops?.map((stop, idx) => (
+          <Marker key={`stop-${idx}`} position={[stop.lat, stop.lon]} icon={stopIcon}>
+            <Popup>Stop {idx + 1}</Popup>
+          </Marker>
+        ))}
+
         {trip?.end?.lat && (
           <Marker position={[trip.end.lat, trip.end.lon]} icon={endIcon}>
             <Popup>Destination</Popup>
@@ -81,7 +88,7 @@ function TripMap({ trip, time, selected, onSelect }) {
                 <PointName
                   lat={point.location.latitude}
                   lon={point.location.longitude}
-                  fallback={`Stop ${idx + 1}`}
+                  fallback={`Point ${idx + 1}`}
                 />
               </strong></div>
               <div>{toF(point.temperature)} · Wind {toMph(point.windspeed)}</div>

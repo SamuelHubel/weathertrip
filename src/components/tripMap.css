@@ -19,6 +19,7 @@
 }
 .pin-start { background: #2fb36d; }
 .pin-end { background: #e0464b; }
+.pin-stop { background: #f0a630; }
 
 .weather-icon {
   display: grid;
