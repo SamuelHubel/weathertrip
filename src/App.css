@@ -77,22 +77,22 @@
 }
 .btn-auth:hover { background: color-mix(in srgb, var(--glass), var(--accent) 16%); }
 
-/* ─── Phones ────────────────────────────────────────────────── */
-@media (max-width: 700px) {
+/* ─── Narrow: auth pills get their own row above the card ───── */
+@media (max-width: 760px) {
+  .auth-bar { top: 10px; right: 10px; max-width: calc(100% - 20px); justify-content: flex-end; flex-wrap: wrap; gap: 6px; }
+  .btn-auth { padding: 8px 14px; font-size: 13px; }
   .trip-card {
-    top: 10px;
+    top: 56px;
     left: 10px;
     right: 10px;
     width: auto;
-    padding: 14px;
-    max-height: calc(100% - 20px);
+    max-height: calc(100% - 66px);
   }
+}
 
-  /* leave room for the sign-in pill */
-  .trip-card-head { padding-right: 96px; }
-
-  .auth-bar { top: 18px; right: 18px; gap: 6px; }
-  .btn-auth { padding: 8px 14px; font-size: 13px; }
+/* ─── Phones ────────────────────────────────────────────────── */
+@media (max-width: 700px) {
+  .trip-card { padding: 14px; }
 
   .trip-card-toggle {
     display: block;
