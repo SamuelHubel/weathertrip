@@ -57,7 +57,7 @@ describe('getRoute', () => {
         });
 
         it('calls the OSRM API with the correct driving URL', async () => {
-            await getRoute(START, END);
+            await getRoute([START, END]);
 
             const calledUrl = axios.get.mock.calls[0][0];
             expect(calledUrl).toBe(
@@ -65,40 +65,49 @@ describe('getRoute', () => {
             );
         });
 
+        it('routes through every stop in order', async () => {
+            const STOP = { lat: 39.7392, lon: -104.9903 };
+            await getRoute([START, STOP, END]);
+
+            expect(axios.get.mock.calls[0][0]).toBe(
+                `http://router.osrm.example/route/v1/driving/${START.lon},${START.lat};${STOP.lon},${STOP.lat};${END.lon},${END.lat}`
+            );
+        });
+
         it('requests full geometry in geojson format', async () => {
-            await getRoute(START, END);
+            await getRoute([START, END]);
 
             const params = axios.get.mock.calls[0][1].params;
             expect(params).toEqual({ overview: 'full', geometries: 'geojson' });
         });
 
         it('swaps lon/lat to lat/lon in the returned geometry', async () => {
-            const result = await getRoute(START, END);
+            const result = await getRoute([START, END]);
 
             expect(result.geometry).toEqual(MOCK_COORDS_LAT_LON);
         });
 
         it('returns distance and duration from the OSRM response', async () => {
-            const result = await getRoute(START, END);
+            const result = await getRoute([START, END]);
 
             expect(result.distance).toBe(4_500_000);
             expect(result.duration).toBe(144_000);
         });
 
         it('passes the converted coordinates to sampleRoute with 80 km interval', async () => {
-            await getRoute(START, END);
+            await getRoute([START, END]);
 
             expect(sampleRoute).toHaveBeenCalledWith(MOCK_COORDS_LAT_LON, 80_000);
         });
 
         it('includes the weather points returned by sampleRoute', async () => {
-            const result = await getRoute(START, END);
+            const result = await getRoute([START, END]);
 
             expect(result.weatherPoints).toEqual(MOCK_WEATHER_POINTS);
         });
 
         it('returns a complete route object with all expected keys', async () => {
-            const result = await getRoute(START, END);
+            const result = await getRoute([START, END]);
 
             expect(result).toMatchObject({
                 distance:      expect.any(Number),
@@ -116,7 +125,7 @@ describe('getRoute', () => {
             axios.get.mockResolvedValueOnce(makeOsrmResponse([[-73.935242, 40.730610]]));
             sampleRoute.mockReturnValueOnce([]);
 
-            const result = await getRoute(START, END);
+            const result = await getRoute([START, END]);
 
             expect(result.geometry).toEqual([[40.730610, -73.935242]]);
         });
@@ -130,7 +139,7 @@ describe('getRoute', () => {
             axios.get.mockResolvedValueOnce(makeOsrmResponse(coords));
             sampleRoute.mockReturnValueOnce([]);
 
-            const result = await getRoute(START, END);
+            const result = await getRoute([START, END]);
 
             expect(result.geometry).toEqual([
                 [40.7128,  -74.006  ],
@@ -146,20 +155,20 @@ describe('getRoute', () => {
         it('throws on a network error, so the caller does not report "no route"', async () => {
             axios.get.mockRejectedValueOnce(new Error('ECONNREFUSED'));
 
-            await expect(getRoute(START, END)).rejects.toThrow('ECONNREFUSED');
+            await expect(getRoute([START, END])).rejects.toThrow('ECONNREFUSED');
         });
 
         it('returns null when OSRM answers 400 (no route between the points)', async () => {
             const noRoute = Object.assign(new Error('Request failed with status code 400'), { response: { status: 400 } });
             axios.get.mockRejectedValueOnce(noRoute);
 
-            expect(await getRoute(START, END)).toBeNull();
+            expect(await getRoute([START, END])).toBeNull();
         });
 
         it('returns null when the OSRM response has no routes', async () => {
             axios.get.mockResolvedValueOnce({ data: { routes: [] } });
 
-            expect(await getRoute(START, END)).toBeNull();
+            expect(await getRoute([START, END])).toBeNull();
         });
     });
 });

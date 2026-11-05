@@ -183,6 +183,7 @@ describe('getTrip', () => {
 
             expect(res.json).toHaveBeenCalledWith({
                 start: { lat: MOCK_START_LOCATION.lat, lon: MOCK_START_LOCATION.lon },
+                stops: [],
                 end:   { lat: MOCK_END_LOCATION.lat,   lon: MOCK_END_LOCATION.lon   },
                 route: {
                     distance:      MOCK_ROUTE.distance,
@@ -267,8 +268,44 @@ describe('getTrip', () => {
             const { req, res } = mockReqRes({ start: 'New York', end: 'Los Angeles' });
             await getTrip(req, res);
 
-            expect(getRoute).toHaveBeenCalledWith(MOCK_START_LOCATION, MOCK_END_LOCATION);
+            expect(getRoute).toHaveBeenCalledWith([MOCK_START_LOCATION, MOCK_END_LOCATION]);
         });
+
+        it('routes through stops in order and saves them', async () => {
+            const stopA = { lat: 41, lon: -90, name: 'Chicago, Illinois' };
+            const stopB = { lat: 39, lon: -105 };
+            geocodingService.geocodeLocation.mockResolvedValueOnce(stopA).mockResolvedValueOnce(stopB);
+            const { req, res } = mockReqRes({ start: 'New York', end: 'Los Angeles', stops: ['chicago', ' ', ' denver '] });
+            await getTrip({ ...req, user: { id: 'u1' } }, res);
+
+            expect(geocodingService.geocodeLocation).toHaveBeenCalledTimes(4); // blank stop skipped
+            expect(getRoute).toHaveBeenCalledWith([MOCK_START_LOCATION, stopA, stopB, MOCK_END_LOCATION]);
+            expect(res.json.mock.calls[0][0].stops).toEqual([{ lat: 41, lon: -90 }, { lat: 39, lon: -105 }]);
+            expect(mockSave.mock.contexts[0].stops.map((s) => s.location)).toEqual(['Chicago, Illinois', 'denver']);
+        });
+
+        it('returns 400 when a stop cannot be geocoded', async () => {
+            getRoute.mockReset(); // drop the beforeEach route, it is never requested here
+            geocodingService.geocodeLocation.mockResolvedValueOnce(null);
+            const { req, res } = mockReqRes({ start: 'New York', end: 'Los Angeles', stops: ['nowhere'] });
+            await getTrip(req, res);
+
+            expect(res.status).toHaveBeenCalledWith(400);
+            expect(res.json).toHaveBeenCalledWith({ error: 'Invalid stop location' });
+            expect(getRoute).not.toHaveBeenCalled();
+        });
+    });
+
+    describe('stop validation', () => {
+        it.each([['not an array', 'Chicago'], ['too many', Array(9).fill('Chicago')], ['non-string', [42]]])(
+            'returns 400 when stops is %s', async (_, stops) => {
+                const { req, res } = mockReqRes({ start: 'New York', end: 'Los Angeles', stops });
+                await getTrip(req, res);
+
+                expect(res.status).toHaveBeenCalledWith(400);
+                expect(res.json).toHaveBeenCalledWith({ error: 'Invalid stop location' });
+                expect(geocodingService.geocodeLocation).not.toHaveBeenCalled();
+            });
     });
 
     // ── Unexpected errors ─────────────────────────────────────────────────────

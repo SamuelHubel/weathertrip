@@ -74,7 +74,7 @@ const pointName = (point, i) => (
   <PointName
     lat={point.location.latitude}
     lon={point.location.longitude}
-    fallback={`Stop ${i + 1}`}
+    fallback={`Point ${i + 1}`}
   />
 );
 

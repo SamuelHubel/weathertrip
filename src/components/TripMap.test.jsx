@@ -100,7 +100,7 @@ describe('TripMap — weather points', () => {
     vi.stubGlobal('fetch', vi.fn().mockRejectedValue(new Error('offline')));
     render(<TripMap trip={tripWithPoint(40.1, -106.5)} />);
     // waits out the 1 req/s gap left by the previous lookup
-    expect(await screen.findByText('Stop 1', {}, { timeout: 3000 })).toBeInTheDocument();
+    expect(await screen.findByText('Point 1', {}, { timeout: 3000 })).toBeInTheDocument();
     vi.unstubAllGlobals();
   });
 

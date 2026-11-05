@@ -32,6 +32,28 @@
 .trip-dot { width: 10px; height: 10px; border-radius: 50%; flex: none; }
 .trip-dot.start { border: 2.5px solid var(--accent); }
 .trip-dot.end { background: var(--accent); }
+.trip-dot.stop { width: 8px; height: 8px; margin: 0 1px; border: 2px solid var(--text-soft); }
+
+.trip-stop-remove {
+  border: 0;
+  background: transparent;
+  color: var(--text-soft);
+  font-size: 14px;
+  padding: 6px;
+  line-height: 1;
+}
+.trip-stop-remove:hover:not(:disabled) { color: var(--text); }
+
+.trip-add-stop {
+  align-self: flex-start;
+  border: 0;
+  background: transparent;
+  color: var(--accent);
+  font-weight: 700;
+  font-size: 14px;
+  padding: 2px 4px;
+}
+.trip-add-stop:disabled { opacity: 0.5; }
 
 .btn-primary {
   border: 0;
