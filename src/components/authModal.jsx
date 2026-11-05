@@ -86,6 +86,10 @@ const AuthModal = ({ onSuccess, onDismiss }) => {
             )}
             </div>
 
+            <p className="modal-subtitle">
+            Your email is only used to save your trips. <a href="/privacy.html" target="_blank" rel="noopener">Privacy policy</a>
+            </p>
+
         </div>
         </div>
     );

@@ -27,3 +27,7 @@ export const logout = () => localStorage.removeItem('wt_token');
 //
 export const getToken = () => localStorage.getItem('wt_token');
 
+
+// deletes the account and its saved trips; the server checks the password again first
+export const deleteAccount = (password) =>
+  axios.delete(`${BASE}/me`, { data: { password }, headers: { Authorization: `Bearer ${getToken()}` } });

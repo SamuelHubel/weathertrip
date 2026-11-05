@@ -3,11 +3,13 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import User from '../models/User.js';
-import { register, login } from './authController.js';
+import Trip from '../models/Trip.js';
+import { register, login, deleteAccount } from './authController.js';
 
 vi.mock('../models/User.js', () => ({
-    default: { findOne: vi.fn(), create: vi.fn() },
+    default: { findOne: vi.fn(), create: vi.fn(), findById: vi.fn(), findByIdAndDelete: vi.fn() },
 }));
+vi.mock('../models/Trip.js', () => ({ default: { deleteMany: vi.fn() } }));
 vi.mock('bcryptjs', () => ({
     default: { hash: vi.fn().mockResolvedValue('hash'), compare: vi.fn() },
 }));
@@ -15,6 +17,7 @@ vi.mock('bcryptjs', () => ({
 const mockRes = () => ({
     status: vi.fn().mockReturnThis(),
     json: vi.fn().mockReturnThis(),
+    end: vi.fn().mockReturnThis(),
 });
 
 describe('authController', () => {
@@ -98,5 +101,36 @@ describe('authController', () => {
 
         await login({}, res);
         expect(res.status).toHaveBeenCalledWith(401);
+    });
+
+    it('refuses to delete an account without a session', async () => {
+        const res = mockRes();
+        await deleteAccount({ body: { password: 'password' } }, res);
+        expect(res.status).toHaveBeenCalledWith(401);
+        expect(User.findByIdAndDelete).not.toHaveBeenCalled();
+    });
+
+    it('refuses to delete an account with the wrong password', async () => {
+        User.findById.mockResolvedValue({ _id: 'u1', password: 'hash' });
+        bcrypt.compare.mockResolvedValue(false);
+        const res = mockRes();
+
+        await deleteAccount({ user: { id: 'u1' }, body: { password: 'nope' } }, res);
+
+        expect(res.status).toHaveBeenCalledWith(403);
+        expect(Trip.deleteMany).not.toHaveBeenCalled();
+        expect(User.findByIdAndDelete).not.toHaveBeenCalled();
+    });
+
+    it('deletes the account and its trips with the right password', async () => {
+        User.findById.mockResolvedValue({ _id: 'u1', password: 'hash' });
+        bcrypt.compare.mockResolvedValue(true);
+        const res = mockRes();
+
+        await deleteAccount({ user: { id: 'u1' }, body: { password: 'password' } }, res);
+
+        expect(Trip.deleteMany).toHaveBeenCalledWith({ userId: 'u1' });
+        expect(User.findByIdAndDelete).toHaveBeenCalledWith('u1');
+        expect(res.status).toHaveBeenCalledWith(204);
     });
 });

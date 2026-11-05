@@ -1,7 +1,8 @@
 // router for user authentication (register and login)
 import express from 'express';
 import rateLimit from 'express-rate-limit';
-import { register, login } from '../controllers/authController.js';
+import { register, login, deleteAccount } from '../controllers/authController.js';
+import optionalAuth from '../middleware/authMiddleware.js';
 
 const authRouter = express.Router();
 
@@ -15,5 +16,6 @@ const authLimiter = rateLimit({
 
 authRouter.post('/register', authLimiter, register);
 authRouter.post('/login', authLimiter, login);
+authRouter.delete('/me', authLimiter, optionalAuth, deleteAccount);
 
 export default authRouter;

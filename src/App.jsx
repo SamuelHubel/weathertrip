@@ -11,6 +11,7 @@ import axios from 'axios';
 // allows for login stuff
 import { getToken, logout } from './services/authService.js'; 
 import AuthModal from './components/authModal.jsx';
+import DeleteAccountModal from './components/DeleteAccountModal.jsx';
 
 function App() {
   const [trip, setTrip] = useState(null);
@@ -35,6 +36,7 @@ function App() {
   const [pendingTrip, setPendingTrip] = useState(null); 
   // state to control whether the login modal (menu) is shown
   const [showLogin, setShowLogin] = useState(false);
+  const [showDelete, setShowDelete] = useState(false);
 
   // check if a token already exists (returning user)
   useEffect(() => {
@@ -154,9 +156,15 @@ function App() {
         </div>
       </section>
 
-      <button type="button" className="btn-auth glass" onClick={user ? handleLogout : () => setShowLogin(true)}>
-        {user ? 'Sign out' : 'Sign in'}
-      </button>
+      <div className="auth-bar">
+        <a className="btn-auth glass" href="/privacy.html" target="_blank" rel="noopener">Privacy</a>
+        {user && (
+          <button type="button" className="btn-auth glass" onClick={() => setShowDelete(true)}>Delete account</button>
+        )}
+        <button type="button" className="btn-auth glass" onClick={user ? handleLogout : () => setShowLogin(true)}>
+          {user ? 'Sign out' : 'Sign in'}
+        </button>
+      </div>
 
       {trip && <DriveSheet trip={trip} label={label} condition={sky.condition} time={sky.time} now={now} selected={selected} onSelect={setSelected} />}
 
@@ -165,6 +173,13 @@ function App() {
           onSuccess={handleLoginSuccess}
           onDismiss={() => setShowLogin(false)}
           />
+      )}
+
+      {showDelete && (
+        <DeleteAccountModal
+          onDeleted={() => { setShowDelete(false); handleLogout(); }}
+          onDismiss={() => setShowDelete(false)}
+        />
       )}
     </div>
   );
