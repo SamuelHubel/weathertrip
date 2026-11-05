@@ -1,6 +1,7 @@
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import User from '../models/User.js';
+import Trip from '../models/Trip.js';
 
 // create a token that expires in 7 days
 // so user doesnt have to log in every single time
@@ -61,5 +62,28 @@ export const login = async (req, res) => {
   } catch (error) {
     console.error('Login error:', error.message);
     res.status(500).json({ error: 'Failed to log in' });
+  }
+};
+
+// function to delete an account and every trip it saved
+// wrong password is 403, not 401, so the frontend doesn't treat it as an expired session
+export const deleteAccount = async (req, res) => {
+  if (!req.user) return res.status(401).json({ error: 'Sign in to delete your account' });
+  try {
+    const { password } = req.body ?? {};
+    if (typeof password !== 'string')
+      return res.status(403).json({ error: 'Incorrect password' });
+
+    const user = await User.findById(req.user.id);
+    if (!user || !(await bcrypt.compare(password, user.password)))
+      return res.status(403).json({ error: 'Incorrect password' });
+
+    // trips first, so a failure part way leaves the account in place to retry
+    await Trip.deleteMany({ userId: user._id });
+    await User.findByIdAndDelete(user._id);
+    res.status(204).end();
+  } catch (err) {
+    console.error('Account delete failed:', err.message);
+    res.status(500).json({ error: 'Failed to delete account' });
   }
 };
