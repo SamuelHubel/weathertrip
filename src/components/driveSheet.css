@@ -133,7 +133,7 @@
 }
 
 /* ─── Phones: bottom sheet ──────────────────────────────────── */
-@media (max-width: 700px) {
+@media (max-width: 800px) {
   .drive-sheet {
     top: auto;
     left: 0;
@@ -145,7 +145,7 @@
     border-bottom: 0;
   }
 
-  .drive-summary { cursor: pointer; padding-top: 24px; }
+  .drive-summary { cursor: pointer; padding-top: 24px; touch-action: none; }
 
   /* grab handle */
   .drive-sheet::before {

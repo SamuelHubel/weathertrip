@@ -32,7 +32,6 @@
   letter-spacing: -0.02em;
   line-height: 1.05;
 }
-.sky-hero-sub { margin-top: 10px; font-size: 18px; color: var(--text-soft); }
 
 /* ─── Trip card (top-left) ──────────────────────────────────── */
 .trip-card {
@@ -78,7 +77,8 @@
 .btn-auth:hover { background: color-mix(in srgb, var(--glass), var(--accent) 16%); }
 
 /* ─── Narrow: auth pills get their own row above the card ───── */
-@media (max-width: 760px) {
+/* one breakpoint for card + drive sheet: the 360px card and 380px sheet need 800px side by side */
+@media (max-width: 800px) {
   .auth-bar { top: 10px; right: 10px; max-width: calc(100% - 20px); justify-content: flex-end; flex-wrap: wrap; gap: 6px; }
   .btn-auth { padding: 8px 14px; font-size: 13px; }
   .trip-card {
@@ -91,7 +91,7 @@
 }
 
 /* ─── Phones ────────────────────────────────────────────────── */
-@media (max-width: 700px) {
+@media (max-width: 800px) {
   .trip-card { padding: 14px; }
 
   .trip-card-toggle {

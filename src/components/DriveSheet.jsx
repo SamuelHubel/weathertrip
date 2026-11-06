@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useRef, useState } from 'react';
 import './driveSheet.css';
 import PointName from './PointName';
 import { weatherIcons, readConditions, isHighSeverity, conditionOf, timeOfDay } from '../sky';
@@ -81,6 +81,12 @@ const pointName = (point, i) => (
 function DriveSheet({ trip, label, condition = 'clear', time, now = new Date(), selected, onSelect }) {
   // only matters on phones, where the sheet peeks from the bottom
   const [expanded, setExpanded] = useState(false);
+  const touchY = useRef(null);
+  const onTouchEnd = (e) => {
+    const dy = e.changedTouches[0].clientY - touchY.current;
+    if (dy < -30) setExpanded(true);
+    else if (dy > 30) setExpanded(false);
+  };
   const events = useMemo(() => buildEvents(trip?.weather, Date.now()), [trip?.weather]);
   const byPoint = useMemo(() => {
     const map = new Map();
@@ -102,6 +108,8 @@ function DriveSheet({ trip, label, condition = 'clear', time, now = new Date(), 
         data-sky-time={time}
         aria-expanded={expanded}
         onClick={() => { setExpanded((e) => !e); onSelect(null); }}
+        onTouchStart={(e) => { touchY.current = e.touches[0].clientY; }}
+        onTouchEnd={onTouchEnd}
       >
         <span className="drive-eyebrow">Your drive</span>
         <span className="drive-verdict">
