@@ -136,8 +136,7 @@ function App() {
       <div className={`sky-layer${trip ? ' faded' : ''}`}>
         {!trip && (
           <div className="sky-hero">
-            <p className="sky-hero-title">Where are you driving?</p>
-            <p className="sky-hero-sub">See the weather all along the way.</p>
+            <p className="sky-hero-title">Where are we headed?</p>
           </div>
         )}
       </div>
@@ -147,7 +146,7 @@ function App() {
           <h1 className="brand">Weather<span>.</span>Trip</h1>
           {trip && (
             <button type="button" className="trip-card-toggle" aria-expanded={cardOpen} onClick={() => setCardOpen(o => !o)}>
-              {cardOpen ? 'Hide' : label || 'New route'}
+              {cardOpen ? 'Hide' : '+ New trip'}
             </button>
           )}
         </div>

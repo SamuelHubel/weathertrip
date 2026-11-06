@@ -26,7 +26,7 @@ test('renders the brand and the empty-state prompt', () => {
     axios.defaults.adapter = async (config) => respond(config, 200, []);
     render(<App />);
     expect(screen.getByRole('heading', { name: /Weather.Trip/i })).toBeInTheDocument();
-    expect(screen.getByText('Where are you driving?')).toBeInTheDocument();
+    expect(screen.getByText('Where are we headed?')).toBeInTheDocument();
     expect(screen.queryByRole('complementary', { name: 'Your drive' })).not.toBeInTheDocument();
 });
 

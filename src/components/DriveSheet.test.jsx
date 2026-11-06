@@ -41,6 +41,17 @@ describe('DriveSheet', () => {
     expect(screen.getByText('6h 10m')).toBeInTheDocument();
   });
 
+  it('swipes the sheet open and closed', () => {
+    renderSheet(weatherTrip);
+    const summary = screen.getByRole('button', { expanded: false });
+    fireEvent.touchStart(summary, { touches: [{ clientY: 300 }] });
+    fireEvent.touchEnd(summary, { changedTouches: [{ clientY: 200 }] });
+    expect(summary).toHaveAttribute('aria-expanded', 'true');
+    fireEvent.touchStart(summary, { touches: [{ clientY: 200 }] });
+    fireEvent.touchEnd(summary, { changedTouches: [{ clientY: 300 }] });
+    expect(summary).toHaveAttribute('aria-expanded', 'false');
+  });
+
   it('formats a sub-hour duration as minutes only', () => {
     renderSheet({ ...weatherTrip, route: { ...weatherTrip.route, duration: 2700 } });
     expect(screen.getByText('45m')).toBeInTheDocument();
