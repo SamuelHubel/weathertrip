@@ -78,7 +78,7 @@
 
 /* ─── Narrow: auth pills get their own row above the card ───── */
 /* one breakpoint for card + drive sheet: the 360px card and 380px sheet need 800px side by side */
-@media (max-width: 800px) {
+@media (max-width: 800px), (max-height: 500px) {
   .auth-bar { top: 10px; right: 10px; max-width: calc(100% - 20px); justify-content: flex-end; flex-wrap: wrap; gap: 6px; }
   .btn-auth { padding: 8px 14px; font-size: 13px; }
   .trip-card {
@@ -91,7 +91,7 @@
 }
 
 /* ─── Phones ────────────────────────────────────────────────── */
-@media (max-width: 800px) {
+@media (max-width: 800px), (max-height: 500px) {
   .trip-card { padding: 14px; }
 
   .trip-card-toggle {
@@ -110,4 +110,10 @@
 
   .trip-card.collapsed .trip-card-body { display: none; }
   .sky-hero { margin-top: 0; }
+}
+
+/* ─── Phone landscape: card + drive sheet stack in a left column ─ */
+@media (max-height: 500px) and (orientation: landscape) {
+  .trip-card { top: 10px; left: 10px; right: auto; width: 300px; padding: 10px; gap: 10px; max-height: calc(100% - 20px); }
+  .brand { font-size: 18px; }
 }

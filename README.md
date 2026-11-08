@@ -142,11 +142,9 @@ Test coverage spans geocoding, routing, route sampling, weather fetching, the tr
 
 ## Roadmap
 
-- [ ] Notable weather events panel (alerts, storms, road hazards)
 - [ ] Time-aware forecasts (predict weather at each stop based on estimated arrival time)
-- [ ] Multi-stop trip planning
 - [ ] Precipitation risk heat overlay on map
-- [ ] Trip sharing
+
 
 ---
 
