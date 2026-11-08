@@ -22,6 +22,9 @@ function getIcon({ rain, snow, isThunder }) {
 
 const HOUR = 3600000;
 
+// keep in sync with the phone @media query in driveSheet.css / App.css
+const PHONE_QUERY = '(max-width: 800px), (max-height: 500px)';
+
 // relative label for a timestamp: "now", "in 3h" or "2h ago"
 function relHours(ms, now) {
   const hours = Math.round((ms - now) / HOUR);
@@ -81,11 +84,29 @@ const pointName = (point, i) => (
 function DriveSheet({ trip, label, condition = 'clear', time, now = new Date(), selected, onSelect }) {
   // only matters on phones, where the sheet peeks from the bottom
   const [expanded, setExpanded] = useState(false);
-  const touchY = useRef(null);
-  const onTouchEnd = (e) => {
-    const dy = e.changedTouches[0].clientY - touchY.current;
-    if (dy < -30) setExpanded(true);
-    else if (dy > 30) setExpanded(false);
+  // dragged height in px; null leaves it to CSS
+  const [height, setHeight] = useState(null);
+  const sheetRef = useRef(null);
+  const drag = useRef(null);
+  const onTouchStart = (e) => {
+    if (!window.matchMedia?.(PHONE_QUERY).matches) return;
+    drag.current = { y: e.touches[0].clientY, h: sheetRef.current.offsetHeight, min: e.currentTarget.offsetHeight };
+  };
+  const onTouchMove = (e) => {
+    if (!drag.current) return;
+    const { y, h, min } = drag.current;
+    const next = Math.min(Math.max(h - (e.touches[0].clientY - y), min), window.innerHeight * 0.72);
+    setHeight(next);
+    setExpanded(true);
+  };
+  const onTouchEnd = () => {
+    if (!drag.current) return;
+    // stays where released; only dropping it near the header closes it
+    if (height !== null && height < drag.current.min + 40) {
+      setExpanded(false);
+      setHeight(null);
+    }
+    drag.current = null;
   };
   const events = useMemo(() => buildEvents(trip?.weather, Date.now()), [trip?.weather]);
   const byPoint = useMemo(() => {
@@ -100,15 +121,16 @@ function DriveSheet({ trip, label, condition = 'clear', time, now = new Date(), 
   const first = events.find((e) => conditionOf(points[e.index]) === condition) ?? events[0];
 
   return (
-    <aside className={`drive-sheet glass${expanded ? ' expanded' : ''}`} aria-label="Your drive">
+    <aside ref={sheetRef} style={{ height: height ?? undefined }} className={`drive-sheet glass${expanded ? ' expanded' : ''}`} aria-label="Your drive">
       <button
         type="button"
         className="drive-summary wx-tile"
         data-wx={condition}
         data-sky-time={time}
         aria-expanded={expanded}
-        onClick={() => { setExpanded((e) => !e); onSelect(null); }}
-        onTouchStart={(e) => { touchY.current = e.touches[0].clientY; }}
+        onClick={() => { setExpanded((e) => !e); setHeight(null); onSelect(null); }}
+        onTouchStart={onTouchStart}
+        onTouchMove={onTouchMove}
         onTouchEnd={onTouchEnd}
       >
         <span className="drive-eyebrow">Your drive</span>

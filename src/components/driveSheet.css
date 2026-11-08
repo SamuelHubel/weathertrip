@@ -133,7 +133,7 @@
 }
 
 /* ─── Phones: bottom sheet ──────────────────────────────────── */
-@media (max-width: 800px) {
+@media (max-width: 800px), (max-height: 500px) {
   .drive-sheet {
     top: auto;
     left: 0;
@@ -166,4 +166,25 @@
   .drive-verdict-headline { font-size: 20px; }
 
   .drive-sheet:not(.expanded) .drive-timeline { display: none; }
+}
+
+/* ─── Phone landscape: sits under the trip card in a left column ─ */
+@media (max-height: 500px) and (orientation: landscape) {
+  .drive-sheet {
+    left: 10px;
+    right: auto;
+    bottom: 10px;
+    width: 300px;
+    max-height: calc(100% - 76px); /* 10px top + ~56px collapsed trip card + 10px gap */
+    border-radius: var(--radius);
+    border-bottom: 1px solid var(--line);
+  }
+  .drive-summary { padding: 18px 14px 10px; }
+  .drive-verdict { margin: 2px 0 6px; font-size: 13px; }
+  .drive-verdict-icon { font-size: 28px; }
+  .drive-verdict-headline { font-size: 17px; }
+  .drive-route { font-size: 13px; }
+  .stop { padding: 8px 10px 8px 8px; }
+  .stop-icon { font-size: 22px; }
+  .stop-temp { font-size: 20px; }
 }

@@ -41,14 +41,31 @@ describe('DriveSheet', () => {
     expect(screen.getByText('6h 10m')).toBeInTheDocument();
   });
 
-  it('swipes the sheet open and closed', () => {
+  it('follows a swipe up, stays put, and closes when dragged back down', () => {
+    vi.stubGlobal('matchMedia', () => ({ matches: true }));
+    renderSheet(weatherTrip);
+    const summary = screen.getByRole('button', { expanded: false });
+    const sheet = screen.getByRole('complementary', { name: 'Your drive' });
+    fireEvent.touchStart(summary, { touches: [{ clientY: 300 }] });
+    fireEvent.touchMove(summary, { touches: [{ clientY: 200 }] });
+    fireEvent.touchEnd(summary);
+    expect(summary).toHaveAttribute('aria-expanded', 'true');
+    expect(sheet.style.height).toBe('100px');
+    // jsdom has no layout, so offsetHeight reads 0 at the next drag start
+    fireEvent.touchStart(summary, { touches: [{ clientY: 200 }] });
+    fireEvent.touchMove(summary, { touches: [{ clientY: 300 }] });
+    fireEvent.touchEnd(summary);
+    expect(summary).toHaveAttribute('aria-expanded', 'false');
+    expect(sheet.style.height).toBe('');
+  });
+
+  it('ignores drags on the desktop layout', () => {
+    vi.stubGlobal('matchMedia', () => ({ matches: false }));
     renderSheet(weatherTrip);
     const summary = screen.getByRole('button', { expanded: false });
     fireEvent.touchStart(summary, { touches: [{ clientY: 300 }] });
-    fireEvent.touchEnd(summary, { changedTouches: [{ clientY: 200 }] });
-    expect(summary).toHaveAttribute('aria-expanded', 'true');
-    fireEvent.touchStart(summary, { touches: [{ clientY: 200 }] });
-    fireEvent.touchEnd(summary, { changedTouches: [{ clientY: 300 }] });
+    fireEvent.touchMove(summary, { touches: [{ clientY: 200 }] });
+    fireEvent.touchEnd(summary);
     expect(summary).toHaveAttribute('aria-expanded', 'false');
   });
 
