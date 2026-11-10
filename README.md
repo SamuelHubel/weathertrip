@@ -96,7 +96,8 @@ weathertrip/
 │   │   └── authModal.jsx       # Login/register modal
 │   ├── services/
 │   │   ├── tripService.js      # API calls for trip planning + log
-│   │   └── authService.js      # Login, register, token management
+│   │   ├── authService.js      # Login, register, token management
+│   │   └── weatherService.js   # Open-Meteo weather, fetched from the browser
 │   └── App.jsx
 │
 ├── server/                     # Node/Express backend
@@ -107,8 +108,7 @@ weathertrip/
 │   ├── services/
 │   │   ├── geocodingService.js    # Nominatim geocoding
 │   │   ├── routingService.js      # OSRM route fetching
-│   │   ├── routeSamplingService.js # Haversine-based route sampling
-│   │   └── weatherService.js      # Open-Meteo weather fetching
+│   │   └── routeSamplingService.js # Haversine-based route sampling
 │   ├── models/
 │   │   ├── Trip.js
 │   │   └── User.js

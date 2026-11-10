@@ -10,20 +10,10 @@ const POINTS = [[39.7392, -104.9903], [40.7608, -111.891]];
 const apiPoint = (latitude, longitude) => ({
   latitude,
   longitude,
-  current: {
-    temperature_2m: 12.5,
-    wind_speed_10m: 18.3,
-    weather_code: 3,
-    precipitation: 0.2,
-    rain: 0.1,
-    showers: 0.3,
-    snowfall: 0.0,
-  },
   hourly: {
     time: [1700000000, 1700003600],
     temperature_2m: [-2, 4],
     weather_code: [95, 3],
-    precipitation: [12, 0],
     rain: [8, 0],
     showers: [4, 0],
     snowfall: [0, 0],
@@ -37,6 +27,8 @@ const apiPoint = (latitude, longitude) => ({
 
 beforeEach(() => {
   vi.clearAllMocks();
+  // inside the second hour, so it stands in for current conditions
+  vi.spyOn(Date, 'now').mockReturnValue(1700004000 * 1000);
 });
 
 describe('getWeather', () => {
@@ -51,12 +43,12 @@ describe('getWeather', () => {
     expect(params.get('longitude')).toBe('-104.9903,-111.8910');
     expect(params.get('wind_speed_unit')).toBe('ms');
     expect(axios.get.mock.calls[0][1].timeout).toBe(10000);
-    expect(params.getAll('current')).toEqual([
-      'temperature_2m', 'wind_speed_10m', 'weather_code', 'precipitation', 'rain', 'showers', 'snowfall',
-    ]);
+    expect(params.getAll('current')).toEqual([]);
     expect(params.getAll('hourly')).toEqual([
-      'temperature_2m', 'weather_code', 'precipitation', 'rain', 'showers', 'snowfall', 'wind_speed_10m',
+      'temperature_2m', 'weather_code', 'rain', 'showers', 'snowfall', 'wind_speed_10m',
     ]);
+    // more than 10 variables makes Open-Meteo count each point as extra calls
+    expect(params.getAll('hourly').length + params.getAll('daily').length).toBeLessThanOrEqual(10);
     expect(params.get('past_hours')).toBe('6');
     expect(params.get('forecast_hours')).toBe('12');
     expect(params.get('timeformat')).toBe('unixtime');
@@ -71,12 +63,12 @@ describe('getWeather', () => {
     expect(result).toHaveLength(2);
     expect(result[0]).toEqual({
       location: { latitude: 39.7, longitude: -105 },
-      temperature: 12.5,
-      windspeed: 18.3,
+      temperature: 4,
+      windspeed: 5,
       weathercode: 3,
-      precipitation: 0.2,
-      rain: 0.4,
-      snowfall: 0.0,
+      precipitation: 0,
+      rain: 0,
+      snowfall: 0,
       sun: { sunrise: 1699995600000, sunset: 1700032800000 },
       hourly: [
         { time: 1700000000000, temperature: -2, weathercode: 95, precipitation: 12, rain: 12, snowfall: 0, windspeed: 20 },
@@ -86,12 +78,22 @@ describe('getWeather', () => {
     expect(result[1].location).toEqual({ latitude: 40.8, longitude: -111.9 });
   });
 
+  it('counts snow as its water equivalent in precipitation', async () => {
+    const point = apiPoint(39.7, -105);
+    point.hourly.snowfall = [0, 1.4];
+    axios.get.mockResolvedValue({ data: point });
+    const [result] = await getWeather([POINTS[0]]);
+
+    expect(result.precipitation).toBe(2);
+    expect(result.snowfall).toBe(1.4);
+  });
+
   it('handles the single object Open-Meteo returns for one point', async () => {
     axios.get.mockResolvedValue({ data: apiPoint(39.7, -105) });
     const result = await getWeather([POINTS[0]]);
 
     expect(result).toHaveLength(1);
-    expect(result[0].temperature).toBe(12.5);
+    expect(result[0].temperature).toBe(4);
   });
 
   it('handles missing current data gracefully', async () => {

@@ -3,7 +3,6 @@
 // includes start and end locations and route info from OSRM API
 import geocodingService from '../services/geocodingService.js';
 import getRoute from '../services/routingService.js';
-import getWeather from '../services/weatherService.js';
 import Trip from '../models/Trip.js';
 
 
@@ -48,17 +47,6 @@ const getTrip = async (req, res) => {
         }
 
 
-        // fetch weather for points in route.weatherPoints
-        // this is an array of {lat, lon} points sampled along the route every ~50 miles
-        // fetches the following data for each point:
-        // location: {latitude, longitude}
-        // temperature
-        // windspeed
-        // weathercode (Open-Meteo's numeric code for current weather conditions)
-        // precipitation (mm) for current hour
-        // rain (mm) for current hour
-        // snowfall (cm) for current hour
-        const weather = await getWeather(route.weatherPoints);
         // if the user is logged in, save the trip to their trip history
         if (req.user && req.body.save !== false) {
             // trip object to be saved to database
@@ -100,8 +88,8 @@ const getTrip = async (req, res) => {
         // returns 
         // start: {lat lon}
         // end: {lat lon}
-        // route: {distance, duration, geometry, weatherPoints}
-        // weather for each point retrieved from 
+        // route: {distance, duration, geometry}
+        // weatherPoints
         res.json({
             start: {
                 
@@ -118,9 +106,9 @@ const getTrip = async (req, res) => {
                 duration: route.duration,
                 geometry: route.geometry,            
             },
-            // weather data for each sampled point along the route
-            // null when it could not be loaded, so the frontend does not report an all-clear
-            weather: weather
+            // [lat, lon] pairs sampled every ~50 miles; the browser fetches their weather
+            // so Open-Meteo's per-IP limit is each user's, not this server's shared host IP
+            weatherPoints: route.weatherPoints
         });
 
     } 

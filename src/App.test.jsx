@@ -3,6 +3,10 @@ import { render, screen, waitFor, fireEvent, within } from '@testing-library/rea
 import axios from 'axios';
 import { afterEach, beforeEach, vi } from 'vitest';
 import App from './App';
+import getWeather from './services/weatherService';
+
+// the browser fetches weather from Open-Meteo after the trip comes back
+vi.mock('./services/weatherService', () => ({ default: vi.fn().mockResolvedValue(null) }));
 
 const originalAdapter = axios.defaults.adapter;
 
@@ -39,8 +43,9 @@ test('selecting a stop re-skies the app to that point', async () => {
         { location: { latitude: 40.5, longitude: -108 }, weathercode: 95, temperature: 15, windspeed: 8, sun: { sunrise: now - 14 * H, sunset: now - 3 * H } },
     ];
     vi.stubGlobal('fetch', vi.fn().mockRejectedValue(new Error('offline')));
+    getWeather.mockResolvedValueOnce(weather);
     axios.defaults.adapter = async (config) =>
-        config.method === 'post' ? respond(config, 200, { route: {}, weather }) : respond(config, 200, []);
+        config.method === 'post' ? respond(config, 200, { route: {}, weatherPoints: [[39.7, -105], [40.5, -108]] }) : respond(config, 200, []);
 
     const { container } = render(<App />);
     const app = container.querySelector('.app');
