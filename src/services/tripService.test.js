@@ -2,8 +2,10 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import axios from 'axios';
 import fetchTrip from './tripService';
 import { getToken } from './authService';
+import getWeather from './weatherService.js';
 
 vi.mock('axios');
+vi.mock('./weatherService.js', () => ({ default: vi.fn().mockResolvedValue(null) }));
 vi.mock('./authService', () => ({
     getToken: vi.fn().mockReturnValue(null),
 }));
@@ -31,7 +33,20 @@ describe('fetchTrip', () => {
 
         const result = await fetchTrip('Denver, CO', 'Salt Lake City, UT');
 
-        expect(result).toEqual(mockTripResponse.data);
+        expect(result).toEqual({ ...mockTripResponse.data, weather: null });
+    });
+
+    it('fetches weather for the sampled points and attaches it', async () => {
+        const weatherPoints = [[39.7, -105], [40.8, -111.9]];
+        const weather = [{ temperature: 4 }, { temperature: 6 }];
+        axios.post.mockResolvedValue({ data: { ...mockTripResponse.data, weatherPoints } });
+        getWeather.mockResolvedValueOnce(weather);
+
+        const result = await fetchTrip('Denver, CO', 'Salt Lake City, UT');
+
+        expect(getWeather).toHaveBeenCalledWith(weatherPoints);
+        expect(result.weather).toBe(weather);
+        expect(result.weatherPoints).toBeUndefined();
     });
 
     it('sends a POST request to the correct endpoint', async () => {

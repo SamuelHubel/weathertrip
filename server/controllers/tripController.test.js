@@ -2,7 +2,6 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 
 import geocodingService from '../services/geocodingService.js';
 import getRoute from '../services/routingService.js';
-import getWeather from '../services/weatherService.js';
 import getTrip from './tripController.js';
 // Mock dependencies before importing the controller
 const mockSave = vi.hoisted(() => vi.fn().mockResolvedValue({}));
@@ -16,9 +15,6 @@ vi.mock('../services/routingService.js', () => ({
     default: vi.fn(),
 }));
 
-vi.mock('../services/weatherService.js', () => ({
-    default: vi.fn(),
-}));
 // mock database model to prevent actual database interactions during tests
 vi.mock('../models/Trip.js', () => {
     function MockTrip(data) {
@@ -174,7 +170,6 @@ describe('getTrip', () => {
                 .mockResolvedValueOnce(MOCK_START_LOCATION)
                 .mockResolvedValueOnce(MOCK_END_LOCATION);
             getRoute.mockResolvedValueOnce(MOCK_ROUTE);
-            getWeather.mockResolvedValue([]);
         });
 
         it('responds with correctly shaped trip data', async () => {
@@ -191,9 +186,8 @@ describe('getTrip', () => {
                     geometry:      MOCK_ROUTE.geometry,
                    
                 },
-                // weather data for each sampled point along the route
-                // test expects that there is some array of weather data, but doesn't check the contents since that's tested in weatherService.test.js
-                weather: expect.any(Array), 
+                // points the browser fetches weather for
+                weatherPoints: MOCK_ROUTE.weatherPoints,
             });
         });
 
@@ -233,20 +227,11 @@ describe('getTrip', () => {
             expect(res.json.mock.calls[0][0].route.geometry).toEqual(MOCK_ROUTE.geometry);
         });
 
-        it('requests weather for all sampled points at once', async () => {
+        it('returns the sampled points for the browser to fetch weather for', async () => {
             const { req, res } = mockReqRes({ start: 'New York', end: 'Los Angeles' });
             await getTrip(req, res);
 
-            expect(getWeather).toHaveBeenCalledTimes(1);
-            expect(getWeather).toHaveBeenCalledWith(MOCK_ROUTE.weatherPoints);
-        });
-
-        it('returns weather as null when it could not be loaded', async () => {
-            getWeather.mockResolvedValue(null);
-            const { req, res } = mockReqRes({ start: 'New York', end: 'Los Angeles' });
-            await getTrip(req, res);
-
-            expect(res.json.mock.calls[0][0].weather).toBeNull();
+            expect(res.json.mock.calls[0][0].weatherPoints).toEqual(MOCK_ROUTE.weatherPoints);
         });
 
         it('does not call res.status on success', async () => {
