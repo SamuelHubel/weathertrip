@@ -25,6 +25,23 @@ describe('TripLog', () => {
     expect(onReplot).toHaveBeenCalledWith(entry);
   });
 
+  it('shows a named trip by its name, with the route beneath', () => {
+    render(<TripLog tripLog={[{ ...entry, name: 'Ski weekend' }]} onReplot={vi.fn()} />);
+    expect(screen.getByText('Ski weekend')).toHaveClass('trip-chip-name');
+    expect(screen.getByText('Denver → Boulder')).toBeInTheDocument();
+  });
+
+  it('calls onDelete from the delete button without replotting', () => {
+    const onReplot = vi.fn();
+    const onDelete = vi.fn();
+    render(<TripLog tripLog={[entry]} onReplot={onReplot} onDelete={onDelete} />);
+
+    fireEvent.click(screen.getByRole('button', { name: 'Delete trip' }));
+
+    expect(onDelete).toHaveBeenCalledWith(entry);
+    expect(onReplot).not.toHaveBeenCalled();
+  });
+
   it('renders nothing when there are no trips', () => {
     const { container } = render(<TripLog tripLog={[]} onReplot={vi.fn()} />);
     expect(container).toBeEmptyDOMElement();

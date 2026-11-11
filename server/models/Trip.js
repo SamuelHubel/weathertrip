@@ -30,6 +30,8 @@ const tripSchema = new mongoose.Schema({
     distance: Number,
     duration: Number,
   },
+  // optional name the user gives the trip after plotting it
+  name: { type: String, trim: true, maxlength: 60 },
 
   createdAt: {
     type: Date,
