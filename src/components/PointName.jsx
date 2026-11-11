@@ -16,7 +16,8 @@ function lookup(lat, lon, fallback) {
           const place = address.city || address.town || address.village || address.hamlet || address.county;
           return place ? [place, address.state].filter(Boolean).join(', ') : fallback;
         })
-        .catch(() => fallback)
+        // a failed lookup (e.g. rate-limited) is not cached, so the next render of this point tries again
+        .catch(() => { nameCache.delete(key); return fallback; })
     );
     queue = request.then(() => new Promise((resolve) => setTimeout(resolve, GAP_MS)));
     nameCache.set(key, request);
