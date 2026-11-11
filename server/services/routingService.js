@@ -7,7 +7,6 @@ import sampleRoute from './routeSamplingService.js';
 
 const getRoute = async (points) => {
   const url = `${process.env.OSRM_URL}/route/v1/driving/${points.map((p) => `${p.lon},${p.lat}`).join(';')}`;
-  console.log(`Fetching route from: ${url}`);
   let response;
   try {
     response = await axios.get(url, {

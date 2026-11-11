@@ -24,11 +24,9 @@ async function search(locationString) {
   });
 
   if (!response.data || response.data.length === 0) {
-    console.warn(`No results found for location: ${locationString}`);
     return null;
   }
   const result = response.data[0];
-  console.log(`Geocoded "${locationString}" to lat: ${result.lat}, lon: ${result.lon}`);
   // "Denver, Colorado": short enough for the trip log, specific enough to geocode the same place on replay
   const region = result.address?.state ?? result.address?.country;
   const name = result.name ? [result.name, region !== result.name && region].filter(Boolean).join(', ') : undefined;

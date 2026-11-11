@@ -10,7 +10,6 @@ import Trip from '../models/Trip.js';
 const getTrip = async (req, res) => {
     try {
         const { start, end } = req.body ?? {};
-        console.log('Start:', start, 'End:', end);
         
         if (!start || !end) {
             console.error('Missing start or end location in request body');
@@ -32,7 +31,6 @@ const getTrip = async (req, res) => {
         const startLocation = await geocodingService.geocodeLocation(start);
         const endLocation = await geocodingService.geocodeLocation(end);
         if (!startLocation || !endLocation) {
-            console.error(`Geocoding failed - start: ${startLocation}, end: ${endLocation}`);
             return res.status(400).json({ error: 'Invalid start or end location' });
         }
         const stopLocations = [];
@@ -77,12 +75,9 @@ const getTrip = async (req, res) => {
             // a failed save must not throw away the trip the user is waiting for
             try {
                 await tripData.save();
-                console.log(`Saved ${tripData.start.location} to ${tripData.end.location} for user ${req.user.id}`);
             } catch (error) {
                 console.error('Trip save failed:', error.message);
             }
-        } else {
-            console.log('No user logged in, skipping trip save to database');
         }
         // return trip info
         // returns 
@@ -114,7 +109,8 @@ const getTrip = async (req, res) => {
     } 
    catch (error) {
     // name the upstream service, so a 429 or timeout says which provider failed
-    console.error('CATCH ERROR:', error.message, error.config?.url ?? '');
+    // host only: the OSRM path holds the user's coordinates
+    console.error('CATCH ERROR:', error.message, error.config?.url?.match(/^[a-z]+:\/\/[^/]+/i)?.[0] ?? '');
     // public OSRM/Nominatim throttle shared host IPs; tell the user to retry rather than report a bug
     if (error.response?.status === 429) {
         return res.status(503).json({ error: 'Map services are busy, try again in a minute' });
