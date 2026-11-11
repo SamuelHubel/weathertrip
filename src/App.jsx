@@ -12,6 +12,7 @@ import axios from 'axios';
 import { getToken, logout } from './services/authService.js'; 
 import AuthModal from './components/authModal.jsx';
 import DeleteAccountModal from './components/DeleteAccountModal.jsx';
+import NameTripModal from './components/NameTripModal.jsx';
 
 function App() {
   const [trip, setTrip] = useState(null);
@@ -37,6 +38,8 @@ function App() {
   // state to control whether the login modal (menu) is shown
   const [showLogin, setShowLogin] = useState(false);
   const [showDelete, setShowDelete] = useState(false);
+  // id of a just-saved trip the signed-in user is being asked to name
+  const [namingTripId, setNamingTripId] = useState(null);
 
   // check if a token already exists (returning user)
   useEffect(() => {
@@ -73,6 +76,9 @@ function App() {
     fetchTripLog().then(data => {
         if (data) setTripLog(data);
     });
+
+    // the server sends an id only when it saved the trip, so replots and guests are not asked
+    if (getToken() && tripData.id) setNamingTripId(tripData.id);
 
     // save the trip to pending and show login if not
     if (!getToken()) {
@@ -118,6 +124,7 @@ function App() {
     logout();
     setUser(null);
     setTripLog([]);
+    setNamingTripId(null);
     setTrip(null);
     setLabel('');
     setSelected(null);
@@ -174,6 +181,17 @@ function App() {
           onSuccess={handleLoginSuccess}
           onDismiss={() => setShowLogin(false)}
           />
+      )}
+
+      {namingTripId && (
+        <NameTripModal
+          tripId={namingTripId}
+          onSaved={() => {
+            setNamingTripId(null);
+            fetchTripLog().then(data => { if (data) setTripLog(data); });
+          }}
+          onDismiss={() => setNamingTripId(null)}
+        />
       )}
 
       {showDelete && (

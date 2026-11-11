@@ -25,6 +25,12 @@ describe('TripLog', () => {
     expect(onReplot).toHaveBeenCalledWith(entry);
   });
 
+  it('shows a named trip by its name, with the route beneath', () => {
+    render(<TripLog tripLog={[{ ...entry, name: 'Ski weekend' }]} onReplot={vi.fn()} />);
+    expect(screen.getByText('Ski weekend')).toHaveClass('trip-chip-name');
+    expect(screen.getByText('Denver → Boulder')).toBeInTheDocument();
+  });
+
   it('renders nothing when there are no trips', () => {
     const { container } = render(<TripLog tripLog={[]} onReplot={vi.fn()} />);
     expect(container).toBeEmptyDOMElement();

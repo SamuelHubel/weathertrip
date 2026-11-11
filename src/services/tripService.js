@@ -46,6 +46,9 @@ const fetchTripLog = async (tokenOverride) => {
     }
 };
 
+// names one of the signed-in user's saved trips
+const renameTrip = (id, name) =>
+    axios.patch(`${BASE_URL}/api/trip/${id}`, { name }, { headers: authHeader() });
 
 export default fetchTrip;
-export { fetchTripLog };
+export { fetchTripLog, renameTrip };
