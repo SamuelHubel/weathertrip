@@ -4,39 +4,48 @@
 import geocodingService from '../services/geocodingService.js';
 import getRoute from '../services/routingService.js';
 import Trip from '../models/Trip.js';
+import User from '../models/User.js';
 
+// a place is a typed name, or a saved one ({ location, lat, lon }) sent back when replaying a trip
+const isPlace = (place) => typeof place === 'string'
+    ? place.length <= 200
+    : typeof place?.location === 'string' && place.location.length <= 200
+        && Number.isFinite(place.lat) && Math.abs(place.lat) <= 90
+        && Number.isFinite(place.lon) && Math.abs(place.lon) <= 180;
 
+// a saved place already has coordinates, so it skips the 1 req/s geocoding queue
+const locate = (place) => typeof place === 'string'
+    ? geocodingService.geocodeLocation(place)
+    : { lat: place.lat, lon: place.lon, name: place.location };
 
 const getTrip = async (req, res) => {
     try {
         const { start, end } = req.body ?? {};
-        console.log('Start:', start, 'End:', end);
         
         if (!start || !end) {
             console.error('Missing start or end location in request body');
             return res.status(400).json({ error: 'Missing start or end location' });
         }
         
-        if ([start, end].some((place) => typeof place !== 'string' || place.length > 200)) {
+        if (![start, end].every(isPlace)) {
             return res.status(400).json({ error: 'Invalid start or end location' });
         }
 
         // optional stops between start and end, in driving order
         const { stops = [] } = req.body;
-        if (!Array.isArray(stops) || stops.length > 8 || stops.some((place) => typeof place !== 'string' || place.length > 200)) {
+        if (!Array.isArray(stops) || stops.length > 8 || !stops.every(isPlace)) {
             return res.status(400).json({ error: 'Invalid stop location' });
         }
-        const stopNames = stops.map((place) => place.trim()).filter(Boolean);
+        const stopNames = stops.map((place) => (typeof place === 'string' ? place.trim() : place)).filter(Boolean);
 
         // geocode start and end locations
-        const startLocation = await geocodingService.geocodeLocation(start);
-        const endLocation = await geocodingService.geocodeLocation(end);
+        const startLocation = await locate(start);
+        const endLocation = await locate(end);
         if (!startLocation || !endLocation) {
-            console.error(`Geocoding failed - start: ${startLocation}, end: ${endLocation}`);
             return res.status(400).json({ error: 'Invalid start or end location' });
         }
         const stopLocations = [];
-        for (const place of stopNames) stopLocations.push(await geocodingService.geocodeLocation(place));
+        for (const place of stopNames) stopLocations.push(await locate(place));
         if (stopLocations.some((location) => !location)) {
             return res.status(400).json({ error: 'Invalid stop location' });
         }
@@ -76,13 +85,11 @@ const getTrip = async (req, res) => {
 
             // a failed save must not throw away the trip the user is waiting for
             try {
-                await tripData.save();
-                console.log(`Saved ${tripData.start.location} to ${tripData.end.location} for user ${req.user.id}`);
+                // a token outlives a deleted account (up to 7 days); don't leave trips nobody can delete
+                if (await User.exists({ _id: req.user.id })) await tripData.save();
             } catch (error) {
                 console.error('Trip save failed:', error.message);
             }
-        } else {
-            console.log('No user logged in, skipping trip save to database');
         }
         // return trip info
         // returns 
@@ -114,7 +121,8 @@ const getTrip = async (req, res) => {
     } 
    catch (error) {
     // name the upstream service, so a 429 or timeout says which provider failed
-    console.error('CATCH ERROR:', error.message, error.config?.url ?? '');
+    // host only: the OSRM path holds the user's coordinates
+    console.error('CATCH ERROR:', error.message, error.config?.url?.match(/^[a-z]+:\/\/[^/]+/i)?.[0] ?? '');
     // public OSRM/Nominatim throttle shared host IPs; tell the user to retry rather than report a bug
     if (error.response?.status === 429) {
         return res.status(503).json({ error: 'Map services are busy, try again in a minute' });

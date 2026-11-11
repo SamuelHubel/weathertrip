@@ -24,6 +24,9 @@ vi.mock('../models/Trip.js', () => {
     return { default: MockTrip };
 });
 
+const userExists = vi.hoisted(() => vi.fn());
+vi.mock('../models/User.js', () => ({ default: { exists: userExists } }));
+
 
 // Helper to create a mock Express req/res pair
 const mockReqRes = (body = {}) => {
@@ -50,6 +53,7 @@ const MOCK_ROUTE = {
 describe('getTrip', () => {
     beforeEach(() => {
         vi.clearAllMocks();
+        userExists.mockResolvedValue({ _id: 'u1' });
     });
 
     // ── Validation ────────────────────────────────────────────────────────────
@@ -206,6 +210,24 @@ describe('getTrip', () => {
             expect(mockSave).not.toHaveBeenCalled();
         });
 
+        it('does not save a trip for an account deleted while its token is still valid', async () => {
+            userExists.mockResolvedValue(null);
+            const { req, res } = mockReqRes({ start: 'New York', end: 'Los Angeles' });
+            await getTrip({ ...req, user: { id: 'gone' } }, res);
+
+            expect(mockSave).not.toHaveBeenCalled();
+            expect(res.json.mock.calls[0][0].route).toBeDefined();
+        });
+
+        it('still answers when the account check fails', async () => {
+            userExists.mockRejectedValue(new Error('db down'));
+            const { req, res } = mockReqRes({ start: 'New York', end: 'Los Angeles' });
+            await getTrip({ ...req, user: { id: 'u1' } }, res);
+
+            expect(res.status).not.toHaveBeenCalled();
+            expect(res.json.mock.calls[0][0].route).toBeDefined();
+        });
+
         it("saves the geocoder's place names", async () => {
             geocodingService.geocodeLocation.mockReset()
                 .mockResolvedValueOnce({ ...MOCK_START_LOCATION, name: 'Denver, Colorado' })
@@ -291,6 +313,38 @@ describe('getTrip', () => {
                 expect(res.json).toHaveBeenCalledWith({ error: 'Invalid stop location' });
                 expect(geocodingService.geocodeLocation).not.toHaveBeenCalled();
             });
+    });
+
+    describe('replaying saved places', () => {
+        it('routes saved places by their coordinates without geocoding them', async () => {
+            getRoute.mockResolvedValueOnce(MOCK_ROUTE);
+            const start = { location: 'Denver, Colorado', lat: 39.74, lon: -104.99, _id: 'x' };
+            const stop = { location: 'Moab, Utah', lat: 38.57, lon: -109.55 };
+            const end = { location: 'Salt Lake City, Utah', lat: 40.76, lon: -111.89 };
+            const { req, res } = mockReqRes({ start, end, stops: [stop], save: false });
+            await getTrip(req, res);
+
+            expect(geocodingService.geocodeLocation).not.toHaveBeenCalled();
+            expect(getRoute).toHaveBeenCalledWith([
+                { lat: 39.74, lon: -104.99, name: 'Denver, Colorado' },
+                { lat: 38.57, lon: -109.55, name: 'Moab, Utah' },
+                { lat: 40.76, lon: -111.89, name: 'Salt Lake City, Utah' },
+            ]);
+            expect(res.status).not.toHaveBeenCalled();
+        });
+
+        it.each([
+            ['no coordinates', { location: 'Denver' }],
+            ['a latitude off the globe', { location: 'Denver', lat: 91, lon: 0 }],
+            ['coordinates as strings', { location: 'Denver', lat: '39', lon: '-105' }],
+            ['a name too long', { location: 'x'.repeat(201), lat: 39, lon: -105 }],
+        ])('returns 400 for a saved place with %s', async (_, start) => {
+            const { req, res } = mockReqRes({ start, end: 'Los Angeles' });
+            await getTrip(req, res);
+
+            expect(res.status).toHaveBeenCalledWith(400);
+            expect(getRoute).not.toHaveBeenCalled();
+        });
     });
 
     // ── Unexpected errors ─────────────────────────────────────────────────────

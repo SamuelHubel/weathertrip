@@ -83,9 +83,10 @@ function App() {
   };
   
   // saved trips have no weather, so replotting fetches it live without saving a duplicate
+  // the saved places go back with their coordinates, so the server skips geocoding them again
   const replotTrip = async (entry) => {
+      const data = await fetchTrip(entry.start, entry.end, { stops: entry.stops ?? [], save: false }).catch(() => null);
       const stops = entry.stops?.map((stop) => stop.location) ?? [];
-      const data = await fetchTrip(entry.start.location, entry.end.location, { stops, save: false }).catch(() => null);
       showTrip(data ?? entry, entry.start.location, entry.end.location, stops);
   };
   // on initial load, fetch the trip log from the server to display in the sidebar

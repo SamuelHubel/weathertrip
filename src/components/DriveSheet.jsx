@@ -64,6 +64,7 @@ function buildEvents(weatherPoints, now) {
       return {
         index,
         from,
+        to,
         icon: getIcon(conditions),
         headline,
         timeText: fromText === toText ? fromText : `${fromText} → ${toText}`,
@@ -108,7 +109,8 @@ function DriveSheet({ trip, label, condition = 'clear', time, now = new Date(), 
     }
     drag.current = null;
   };
-  const events = useMemo(() => buildEvents(trip?.weather, Date.now()), [trip?.weather]);
+  // rebuilt as the clock ticks, so "in 3h" counts down
+  const events = useMemo(() => buildEvents(trip?.weather, now.getTime()), [trip?.weather, now]);
   const byPoint = useMemo(() => {
     const map = new Map();
     for (const e of events) map.set(e.index, [...(map.get(e.index) ?? []), e]);
@@ -117,8 +119,9 @@ function DriveSheet({ trip, label, condition = 'clear', time, now = new Date(), 
 
   // only claim the route is clear if weather was actually fetched for it
   const points = Array.isArray(trip?.weather) ? trip.weather : null;
-  // lead with a hazard that matches the header's scene, so a storm tile doesn't headline snow
-  const first = events.find((e) => conditionOf(points[e.index]) === condition) ?? events[0];
+  // lead with a hazard that hasn't ended, preferring one that matches the header's scene, so a storm tile doesn't headline snow
+  const upcoming = events.filter((e) => e.to >= now.getTime());
+  const first = upcoming.find((e) => conditionOf(points[e.index]) === condition) ?? upcoming[0];
 
   return (
     <aside ref={sheetRef} style={{ height: height ?? undefined }} className={`drive-sheet glass${expanded ? ' expanded' : ''}`} aria-label="Your drive">

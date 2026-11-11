@@ -112,8 +112,16 @@
   .sky-hero { margin-top: 0; }
 }
 
+/* ─── Phone portrait: the full-width card covers the centre, so the hero sits low ─ */
+@media (max-width: 800px) and (orientation: portrait) {
+  .sky-hero { align-self: end; margin-bottom: 12vh; }
+}
+
 /* ─── Phone landscape: card + drive sheet stack in a left column ─ */
 @media (max-height: 500px) and (orientation: landscape) {
   .trip-card { top: 10px; left: 10px; right: auto; width: 300px; padding: 10px; gap: 10px; max-height: calc(100% - 20px); }
   .brand { font-size: 18px; }
+  /* 10px gap + 300px card: the grid centers the hero in the space right of the card */
+  .sky-hero { margin-left: 310px; }
+  .sky-hero-title { max-width: 8em; margin: 0 auto; } /* wraps to 2 lines */
 }
