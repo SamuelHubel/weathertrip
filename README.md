@@ -7,11 +7,11 @@ A road trip weather web application that visualizes weather conditions along a d
 
 ## Features
 
-- **Route planning** — enter any origin and destination (city names, addresses, etc.)
-- **Weather along the route** — current temperature, wind speed, precipitation, snowfall, and weather conditions fetched every ~50 miles
+- **Route planning** — enter any origin and destination (city names, addresses, etc.), with up to 8 stops in between
+- **Weather along the route** — temperature, wind speed, rain, snowfall and conditions every ~50 miles, with hazards flagged from 6 hours back to 12 hours ahead
 - **Interactive map** — dark-themed Leaflet map with a rendered polyline and clickable weather markers
 - **Trip log** — authenticated users can save trips and replay them from the sidebar
-- **User accounts** — register and log in to persist your trip history across sessions
+- **User accounts** — register and log in to persist your trip history across sessions, or delete the account and its trips
 
 ---
 
@@ -92,8 +92,9 @@ weathertrip/
 │   │   ├── TripInput.jsx       # Origin/destination form
 │   │   ├── TripMap.jsx         # Leaflet map with route + weather markers
 │   │   ├── TripLog.jsx         # Saved trip history sidebar
-│   │   ├── WeatherEvents.jsx   # Notable weather events panel (coming soon)
-│   │   └── authModal.jsx       # Login/register modal
+│   │   ├── DriveSheet.jsx      # Route summary and per-stop weather hazards
+│   │   ├── authModal.jsx       # Login/register modal
+│   │   └── DeleteAccountModal.jsx
 │   ├── services/
 │   │   ├── tripService.js      # API calls for trip planning + log
 │   │   ├── authService.js      # Login, register, token management
@@ -104,7 +105,7 @@ weathertrip/
 │   ├── controllers/
 │   │   ├── tripController.js   # Trip planning logic
 │   │   ├── logController.js    # Trip log retrieval
-│   │   └── authController.js  # Register/login
+│   │   └── authController.js   # Register/login/delete account
 │   ├── services/
 │   │   ├── geocodingService.js    # Nominatim geocoding
 │   │   ├── routingService.js      # OSRM route fetching

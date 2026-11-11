@@ -22,7 +22,6 @@ test.http
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
-AGENTS.md
 
 *.zip
 *.7z
