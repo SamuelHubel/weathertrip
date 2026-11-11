@@ -48,6 +48,8 @@ const getTrip = async (req, res) => {
 
 
         // if the user is logged in, save the trip to their trip history
+        // id of the saved trip, so the signed-in user can name it
+        let savedId;
         if (req.user && req.body.save !== false) {
             // trip object to be saved to database
             const tripData = new Trip({
@@ -77,6 +79,7 @@ const getTrip = async (req, res) => {
             // a failed save must not throw away the trip the user is waiting for
             try {
                 await tripData.save();
+                savedId = tripData._id;
                 console.log(`Saved ${tripData.start.location} to ${tripData.end.location} for user ${req.user.id}`);
             } catch (error) {
                 console.error('Trip save failed:', error.message);
@@ -108,7 +111,8 @@ const getTrip = async (req, res) => {
             },
             // [lat, lon] pairs sampled every ~50 miles; the browser fetches their weather
             // so Open-Meteo's per-IP limit is each user's, not this server's shared host IP
-            weatherPoints: route.weatherPoints
+            weatherPoints: route.weatherPoints,
+            id: savedId,
         });
 
     } 

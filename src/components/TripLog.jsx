@@ -11,7 +11,11 @@ function TripLog({ tripLog, onReplot }) {
       <div className="trip-log-list">
         {tripLog.map((entry) => (
           <button type="button" className="trip-chip" key={entry._id} onClick={() => onReplot(entry)}>
-            <span className="trip-chip-route">{[entry.start, ...(entry.stops ?? []), entry.end].map((place) => place.location).join(' → ')}</span>
+            {/* a named trip shows its name, with the route beneath */}
+            <span className="trip-chip-text">
+              {entry.name && <span className="trip-chip-name">{entry.name}</span>}
+              <span className="trip-chip-route">{[entry.start, ...(entry.stops ?? []), entry.end].map((place) => place.location).join(' → ')}</span>
+            </span>
             <span className="trip-chip-date">{new Date(entry.createdAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}</span>
           </button>
         ))}

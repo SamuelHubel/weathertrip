@@ -21,3 +21,26 @@ const getLoggedTrips = async (req, res) => {
 };
 
 export default getLoggedTrips;
+// names one of the signed-in user's own trips
+const renameTrip = async (req, res) => {
+    if (!req.user) return res.status(401).json({ error: 'Sign in to name trips' });
+    const { name } = req.body;
+    if (typeof name !== 'string') return res.status(400).json({ error: 'Name must be text' });
+    try {
+        // userId in the filter keeps users from renaming someone else's trip
+        const trip = await Trip.findOneAndUpdate(
+            { _id: req.params.id, userId: req.user.id },
+            { name: name.trim().slice(0, 60) },
+            { new: true, runValidators: true }
+        );
+        if (!trip) return res.status(404).json({ error: 'Trip not found' });
+        res.json(trip);
+    } catch (error) {
+        // a malformed id is just a trip that does not exist
+        if (error.name === 'CastError') return res.status(404).json({ error: 'Trip not found' });
+        console.error('Error renaming trip:', error);
+        res.status(500).json({ error: 'Failed to rename trip' });
+    }
+};
+
+export { renameTrip };
