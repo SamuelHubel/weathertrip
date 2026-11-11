@@ -110,3 +110,25 @@ test('a guest trip is saved after signing in', async () => {
     expect(posts[1].body).toEqual({ start: 'Denver', end: 'Boulder', stops: [] });
     expect(posts[1].auth).toBe('Bearer fresh');
 });
+
+test('replaying a saved trip sends its saved coordinates, not just names', async () => {
+    localStorage.setItem('wt_token', 'token');
+    const saved = {
+        _id: 't1',
+        createdAt: '2026-11-01T00:00:00Z',
+        start: { location: 'Denver, Colorado', lat: 39.74, lon: -104.99 },
+        stops: [{ location: 'Moab, Utah', lat: 38.57, lon: -109.55 }],
+        end: { location: 'Salt Lake City, Utah', lat: 40.76, lon: -111.89 },
+    };
+    let posted;
+    axios.defaults.adapter = async (config) => {
+        if (config.method === 'get') return respond(config, 200, [saved]);
+        posted = JSON.parse(config.data);
+        return respond(config, 200, { start: saved.start, end: saved.end, route: { geometry: [[39.74, -104.99]] } });
+    };
+    render(<App />);
+    fireEvent.click(await screen.findByRole('button', { name: /Denver, Colorado → Moab, Utah → Salt Lake City, Utah/ }));
+
+    await waitFor(() => expect(posted).toBeDefined());
+    expect(posted).toEqual({ start: saved.start, end: saved.end, stops: saved.stops, save: false });
+});

@@ -293,6 +293,38 @@ describe('getTrip', () => {
             });
     });
 
+    describe('replaying saved places', () => {
+        it('routes saved places by their coordinates without geocoding them', async () => {
+            getRoute.mockResolvedValueOnce(MOCK_ROUTE);
+            const start = { location: 'Denver, Colorado', lat: 39.74, lon: -104.99, _id: 'x' };
+            const stop = { location: 'Moab, Utah', lat: 38.57, lon: -109.55 };
+            const end = { location: 'Salt Lake City, Utah', lat: 40.76, lon: -111.89 };
+            const { req, res } = mockReqRes({ start, end, stops: [stop], save: false });
+            await getTrip(req, res);
+
+            expect(geocodingService.geocodeLocation).not.toHaveBeenCalled();
+            expect(getRoute).toHaveBeenCalledWith([
+                { lat: 39.74, lon: -104.99, name: 'Denver, Colorado' },
+                { lat: 38.57, lon: -109.55, name: 'Moab, Utah' },
+                { lat: 40.76, lon: -111.89, name: 'Salt Lake City, Utah' },
+            ]);
+            expect(res.status).not.toHaveBeenCalled();
+        });
+
+        it.each([
+            ['no coordinates', { location: 'Denver' }],
+            ['a latitude off the globe', { location: 'Denver', lat: 91, lon: 0 }],
+            ['coordinates as strings', { location: 'Denver', lat: '39', lon: '-105' }],
+            ['a name too long', { location: 'x'.repeat(201), lat: 39, lon: -105 }],
+        ])('returns 400 for a saved place with %s', async (_, start) => {
+            const { req, res } = mockReqRes({ start, end: 'Los Angeles' });
+            await getTrip(req, res);
+
+            expect(res.status).toHaveBeenCalledWith(400);
+            expect(getRoute).not.toHaveBeenCalled();
+        });
+    });
+
     // ── Unexpected errors ─────────────────────────────────────────────────────
 
     describe('unexpected errors', () => {
