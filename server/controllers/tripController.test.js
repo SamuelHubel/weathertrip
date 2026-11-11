@@ -24,6 +24,9 @@ vi.mock('../models/Trip.js', () => {
     return { default: MockTrip };
 });
 
+const userExists = vi.hoisted(() => vi.fn());
+vi.mock('../models/User.js', () => ({ default: { exists: userExists } }));
+
 
 // Helper to create a mock Express req/res pair
 const mockReqRes = (body = {}) => {
@@ -50,6 +53,7 @@ const MOCK_ROUTE = {
 describe('getTrip', () => {
     beforeEach(() => {
         vi.clearAllMocks();
+        userExists.mockResolvedValue({ _id: 'u1' });
     });
 
     // ── Validation ────────────────────────────────────────────────────────────
@@ -204,6 +208,24 @@ describe('getTrip', () => {
             const replay = mockReqRes({ start: 'New York', end: 'Los Angeles', save: false });
             await getTrip({ ...replay.req, user: { id: 'u1' } }, replay.res);
             expect(mockSave).not.toHaveBeenCalled();
+        });
+
+        it('does not save a trip for an account deleted while its token is still valid', async () => {
+            userExists.mockResolvedValue(null);
+            const { req, res } = mockReqRes({ start: 'New York', end: 'Los Angeles' });
+            await getTrip({ ...req, user: { id: 'gone' } }, res);
+
+            expect(mockSave).not.toHaveBeenCalled();
+            expect(res.json.mock.calls[0][0].route).toBeDefined();
+        });
+
+        it('still answers when the account check fails', async () => {
+            userExists.mockRejectedValue(new Error('db down'));
+            const { req, res } = mockReqRes({ start: 'New York', end: 'Los Angeles' });
+            await getTrip({ ...req, user: { id: 'u1' } }, res);
+
+            expect(res.status).not.toHaveBeenCalled();
+            expect(res.json.mock.calls[0][0].route).toBeDefined();
         });
 
         it("saves the geocoder's place names", async () => {

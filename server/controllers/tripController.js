@@ -4,6 +4,7 @@
 import geocodingService from '../services/geocodingService.js';
 import getRoute from '../services/routingService.js';
 import Trip from '../models/Trip.js';
+import User from '../models/User.js';
 
 // a place is a typed name, or a saved one ({ location, lat, lon }) sent back when replaying a trip
 const isPlace = (place) => typeof place === 'string'
@@ -84,7 +85,8 @@ const getTrip = async (req, res) => {
 
             // a failed save must not throw away the trip the user is waiting for
             try {
-                await tripData.save();
+                // a token outlives a deleted account (up to 7 days); don't leave trips nobody can delete
+                if (await User.exists({ _id: req.user.id })) await tripData.save();
             } catch (error) {
                 console.error('Trip save failed:', error.message);
             }
