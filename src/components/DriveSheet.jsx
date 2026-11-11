@@ -109,7 +109,8 @@ function DriveSheet({ trip, label, condition = 'clear', time, now = new Date(), 
     }
     drag.current = null;
   };
-  const events = useMemo(() => buildEvents(trip?.weather, Date.now()), [trip?.weather]);
+  // rebuilt as the clock ticks, so "in 3h" counts down
+  const events = useMemo(() => buildEvents(trip?.weather, now.getTime()), [trip?.weather, now]);
   const byPoint = useMemo(() => {
     const map = new Map();
     for (const e of events) map.set(e.index, [...(map.get(e.index) ?? []), e]);

@@ -207,6 +207,14 @@ describe('DriveSheet', () => {
       expect(summary).not.toHaveTextContent(/thunderstorm/i);
     });
 
+    it('counts hazard times down as the clock moves on', () => {
+      const trip = tripWith(calm, [at(3, storm)]);
+      const { rerender } = renderSheet(trip, { now: new Date() });
+      expect(timeline().getByText('in 3h')).toBeInTheDocument();
+      rerender(<DriveSheet trip={trip} label="" selected={null} onSelect={vi.fn()} now={new Date(Date.now() + 2 * HOUR)} />);
+      expect(timeline().getByText('in 1h')).toBeInTheDocument();
+    });
+
     it('reports a clear drive when every hour is calm', () => {
       renderSheet(tripWith(calm, [at(-3, calm), at(6, calm)]));
       expect(screen.getByText(/no notable weather along this route/i)).toBeInTheDocument();
