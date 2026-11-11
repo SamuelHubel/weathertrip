@@ -199,6 +199,14 @@ describe('DriveSheet', () => {
       expect(timeline().getByText('2h ago → in 3h')).toBeInTheDocument();
     });
 
+    it('leads the summary with a hazard still to come, not one already over', () => {
+      const heavySnow = { weathercode: 75, rain: 0, snowfall: 6, windspeed: 4 };
+      renderSheet(tripWith(calm, [at(-5, storm), at(2, heavySnow)]));
+      const summary = screen.getByRole('button', { name: /your drive/i });
+      expect(summary).toHaveTextContent(/heavy snow expected/i);
+      expect(summary).not.toHaveTextContent(/thunderstorm/i);
+    });
+
     it('reports a clear drive when every hour is calm', () => {
       renderSheet(tripWith(calm, [at(-3, calm), at(6, calm)]));
       expect(screen.getByText(/no notable weather along this route/i)).toBeInTheDocument();
