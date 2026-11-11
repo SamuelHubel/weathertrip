@@ -51,4 +51,8 @@ const renameTrip = (id, name) =>
     axios.patch(`${BASE_URL}/api/trip/${id}`, { name }, { headers: authHeader() });
 
 export default fetchTrip;
-export { fetchTripLog, renameTrip };
+// deletes one of the signed-in user's saved trips
+const deleteTrip = (id) =>
+    axios.delete(`${BASE_URL}/api/trip/${id}`, { headers: authHeader() });
+
+export { fetchTripLog, renameTrip, deleteTrip };

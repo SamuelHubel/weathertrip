@@ -13,6 +13,7 @@ import { getToken, logout } from './services/authService.js';
 import AuthModal from './components/authModal.jsx';
 import DeleteAccountModal from './components/DeleteAccountModal.jsx';
 import NameTripModal from './components/NameTripModal.jsx';
+import DeleteTripModal from './components/DeleteTripModal.jsx';
 
 function App() {
   const [trip, setTrip] = useState(null);
@@ -40,6 +41,8 @@ function App() {
   const [showDelete, setShowDelete] = useState(false);
   // id of a just-saved trip the signed-in user is being asked to name
   const [namingTripId, setNamingTripId] = useState(null);
+  // trip the user asked to delete, waiting on their confirmation
+  const [deletingTrip, setDeletingTrip] = useState(null);
 
   // check if a token already exists (returning user)
   useEffect(() => {
@@ -125,6 +128,7 @@ function App() {
     setUser(null);
     setTripLog([]);
     setNamingTripId(null);
+    setDeletingTrip(null);
     setTrip(null);
     setLabel('');
     setSelected(null);
@@ -160,7 +164,7 @@ function App() {
         </div>
         <div className="trip-card-body">
           <TripInput addTrip={addTrip} />
-          <TripLog tripLog={tripLog} onReplot={replotTrip} />
+          <TripLog tripLog={tripLog} onReplot={replotTrip} onDelete={setDeletingTrip} />
         </div>
       </section>
 
@@ -191,6 +195,17 @@ function App() {
             fetchTripLog().then(data => { if (data) setTripLog(data); });
           }}
           onDismiss={() => setNamingTripId(null)}
+        />
+      )}
+
+      {deletingTrip && (
+        <DeleteTripModal
+          trip={deletingTrip}
+          onDeleted={(deleted) => {
+            setDeletingTrip(null);
+            setTripLog(log => log.filter(t => t._id !== deleted._id));
+          }}
+          onDismiss={() => setDeletingTrip(null)}
         />
       )}
 

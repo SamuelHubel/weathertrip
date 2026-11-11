@@ -1,13 +1,14 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 
 import Trip from '../models/Trip.js';
-import getLoggedTrips, { renameTrip } from './logController.js';
+import getLoggedTrips, { renameTrip, deleteTrip } from './logController.js';
 
-vi.mock('../models/Trip.js', () => ({ default: { find: vi.fn(), findOneAndUpdate: vi.fn() } }));
+vi.mock('../models/Trip.js', () => ({ default: { find: vi.fn(), findOneAndUpdate: vi.fn(), findOneAndDelete: vi.fn() } }));
 
 const mockRes = () => ({
     status: vi.fn().mockReturnThis(),
     json: vi.fn().mockReturnThis(),
+    end: vi.fn().mockReturnThis(),
 });
 
 describe('getLoggedTrips', () => {
@@ -80,5 +81,31 @@ describe('renameTrip', () => {
         const res = mockRes();
         await renameTrip({ user: { id: 'u1' }, params: { id: 't1' }, body: {} }, res);
         expect(res.status).toHaveBeenCalledWith(400);
+    });
+});
+
+describe('deleteTrip', () => {
+    beforeEach(() => vi.clearAllMocks());
+
+    it('rejects a guest', async () => {
+        const res = mockRes();
+        await deleteTrip({ params: { id: 't1' } }, res);
+        expect(res.status).toHaveBeenCalledWith(401);
+        expect(Trip.findOneAndDelete).not.toHaveBeenCalled();
+    });
+
+    it("deletes only the user's own trip", async () => {
+        Trip.findOneAndDelete.mockResolvedValue({ _id: 't1' });
+        const res = mockRes();
+        await deleteTrip({ user: { id: 'u1' }, params: { id: 't1' } }, res);
+        expect(Trip.findOneAndDelete).toHaveBeenCalledWith({ _id: 't1', userId: 'u1' });
+        expect(res.status).toHaveBeenCalledWith(204);
+    });
+
+    it("returns 404 for a trip that is missing or someone else's", async () => {
+        Trip.findOneAndDelete.mockResolvedValue(null);
+        const res = mockRes();
+        await deleteTrip({ user: { id: 'u1' }, params: { id: 't2' } }, res);
+        expect(res.status).toHaveBeenCalledWith(404);
     });
 });
