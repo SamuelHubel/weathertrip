@@ -7,6 +7,8 @@ import authRouter from './routes/authRoutes.js';
 
 
 dotenv.config();
+// without it sign-up saves the user, then fails to sign a token, leaving an account the user can't reach
+if (!process.env.JWT_SECRET) throw new Error('JWT_SECRET is not set');
 
 
 const allowedOrigins = [
