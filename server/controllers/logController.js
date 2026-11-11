@@ -43,4 +43,19 @@ const renameTrip = async (req, res) => {
     }
 };
 
-export { renameTrip };
+// deletes one of the signed-in user's own trips
+const deleteTrip = async (req, res) => {
+    if (!req.user) return res.status(401).json({ error: 'Sign in to delete trips' });
+    try {
+        // userId in the filter keeps users from deleting someone else's trip
+        const trip = await Trip.findOneAndDelete({ _id: req.params.id, userId: req.user.id });
+        if (!trip) return res.status(404).json({ error: 'Trip not found' });
+        res.status(204).end();
+    } catch (error) {
+        if (error.name === 'CastError') return res.status(404).json({ error: 'Trip not found' });
+        console.error('Error deleting trip:', error);
+        res.status(500).json({ error: 'Failed to delete trip' });
+    }
+};
+
+export { renameTrip, deleteTrip };

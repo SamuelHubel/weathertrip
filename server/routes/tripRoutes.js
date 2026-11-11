@@ -1,7 +1,7 @@
 import express from 'express';
 import rateLimit from 'express-rate-limit';
 import  getTrip  from '../controllers/tripController.js';
-import getLoggedTrips, { renameTrip } from '../controllers/logController.js';
+import getLoggedTrips, { renameTrip, deleteTrip } from '../controllers/logController.js';
 import optionalAuth from '../middleware/authMiddleware.js';
 
 const tripRouter = express.Router();
@@ -19,6 +19,8 @@ tripRouter.post('/', tripReadLimiter, optionalAuth, getTrip);
 tripRouter.get('/', tripReadLimiter, optionalAuth, getLoggedTrips);
 
 tripRouter.patch('/:id', tripReadLimiter, optionalAuth, renameTrip);
+
+tripRouter.delete('/:id', tripReadLimiter, optionalAuth, deleteTrip);
 
 
 

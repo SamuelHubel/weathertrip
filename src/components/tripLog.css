@@ -8,25 +8,49 @@
   color: var(--tile-soft, var(--text-soft));
 }
 
-.trip-log-list { display: flex; flex-wrap: wrap; gap: 6px; }
+.trip-log-list { display: flex; flex-direction: column; gap: 6px; }
 
 .trip-chip {
-  display: inline-flex;
-  align-items: baseline;
-  gap: 8px;
-  max-width: 100%;
-  padding: 7px 12px;
+  display: flex;
+  align-items: center;
   border: 1px solid var(--line);
   border-radius: 999px;
   background: var(--glass);
   color: var(--text);
-  font-size: 13px;
-  font-weight: 600;
-  text-align: left;
   transition: background 150ms ease, border-color 150ms ease;
 }
 .trip-chip:hover { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 14%, var(--glass)); }
 
+.trip-chip-open {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  min-width: 0;
+  padding: 7px 4px 7px 12px;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  text-align: left;
+  cursor: pointer;
+}
+.trip-chip-delete {
+  flex: none;
+  margin-left: auto;
+  padding: 4px 10px 4px 6px;
+  border: 0;
+  background: none;
+  color: var(--text-soft);
+  font-size: 16px;
+  line-height: 1;
+  cursor: pointer;
+}
+.trip-chip-delete:hover,
+.trip-chip-delete:focus-visible { color: var(--danger); }
 .trip-chip-text { display: flex; flex-direction: column; min-width: 0; }
 .trip-chip-name,
 .trip-chip-route { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
