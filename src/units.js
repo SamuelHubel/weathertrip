@@ -5,6 +5,8 @@ const missing = (v) => v == null || Number.isNaN(Number(v));
 export const toF = (c) => (missing(c) ? '—' : `${Math.round(Number(c) * 9 / 5 + 32)}°F`);
 export const toMph = (ms) => (missing(ms) ? '—' : `${Math.round(Number(ms) * 2.23694)} mph`);
 export const mmToIn = (mm) => (missing(mm) ? '—' : `${(Number(mm) / 25.4).toFixed(2)} in`);
+// 8-point compass name for a bearing in degrees; null when there is no reading
+export const compass = (deg) => (missing(deg) ? null : ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW'][Math.round(Number(deg) / 45) % 8]);
 export const cmToIn = (cm) => (missing(cm) ? '—' : `${(Number(cm) / 2.54).toFixed(1)} in`);
 
 export function formatDistance(meters) {

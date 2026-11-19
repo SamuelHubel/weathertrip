@@ -1,11 +1,12 @@
 import React, { useMemo, useRef, useState } from 'react';
 import './driveSheet.css';
 import PointName from './PointName';
-import { weatherIcons, readConditions, isHighSeverity, conditionOf, timeOfDay } from '../sky';
-import { toF, toMph, mmToIn, cmToIn, formatDistance, formatDuration } from '../units';
+import { weatherIcons, readConditions, isHighSeverity, conditionOf, timeOfDay, INCIDENTS } from '../sky';
+import { toF, toMph, mmToIn, cmToIn, compass, formatDistance, formatDuration } from '../units';
 
-function getHeadline({ rain, snow, isThunder }) {
+function getHeadline({ rain, snow, isThunder, isFreezing }) {
   if (isThunder) return 'Thunderstorm risk';
+  if (isFreezing) return 'Icy roads possible';
   if (snow >= 5) return 'Heavy snow expected';
   if (rain >= 10) return 'Heavy rain expected';
   if (snow >= 1) return 'Snow showers possible';
@@ -13,8 +14,9 @@ function getHeadline({ rain, snow, isThunder }) {
   return 'Strong winds along route';
 }
 
-function getIcon({ rain, snow, isThunder }) {
+function getIcon({ rain, snow, isThunder, isFreezing }) {
   if (isThunder) return '⛈️';
+  if (isFreezing) return '🧊';
   if (snow > 0) return '🌨️';
   if (rain > 0) return '🌧️';
   return '💨';
@@ -32,11 +34,34 @@ function relHours(ms, now) {
   return hours > 0 ? `in ${hours}h` : `${-hours}h ago`;
 }
 
-function buildEvents(weatherPoints, now) {
+// a live road incident, listed under the nearest weather point (points are ~80 km apart, so flat lat/lon distance will do)
+function incidentEvent(incident, weatherPoints, now) {
+  let index = -1;
+  let best = Infinity;
+  weatherPoints.forEach((p, i) => {
+    if (!p?.location) return;
+    const d = (p.location.latitude - incident.lat) ** 2 + (p.location.longitude - incident.lon) ** 2;
+    if (d < best) { best = d; index = i; }
+  });
+  if (index < 0) return [];
+  const [icon, headline] = INCIDENTS[incident.category] ?? ['⚠️', 'Road incident'];
+  return [{
+    index,
+    from: now,
+    to: now,
+    icon,
+    headline,
+    timeText: 'now',
+    description: [incident.description, incident.road, incident.delay > 0 && `Delay ${Math.round(incident.delay / 60)} min`].filter(Boolean).join(' · '),
+  }];
+}
+
+function buildEvents(weatherPoints, incidents, now) {
   if (!Array.isArray(weatherPoints)) {
     return [];
   }
 
+  const roadEvents = (incidents ?? []).flatMap((incident) => incidentEvent(incident, weatherPoints, now));
   return weatherPoints.flatMap((point, index) => {
     if (!point?.location) {
       return [];
@@ -71,7 +96,7 @@ function buildEvents(weatherPoints, now) {
         description: `${toF(entry.temperature ?? point.temperature)} · Wind ${toMph(wind)} · Rain ${mmToIn(rain)} · Snow ${cmToIn(snow)}`,
       };
     });
-  }).sort((a, b) => a.from - b.from);
+  }).concat(roadEvents).sort((a, b) => a.from - b.from);
 }
 
 const pointName = (point, i) => (
@@ -110,7 +135,7 @@ function DriveSheet({ trip, label, condition = 'clear', time, now = new Date(), 
     drag.current = null;
   };
   // rebuilt as the clock ticks, so "in 3h" counts down
-  const events = useMemo(() => buildEvents(trip?.weather, now.getTime()), [trip?.weather, now]);
+  const events = useMemo(() => buildEvents(trip?.weather, trip?.incidents, now.getTime()), [trip?.weather, trip?.incidents, now]);
   const byPoint = useMemo(() => {
     const map = new Map();
     for (const e of events) map.set(e.index, [...(map.get(e.index) ?? []), e]);
@@ -177,9 +202,19 @@ function DriveSheet({ trip, label, condition = 'clear', time, now = new Date(), 
                   <span className="stop-icon" aria-hidden="true">{weatherIcons[point.weathercode] ?? '❓'}</span>
                   <span className="stop-main">
                     <span className="stop-name">{pointName(point, i)}</span>
-                    <span className="stop-detail">Wind {toMph(point.windspeed)}</span>
-                    {hazards.map((h) => (
-                      <span className="stop-hazard" key={h.headline}>
+                    <span className="stop-detail">
+                      Wind {toMph(point.windspeed)}
+                      {compass(point.winddirection) && (
+                        <>
+                          {' '}
+                          {/* Open-Meteo gives where the wind comes FROM; +180 points the arrow downwind, as on the map */}
+                          <span className="wind-dir" aria-hidden="true" style={{ transform: `rotate(${(point.winddirection + 180) % 360}deg)` }}>↑</span>
+                          {' '}from {compass(point.winddirection)}
+                        </>
+                      )}
+                    </span>
+                    {hazards.map((h, j) => (
+                      <span className="stop-hazard" key={`${h.headline}-${j}`}>
                         <span className="stop-hazard-title"><span aria-hidden="true">⚠ </span><strong>{h.headline}</strong> <span className="stop-when">{h.timeText}</span></span>
                         <span className="stop-hazard-detail">{h.description}</span>
                       </span>

@@ -85,6 +85,13 @@ describe('DriveSheet', () => {
     expect(timeline().getByText('Wind 34 mph')).toBeInTheDocument();
   });
 
+  it('shows wind direction as a downwind arrow and a compass name', () => {
+    renderSheet({ ...weatherTrip, weather: [{ ...weatherTrip.weather[0], winddirection: 270 }] });
+    const detail = timeline().getByText(/from W/);
+    expect(detail).toHaveTextContent('Wind 34 mph ↑ from W');
+    expect(detail.querySelector('.wind-dir')).toHaveStyle({ transform: 'rotate(90deg)' });
+  });
+
   it('does not report an all-clear when the trip has no weather data', () => {
     renderSheet({ route: { geometry: [[1, 2]] } });
     expect(screen.queryByText(/No notable weather/i)).not.toBeInTheDocument();
@@ -97,6 +104,31 @@ describe('DriveSheet', () => {
       weather: [{ location: { latitude: 39.74, longitude: -104.99 }, temperature: 18, windspeed: 3, rain: 0, snowfall: 0, weathercode: 0 }],
     });
     expect(screen.getByText(/no notable weather along this route/i)).toBeInTheDocument();
+  });
+
+  it('lists a road incident under the nearest stop', () => {
+    const clear = { temperature: 18, windspeed: 3, rain: 0, snowfall: 0, weathercode: 0 };
+    renderSheet({
+      ...weatherTrip,
+      weather: [
+        { ...clear, location: { latitude: 39.74, longitude: -104.99 } },
+        { ...clear, location: { latitude: 40.76, longitude: -111.89 } },
+      ],
+      incidents: [{ lat: 40.7, lon: -111.8, category: 8, description: 'Closed', road: 'I-80', delay: 600 }],
+    });
+    const stops = timeline().getAllByRole('button');
+    expect(within(stops[0]).queryByText('Road closed')).not.toBeInTheDocument();
+    expect(within(stops[1]).getByText('Road closed')).toBeInTheDocument();
+    expect(within(stops[1]).getByText('Closed · I-80 · Delay 10 min')).toBeInTheDocument();
+    expect(screen.queryByText(/no notable weather/i)).not.toBeInTheDocument();
+  });
+
+  it('flags freezing rain as icy roads', () => {
+    renderSheet({
+      ...weatherTrip,
+      weather: [{ location: { latitude: 39.74, longitude: -104.99 }, temperature: -1, windspeed: 3, rain: 1, snowfall: 0, weathercode: 66 }],
+    });
+    expect(timeline().getByText('Icy roads possible')).toBeInTheDocument();
   });
 
   it('does not flag medium-severity conditions', () => {

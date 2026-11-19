@@ -3,16 +3,14 @@ import './tripMap.css';
 import PointName from './PointName';
 import { MapContainer, TileLayer, Polyline, Marker, Popup, ZoomControl, useMap } from 'react-leaflet';
 import L from 'leaflet';
-import { weatherIcons } from '../sky';
-import { toF, toMph, mmToIn, cmToIn } from '../units';
+import { weatherIcons, INCIDENTS } from '../sky';
+import { toF, toMph, mmToIn, cmToIn, compass } from '../units';
 
 const startIcon = L.divIcon({ className: 'pin pin-start', iconSize: [16, 16] });
 const endIcon = L.divIcon({ className: 'pin pin-end', iconSize: [16, 16] });
 const stopIcon = L.divIcon({ className: 'pin pin-stop', iconSize: [14, 14] });
 
-// TomTom iconCategory → marker
-const INCIDENT_ICONS = { 1: '💥', 7: '🚧', 8: '⛔', 9: '🚧', 5: '🧊', 11: '🌊' };
-const incidentIcon = (category) => L.divIcon({ className: 'incident-icon', iconSize: [26, 26], html: INCIDENT_ICONS[category] ?? '⚠️' });
+const incidentIcon = (category) => L.divIcon({ className: 'incident-icon', iconSize: [26, 26], html: INCIDENTS[category]?.[0] ?? '⚠️' });
 
 const PHONE = '(max-width: 700px)';
 
@@ -91,10 +89,13 @@ function TripMap({ trip, time, selected, onSelect }) {
             key={idx}
             position={[point.location.latitude, point.location.longitude]}
             eventHandlers={{ click: () => onSelect?.(idx) }}
+            title={compass(point.winddirection) && `Wind from ${compass(point.winddirection)}, ${toMph(point.windspeed)}`}
             icon={L.divIcon({
               className: `weather-icon${selected === idx ? ' selected' : ''}`,
               iconSize: [34, 34],
-              html: weatherIcons[point.weathercode] || '❓',
+              html: (weatherIcons[point.weathercode] || '❓') + (point.winddirection == null ? ''
+                // Open-Meteo gives where the wind comes FROM; +180 points the arrow downwind
+                : `<span class="wind-arrow" style="transform:rotate(${(point.winddirection + 180) % 360}deg)"><b>↑</b></span>`),
             })}
           >
             <Popup>
@@ -105,7 +106,7 @@ function TripMap({ trip, time, selected, onSelect }) {
                   fallback={`Point ${idx + 1}`}
                 />
               </strong></div>
-              <div>{toF(point.temperature)} · Wind {toMph(point.windspeed)}</div>
+              <div>{toF(point.temperature)} · Wind {toMph(point.windspeed)}{compass(point.winddirection) && ` from ${compass(point.winddirection)}`}</div>
               <div>Rain {mmToIn(point.rain)} · Snow {cmToIn(point.snowfall)}</div>
             </Popup>
           </Marker>
