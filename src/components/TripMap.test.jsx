@@ -127,3 +127,17 @@ describe('TripMap — weather points', () => {
     vi.unstubAllGlobals();
   });
 });
+
+describe('TripMap — traffic incidents', () => {
+  it('renders a marker and popup for each incident', () => {
+    const incidents = [
+      { lat: 40, lon: -105, category: 8, description: 'Road closed', road: 'I-70', delay: 600 },
+      { lat: 40.5, lon: -108, category: 1, description: 'Accident', road: '', delay: 0 },
+    ];
+    render(<TripMap trip={{ ...mockTrip, incidents }} />);
+    expect(screen.getByText('Road closed')).toBeInTheDocument();
+    expect(screen.getByText('I-70')).toBeInTheDocument();
+    expect(screen.getByText('Delay 10 min')).toBeInTheDocument();
+    expect(screen.getByText('Accident')).toBeInTheDocument();
+  });
+});

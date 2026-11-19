@@ -21,7 +21,8 @@
 .pin-end { background: #e0464b; }
 .pin-stop { background: #f0a630; }
 
-.weather-icon {
+.weather-icon,
+.incident-icon {
   display: grid;
   place-items: center;
   font-size: 18px;
