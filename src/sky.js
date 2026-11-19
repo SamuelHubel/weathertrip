@@ -19,12 +19,19 @@ export function readConditions(point) {
     snow: Number(point.snowfall ?? 0),
     wind: Number(point.windspeed ?? 0),
     isThunder: [95, 96, 99].includes(Number(point.weathercode)),
+    isFreezing: [56, 57, 66, 67].includes(Number(point.weathercode)),
   };
 }
 
-export function isHighSeverity({ rain, snow, wind, isThunder }) {
-  return isThunder || rain >= 10 || snow >= 5 || wind >= 18;
+export function isHighSeverity({ rain, snow, wind, isThunder, isFreezing }) {
+  return isThunder || isFreezing || rain >= 10 || snow >= 5 || wind >= 18;
 }
+
+// TomTom incident iconCategory -> [icon, label]; categories kept by server/services/incidentService.js
+export const INCIDENTS = {
+  1: ['💥', 'Crash'], 3: ['⚠️', 'Dangerous conditions'], 5: ['🧊', 'Icy road'], 7: ['🚧', 'Lane closed'],
+  8: ['⛔', 'Road closed'], 9: ['🚧', 'Roadworks'], 11: ['🌊', 'Flooding'],
+};
 
 const RANK = ['clear', 'cloudy', 'rain', 'snow', 'storm'];
 const SNOW_CODES = [66, 67, 71, 73, 75, 77, 85, 86];

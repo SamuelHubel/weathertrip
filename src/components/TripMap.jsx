@@ -3,16 +3,14 @@ import './tripMap.css';
 import PointName from './PointName';
 import { MapContainer, TileLayer, Polyline, Marker, Popup, ZoomControl, useMap } from 'react-leaflet';
 import L from 'leaflet';
-import { weatherIcons } from '../sky';
+import { weatherIcons, INCIDENTS } from '../sky';
 import { toF, toMph, mmToIn, cmToIn, compass } from '../units';
 
 const startIcon = L.divIcon({ className: 'pin pin-start', iconSize: [16, 16] });
 const endIcon = L.divIcon({ className: 'pin pin-end', iconSize: [16, 16] });
 const stopIcon = L.divIcon({ className: 'pin pin-stop', iconSize: [14, 14] });
 
-// TomTom iconCategory → marker
-const INCIDENT_ICONS = { 1: '💥', 7: '🚧', 8: '⛔', 9: '🚧', 5: '🧊', 11: '🌊' };
-const incidentIcon = (category) => L.divIcon({ className: 'incident-icon', iconSize: [26, 26], html: INCIDENT_ICONS[category] ?? '⚠️' });
+const incidentIcon = (category) => L.divIcon({ className: 'incident-icon', iconSize: [26, 26], html: INCIDENTS[category]?.[0] ?? '⚠️' });
 
 const PHONE = '(max-width: 700px)';
 
