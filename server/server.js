@@ -12,8 +12,9 @@ if (!process.env.JWT_SECRET) throw new Error('JWT_SECRET is not set');
 
 
 const allowedOrigins = [
-  process.env.FRONTEND_URL,         
-  'http://localhost:3000',           
+  // comma-separated, e.g. "https://www.weathertrip.xyz,https://weathertrip.xyz"
+  ...(process.env.FRONTEND_URL || '').split(',').map(s => s.trim()),
+  'http://localhost:3000',
 ].filter(Boolean);
 
 
