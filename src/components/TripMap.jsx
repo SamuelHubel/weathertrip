@@ -10,6 +10,10 @@ const startIcon = L.divIcon({ className: 'pin pin-start', iconSize: [16, 16] });
 const endIcon = L.divIcon({ className: 'pin pin-end', iconSize: [16, 16] });
 const stopIcon = L.divIcon({ className: 'pin pin-stop', iconSize: [14, 14] });
 
+// TomTom iconCategory → marker
+const INCIDENT_ICONS = { 1: '💥', 7: '🚧', 8: '⛔', 9: '🚧', 5: '🧊', 11: '🌊' };
+const incidentIcon = (category) => L.divIcon({ className: 'incident-icon', iconSize: [26, 26], html: INCIDENT_ICONS[category] ?? '⚠️' });
+
 const PHONE = '(max-width: 700px)';
 
 // frame a newly plotted route clear of the floating panels
@@ -71,6 +75,16 @@ function TripMap({ trip, time, selected, onSelect }) {
             <Popup>Destination</Popup>
           </Marker>
         )}
+
+        {trip?.incidents?.map((incident, idx) => (
+          <Marker key={`incident-${idx}`} position={[incident.lat, incident.lon]} icon={incidentIcon(incident.category)}>
+            <Popup>
+              <div><strong>{incident.description || 'Traffic incident'}</strong></div>
+              {incident.road && <div>{incident.road}</div>}
+              {incident.delay > 0 && <div>Delay {Math.round(incident.delay / 60)} min</div>}
+            </Popup>
+          </Marker>
+        ))}
 
         {trip?.weather?.map((point, idx) => point?.location && (
           <Marker

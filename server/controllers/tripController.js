@@ -3,6 +3,7 @@
 // includes start and end locations and route info from OSRM API
 import geocodingService from '../services/geocodingService.js';
 import getRoute from '../services/routingService.js';
+import getIncidents from '../services/incidentService.js';
 import Trip from '../models/Trip.js';
 import User from '../models/User.js';
 
@@ -54,6 +55,8 @@ const getTrip = async (req, res) => {
         if (!route) {
             return res.status(400).json({ error: 'No route found' });
         }
+        // live crashes, closures and roadworks on the route; null if TomTom is unavailable, never fails the trip
+        const incidents = await getIncidents(route.geometry);
 
 
         // if the user is logged in, save the trip to their trip history
@@ -121,6 +124,7 @@ const getTrip = async (req, res) => {
             // [lat, lon] pairs sampled every ~50 miles; the browser fetches their weather
             // so Open-Meteo's per-IP limit is each user's, not this server's shared host IP
             weatherPoints: route.weatherPoints,
+            incidents,
             id: savedId,
         });
 

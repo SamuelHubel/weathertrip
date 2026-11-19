@@ -6,7 +6,8 @@ Road-trip weather app: enter a start, optional stops (up to 8) and an end; see t
 
 1. The browser POSTs place names to `server/` (`/api/trip`).
 2. The server geocodes them (Nominatim, `server/services/geocodingService.js`), gets the route (OSRM, `routingService.js`)
-   and samples a weather point every 80 km (`routeSamplingService.js`). Signed-in trips are saved to MongoDB.
+   and samples a weather point every 80 km (`routeSamplingService.js`). Live crashes, closures and roadworks on the
+   route come from TomTom (`incidentService.js`, needs `TOMTOM_KEY`; on the server so the key stays secret). Signed-in trips are saved to MongoDB.
 3. The browser fetches the weather for those points from Open-Meteo (`src/services/weatherService.js`) and renders
    the map (`TripMap.jsx`) and the hazard timeline (`DriveSheet.jsx`).
 

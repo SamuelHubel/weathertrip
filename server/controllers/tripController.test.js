@@ -2,6 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 
 import geocodingService from '../services/geocodingService.js';
 import getRoute from '../services/routingService.js';
+import getIncidents from '../services/incidentService.js';
 import getTrip from './tripController.js';
 // Mock dependencies before importing the controller
 const mockSave = vi.hoisted(() => vi.fn().mockResolvedValue({}));
@@ -14,6 +15,11 @@ vi.mock('../services/geocodingService.js', () => ({
 vi.mock('../services/routingService.js', () => ({
     default: vi.fn(),
 }));
+
+vi.mock('../services/incidentService.js', () => ({
+    default: vi.fn(),
+}));
+const MOCK_INCIDENTS = [{ lat: 39, lon: -90, category: 8, description: 'Closed', road: 'I-70', delay: 0 }];
 
 // mock database model to prevent actual database interactions during tests
 vi.mock('../models/Trip.js', () => {
@@ -174,6 +180,7 @@ describe('getTrip', () => {
                 .mockResolvedValueOnce(MOCK_START_LOCATION)
                 .mockResolvedValueOnce(MOCK_END_LOCATION);
             getRoute.mockResolvedValueOnce(MOCK_ROUTE);
+            getIncidents.mockResolvedValue(MOCK_INCIDENTS);
         });
 
         it('responds with correctly shaped trip data', async () => {
@@ -192,7 +199,17 @@ describe('getTrip', () => {
                 },
                 // points the browser fetches weather for
                 weatherPoints: MOCK_ROUTE.weatherPoints,
+                incidents: MOCK_INCIDENTS,
             });
+            expect(getIncidents).toHaveBeenCalledWith(MOCK_ROUTE.geometry);
+        });
+
+        it('still answers when incidents could not be loaded', async () => {
+            getIncidents.mockResolvedValue(null);
+            const { req, res } = mockReqRes({ start: 'New York', end: 'Los Angeles' });
+            await getTrip(req, res);
+            expect(res.status).not.toHaveBeenCalled();
+            expect(res.json.mock.calls[0][0].incidents).toBeNull();
         });
 
         it('saves a signed-in trip, but not a replay', async () => {
