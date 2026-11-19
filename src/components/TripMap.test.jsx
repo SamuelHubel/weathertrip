@@ -11,7 +11,7 @@ vi.mock('react-leaflet', () => ({
   TileLayer: ({ url }) => <div data-testid="tiles" data-url={url} />,
   ZoomControl: () => null,
   Polyline: ({ positions }) => <div data-testid="polyline" data-positions={JSON.stringify(positions)} />,
-  Marker: ({ children, eventHandlers }) => <div data-testid="marker" onClick={eventHandlers?.click}>{children}</div>,
+  Marker: ({ children, eventHandlers, icon }) => <div data-testid="marker" data-icon={icon?.options?.html} onClick={eventHandlers?.click}>{children}</div>,
   Popup: ({ children }) => <div>{children}</div>,
   useMap: () => map,
 }));
@@ -108,6 +108,17 @@ describe('TripMap — weather points', () => {
     vi.stubGlobal('fetch', vi.fn().mockRejectedValue(new Error('offline')));
     render(<TripMap trip={tripWithPoint(40.2, -106.6)} />);
     expect(screen.getByText('50°F · Wind 11 mph')).toBeInTheDocument();
+    vi.unstubAllGlobals();
+  });
+
+  it('points the wind arrow downwind, and hides it with no direction', () => {
+    vi.stubGlobal('fetch', vi.fn().mockRejectedValue(new Error('offline')));
+    const trip = tripWithPoint(40.25, -106.65);
+    trip.weather.push({ ...trip.weather[0], winddirection: 90 });
+    render(<TripMap trip={trip} />);
+    const [calm, east] = screen.getAllByTestId('marker').slice(2).map((m) => m.dataset.icon);
+    expect(calm).not.toContain('wind-arrow');
+    expect(east).toContain('rotate(270deg)');
     vi.unstubAllGlobals();
   });
 

@@ -32,6 +32,20 @@
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
   transition: transform 150ms ease, border-color 150ms ease;
 }
+.weather-icon { position: relative; }
+/* ring wider than the pin; rotating it walks the arrow around the edge */
+.wind-arrow { position: absolute; inset: -16px; pointer-events: none; }
+.wind-arrow b {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  translate: -50% 0;
+  font-size: 20px;
+  -webkit-text-stroke: 1.5px currentColor; /* thickens the glyph; font-weight barely changes arrows */
+  line-height: 1;
+  color: var(--accent);
+  text-shadow: 0 0 3px rgba(0, 0, 0, 0.6);
+}
 .weather-icon:hover { transform: scale(1.1); }
 .weather-icon.selected { border-color: var(--accent); transform: scale(1.25); z-index: 1000 !important; }
 

@@ -94,7 +94,9 @@ function TripMap({ trip, time, selected, onSelect }) {
             icon={L.divIcon({
               className: `weather-icon${selected === idx ? ' selected' : ''}`,
               iconSize: [34, 34],
-              html: weatherIcons[point.weathercode] || '❓',
+              html: (weatherIcons[point.weathercode] || '❓') + (point.winddirection == null ? ''
+                // Open-Meteo gives where the wind comes FROM; +180 points the arrow downwind
+                : `<span class="wind-arrow" style="transform:rotate(${(point.winddirection + 180) % 360}deg)"><b>↑</b></span>`),
             })}
           >
             <Popup>

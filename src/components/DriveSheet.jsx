@@ -2,7 +2,7 @@ import React, { useMemo, useRef, useState } from 'react';
 import './driveSheet.css';
 import PointName from './PointName';
 import { weatherIcons, readConditions, isHighSeverity, conditionOf, timeOfDay } from '../sky';
-import { toF, toMph, mmToIn, cmToIn, formatDistance, formatDuration } from '../units';
+import { toF, toMph, mmToIn, cmToIn, compass, formatDistance, formatDuration } from '../units';
 
 function getHeadline({ rain, snow, isThunder }) {
   if (isThunder) return 'Thunderstorm risk';
@@ -177,7 +177,17 @@ function DriveSheet({ trip, label, condition = 'clear', time, now = new Date(), 
                   <span className="stop-icon" aria-hidden="true">{weatherIcons[point.weathercode] ?? '❓'}</span>
                   <span className="stop-main">
                     <span className="stop-name">{pointName(point, i)}</span>
-                    <span className="stop-detail">Wind {toMph(point.windspeed)}</span>
+                    <span className="stop-detail">
+                      Wind {toMph(point.windspeed)}
+                      {compass(point.winddirection) && (
+                        <>
+                          {' '}
+                          {/* Open-Meteo gives where the wind comes FROM; +180 points the arrow downwind, as on the map */}
+                          <span className="wind-dir" aria-hidden="true" style={{ transform: `rotate(${(point.winddirection + 180) % 360}deg)` }}>↑</span>
+                          {' '}from {compass(point.winddirection)}
+                        </>
+                      )}
+                    </span>
                     {hazards.map((h) => (
                       <span className="stop-hazard" key={h.headline}>
                         <span className="stop-hazard-title"><span aria-hidden="true">⚠ </span><strong>{h.headline}</strong> <span className="stop-when">{h.timeText}</span></span>

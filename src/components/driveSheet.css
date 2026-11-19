@@ -112,6 +112,7 @@
 .stop-main { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
 .stop-name { font-weight: 800; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .stop-detail { font-size: 13px; color: var(--tile-soft); font-weight: 600; }
+.wind-dir { display: inline-block; font-size: 18px; line-height: 1; vertical-align: -2px; -webkit-text-stroke: 1.2px currentColor; }
 
 .stop-hazard {
   margin-top: 8px;

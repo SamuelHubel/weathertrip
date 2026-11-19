@@ -85,6 +85,13 @@ describe('DriveSheet', () => {
     expect(timeline().getByText('Wind 34 mph')).toBeInTheDocument();
   });
 
+  it('shows wind direction as a downwind arrow and a compass name', () => {
+    renderSheet({ ...weatherTrip, weather: [{ ...weatherTrip.weather[0], winddirection: 270 }] });
+    const detail = timeline().getByText(/from W/);
+    expect(detail).toHaveTextContent('Wind 34 mph ↑ from W');
+    expect(detail.querySelector('.wind-dir')).toHaveStyle({ transform: 'rotate(90deg)' });
+  });
+
   it('does not report an all-clear when the trip has no weather data', () => {
     renderSheet({ route: { geometry: [[1, 2]] } });
     expect(screen.queryByText(/No notable weather/i)).not.toBeInTheDocument();

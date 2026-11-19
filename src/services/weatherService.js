@@ -25,7 +25,7 @@ const getWeather = async (points) => {
                 // 10 or fewer variables, so each point counts as one call against the limit
                 // no "current" block: the hourly entry for this hour stands in for it
                 // hourly window so the client can flag severe weather from the recent past and near future
-                ...['temperature_2m', 'weather_code', 'rain', 'showers', 'snowfall', 'wind_speed_10m'].map((field) => ['hourly', field]),
+                ...['temperature_2m', 'weather_code', 'rain', 'showers', 'snowfall', 'wind_speed_10m', 'wind_direction_10m'].map((field) => ['hourly', field]),
                 ['past_hours', '6'],
                 ['forecast_hours', '12'],
                 // today's sunrise/sunset at each point, so the client can draw that spot's sky
@@ -53,6 +53,7 @@ const getWeather = async (points) => {
                     rain,
                     snowfall,
                     windspeed: point.hourly.wind_speed_10m?.[i],
+                    winddirection: point.hourly.wind_direction_10m?.[i],
                 };
             });
             // the hour we are in now: the last one that has started
@@ -63,6 +64,7 @@ const getWeather = async (points) => {
                 location: { latitude: point.latitude, longitude: point.longitude },
                 temperature: current?.temperature,
                 windspeed: current?.windspeed,
+                winddirection: current?.winddirection,
                 weathercode: current?.weathercode,
                 precipitation: current?.precipitation,
                 rain: current?.rain,
