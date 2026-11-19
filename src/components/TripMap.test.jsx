@@ -11,7 +11,7 @@ vi.mock('react-leaflet', () => ({
   TileLayer: ({ url }) => <div data-testid="tiles" data-url={url} />,
   ZoomControl: () => null,
   Polyline: ({ positions }) => <div data-testid="polyline" data-positions={JSON.stringify(positions)} />,
-  Marker: ({ children, eventHandlers, icon }) => <div data-testid="marker" data-icon={icon?.options?.html} onClick={eventHandlers?.click}>{children}</div>,
+  Marker: ({ children, eventHandlers, icon, title }) => <div data-testid="marker" title={title} data-icon={icon?.options?.html} onClick={eventHandlers?.click}>{children}</div>,
   Popup: ({ children }) => <div>{children}</div>,
   useMap: () => map,
 }));
@@ -116,9 +116,12 @@ describe('TripMap — weather points', () => {
     const trip = tripWithPoint(40.25, -106.65);
     trip.weather.push({ ...trip.weather[0], winddirection: 90 });
     render(<TripMap trip={trip} />);
-    const [calm, east] = screen.getAllByTestId('marker').slice(2).map((m) => m.dataset.icon);
-    expect(calm).not.toContain('wind-arrow');
-    expect(east).toContain('rotate(270deg)');
+    const [calm, east] = screen.getAllByTestId('marker').slice(2);
+    expect(calm.dataset.icon).not.toContain('wind-arrow');
+    expect(calm).not.toHaveAttribute('title');
+    expect(east.dataset.icon).toContain('rotate(270deg)');
+    expect(east).toHaveAttribute('title', 'Wind from E, 11 mph');
+    expect(screen.getByText('50°F · Wind 11 mph from E')).toBeInTheDocument();
     vi.unstubAllGlobals();
   });
 

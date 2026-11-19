@@ -4,7 +4,7 @@ import PointName from './PointName';
 import { MapContainer, TileLayer, Polyline, Marker, Popup, ZoomControl, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import { weatherIcons } from '../sky';
-import { toF, toMph, mmToIn, cmToIn } from '../units';
+import { toF, toMph, mmToIn, cmToIn, compass } from '../units';
 
 const startIcon = L.divIcon({ className: 'pin pin-start', iconSize: [16, 16] });
 const endIcon = L.divIcon({ className: 'pin pin-end', iconSize: [16, 16] });
@@ -91,6 +91,7 @@ function TripMap({ trip, time, selected, onSelect }) {
             key={idx}
             position={[point.location.latitude, point.location.longitude]}
             eventHandlers={{ click: () => onSelect?.(idx) }}
+            title={compass(point.winddirection) && `Wind from ${compass(point.winddirection)}, ${toMph(point.windspeed)}`}
             icon={L.divIcon({
               className: `weather-icon${selected === idx ? ' selected' : ''}`,
               iconSize: [34, 34],
@@ -107,7 +108,7 @@ function TripMap({ trip, time, selected, onSelect }) {
                   fallback={`Point ${idx + 1}`}
                 />
               </strong></div>
-              <div>{toF(point.temperature)} · Wind {toMph(point.windspeed)}</div>
+              <div>{toF(point.temperature)} · Wind {toMph(point.windspeed)}{compass(point.winddirection) && ` from ${compass(point.winddirection)}`}</div>
               <div>Rain {mmToIn(point.rain)} · Snow {cmToIn(point.snowfall)}</div>
             </Popup>
           </Marker>
