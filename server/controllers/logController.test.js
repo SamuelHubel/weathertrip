@@ -81,6 +81,10 @@ describe('renameTrip', () => {
         const res = mockRes();
         await renameTrip({ user: { id: 'u1' }, params: { id: 't1' }, body: {} }, res);
         expect(res.status).toHaveBeenCalledWith(400);
+        // no JSON body at all: Express 5 leaves req.body undefined
+        const noBody = mockRes();
+        await renameTrip({ user: { id: 'u1' }, params: { id: 't1' } }, noBody);
+        expect(noBody.status).toHaveBeenCalledWith(400);
     });
 });
 

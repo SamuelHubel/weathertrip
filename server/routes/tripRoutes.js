@@ -1,3 +1,4 @@
+// router for trip retrieval and trip logging
 import express from 'express';
 import rateLimit from 'express-rate-limit';
 import  getTrip  from '../controllers/tripController.js';

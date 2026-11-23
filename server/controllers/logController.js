@@ -21,7 +21,7 @@ export default getLoggedTrips;
 // names one of the signed-in user's own trips
 const renameTrip = async (req, res) => {
     if (!req.user) return res.status(401).json({ error: 'Sign in to name trips' });
-    const { name } = req.body;
+    const { name } = req.body ?? {};
     if (typeof name !== 'string') return res.status(400).json({ error: 'Name must be text' });
     try {
         // userId in the filter keeps users from renaming someone else's trip

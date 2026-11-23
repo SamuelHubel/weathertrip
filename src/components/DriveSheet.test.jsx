@@ -123,6 +123,16 @@ describe('DriveSheet', () => {
     expect(screen.queryByText(/no notable weather/i)).not.toBeInTheDocument();
   });
 
+  it('says when road incidents could not be loaded, and counts them when weather is missing', () => {
+    const { unmount } = renderSheet({ ...weatherTrip, incidents: null });
+    expect(screen.getByText('Road incidents could not be loaded.')).toBeInTheDocument();
+    unmount();
+
+    renderSheet({ ...weatherTrip, weather: null, incidents: [{ lat: 40.7, lon: -111.8, category: 8 }] });
+    expect(screen.getByText('1 road incident on this route, shown on the map.')).toBeInTheDocument();
+    expect(screen.queryByText('Road incidents could not be loaded.')).not.toBeInTheDocument();
+  });
+
   it('flags freezing rain as icy roads', () => {
     renderSheet({
       ...weatherTrip,

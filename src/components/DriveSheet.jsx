@@ -24,8 +24,8 @@ function getIcon({ rain, snow, isThunder, isFreezing }) {
 
 const HOUR = 3600000;
 
-// keep in sync with the phone @media query in driveSheet.css / App.css
-const PHONE_QUERY = '(max-width: 800px), (max-height: 500px)';
+// keep in sync with the phone @media query in driveSheet.css / App.css; TripMap uses it too
+export const PHONE_QUERY = '(max-width: 800px), (max-height: 500px)';
 
 // relative label for a timestamp: "now", "in 3h" or "2h ago"
 function relHours(ms, now) {
@@ -175,6 +175,10 @@ function DriveSheet({ trip, label, condition = 'clear', time, now = new Date(), 
           {!first && points && 'No notable weather along this route right now.'}
           {!points && 'Weather could not be loaded for this route. Try plotting it again.'}
         </span>
+        {/* null means TomTom could not be asked, not that the road is clear */}
+        {trip?.incidents === null && <span className="drive-route">Road incidents could not be loaded.</span>}
+        {/* without weather points the timeline is empty, so incidents would only be map markers */}
+        {!points && trip?.incidents?.length > 0 && <span className="drive-route">{trip.incidents.length} road incident{trip.incidents.length > 1 ? 's' : ''} on this route, shown on the map.</span>}
         {label && <span className="drive-route">{label}</span>}
         <span className="drive-stats">
           <span>{formatDistance(trip?.route?.distance)}</span>
