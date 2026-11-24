@@ -141,6 +141,15 @@ describe('DriveSheet', () => {
     expect(timeline().getByText('Icy roads possible')).toBeInTheDocument();
   });
 
+  it('names strong wind as the hazard even when there is some rain', () => {
+    renderSheet({
+      ...weatherTrip,
+      weather: [{ location: { latitude: 39.74, longitude: -104.99 }, temperature: 8, windspeed: 20, rain: 4, snowfall: 0, weathercode: 61 }],
+    });
+    expect(timeline().getByText('Strong winds along route')).toBeInTheDocument();
+    expect(screen.queryByText(/rain showers ahead/i)).not.toBeInTheDocument();
+  });
+
   it('does not flag medium-severity conditions', () => {
     renderSheet({
       ...weatherTrip,

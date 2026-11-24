@@ -9,16 +9,16 @@ function getHeadline({ rain, snow, isThunder, isFreezing }) {
   if (isFreezing) return 'Icy roads possible';
   if (snow >= 5) return 'Heavy snow expected';
   if (rain >= 10) return 'Heavy rain expected';
-  if (snow >= 1) return 'Snow showers possible';
-  if (rain >= 3) return 'Rain showers ahead';
+  // only called for high-severity hours, so what is left is wind (isHighSeverity's last trigger)
   return 'Strong winds along route';
 }
 
+// same order as getHeadline, so the icon matches the headline
 function getIcon({ rain, snow, isThunder, isFreezing }) {
   if (isThunder) return '⛈️';
   if (isFreezing) return '🧊';
-  if (snow > 0) return '🌨️';
-  if (rain > 0) return '🌧️';
+  if (snow >= 5) return '🌨️';
+  if (rain >= 10) return '🌧️';
   return '💨';
 }
 
