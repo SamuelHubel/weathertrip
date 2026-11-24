@@ -31,9 +31,6 @@ app.use(cors({
     // no CORS headers: the browser blocks the response; an Error here would be a 500 with a stack trace
     callback(null, false);
   },
-
-  credentials: true,
-
 }));
 
 app.use(express.json());
