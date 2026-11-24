@@ -30,9 +30,9 @@ const fetchTrip = async (startLocation, endLocation, extraBody = {}) => {
     return { ...trip, weather: await getWeather(weatherPoints) };
 };
 
-const fetchTripLog = async (tokenOverride) => {
+const fetchTripLog = async () => {
     try {
-        const token = tokenOverride || getToken();
+        const token = getToken();
         if (!token) {
             return [];
         }
