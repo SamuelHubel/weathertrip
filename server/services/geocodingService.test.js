@@ -47,6 +47,16 @@ test('returns a short place name with its state, or country when there is no sta
   expect((await geocodingService.geocodeLocation('sao paulo')).name).toBe('São Paulo');
 });
 
+test('spaces lookups at least 1.1 s apart, the public Nominatim limit', async () => {
+  delete process.env.NOMINATIM_KEY;
+  const calls = [];
+  axios.get = vi.fn(async () => { calls.push(Date.now()); return { data: [] }; });
+
+  await Promise.all([geocodingService.geocodeLocation('gap one'), geocodingService.geocodeLocation('gap two')]);
+  // timers can fire a few ms early; anything near 0 means the queue is gone
+  expect(calls[1] - calls[0]).toBeGreaterThanOrEqual(1050);
+}, 10000);
+
 // keep last: its lookups never finish, so the shared queue stays blocked afterwards
 test('refuses new places once 20 lookups are waiting, as a 429', async () => {
   axios.get = vi.fn(() => new Promise(() => {}));
