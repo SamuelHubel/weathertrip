@@ -15,7 +15,7 @@ Road-trip weather app: enter a start, optional stops (up to 8) and an end; see t
 
 - Weather is fetched in the browser, not on the server: Open-Meteo's free limit is per IP, and the server's shared
   host IP ran out of it.
-- Geocoding runs one request at a time, 1.1 s apart (Nominatim allows 1 req/s for the whole app). Replaying a saved
+- Geocoding runs one request at a time, 1.1 s apart (Nominatim allows 1 req/s for the whole app), or 0.55 s apart with `NOMINATIM_KEY` (LocationIQ allows 2 req/s); at most 20 lookups wait, the rest get "busy". Replaying a saved
   trip sends its stored coordinates so it skips this queue.
 - The server and hazard thresholds are metric; `src/units.js` converts to US units for display only.
 - Don't log searched places or user ids: the privacy page (`public/privacy.html`) says guest searches are not stored.

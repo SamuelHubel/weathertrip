@@ -1,7 +1,9 @@
 import axios from 'axios';
 
-// public Nominatim allows 1 request per second for the whole app, so lookups run one at a time, spaced out
-const GAP_MS = 1100;
+// lookups run one at a time, spaced out: public Nominatim allows 1 request per second for the whole app,
+// a keyed host (LocationIQ free plan) allows 2; check the plan's limit before lowering this
+// read per call: ES imports run before server.js loads .env
+const gapMs = () => (process.env.NOMINATIM_KEY ? 550 : 1100);
 let queue = Promise.resolve();
 // place string -> promise of { lat, lon } or null, so a repeated place costs no request
 // shortcut: in-memory and never pruned, move to a shared cache (or TTL) if several server instances run or memory grows
@@ -52,7 +54,7 @@ const geocodingService = {
       const request = queue.then(() => search(locationString));
       queue = request.catch(() => {}).then(() => {
         waiting--;
-        return new Promise((resolve) => setTimeout(resolve, GAP_MS));
+        return new Promise((resolve) => setTimeout(resolve, gapMs()));
       });
       // a failed lookup is not cached, so the next request tries again
       request.catch(() => cache.delete(key));
