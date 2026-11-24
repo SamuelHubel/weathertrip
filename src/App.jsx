@@ -43,7 +43,7 @@ function App() {
   const [namingTripId, setNamingTripId] = useState(null);
   // trip the user asked to delete, waiting on their confirmation
   const [deletingTrip, setDeletingTrip] = useState(null);
-  // a failure outside the search form (a replay), shown on the trip card
+  // a failure outside the search form (a replay, saving a guest trip after sign-in), shown on the trip card
   const [notice, setNotice] = useState(null);
   // bumped on every new trip, so a slower earlier replay doesn't replace the one picked last
   const latestTrip = useRef(0);
@@ -132,7 +132,10 @@ function App() {
       setPendingTrip(null);
       fetchTrip(start, end, { stops })
         .then(data => addTrip(data, start, end, stops))
-        .catch(error => console.error('Error saving pending trip:', error));
+        .catch(() => {
+          setNotice("Couldn't save your trip. Plot it again to add it to your log.");
+          setCardOpen(true);
+        });
     }
   };
 

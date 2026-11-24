@@ -175,3 +175,24 @@ test('a failed replay shows the server message instead of an empty trip', async 
     expect(await screen.findByRole('alert')).toHaveTextContent('Map services are busy');
     expect(screen.queryByRole('complementary', { name: 'Your drive' })).not.toBeInTheDocument();
 });
+
+test('says so when the guest trip cannot be saved after signing in', async () => {
+    let posts = 0;
+    axios.defaults.adapter = async (config) => {
+        if (config.url.endsWith('/api/auth/login')) return respond(config, 200, { token: 'fresh', email: 'a@b.co' });
+        if (config.method === 'post') return ++posts === 1 ? respond(config, 200, { route: {} }) : respond(config, 503, { error: 'busy' });
+        return respond(config, 200, []);
+    };
+    render(<App />);
+    const [start, end] = screen.getAllByRole('textbox');
+    fireEvent.change(start, { target: { value: 'Denver' } });
+    fireEvent.change(end, { target: { value: 'Boulder' } });
+    fireEvent.click(screen.getByText('Plot route'));
+
+    await screen.findByText('Sign in to save your trips.');
+    fireEvent.change(screen.getByLabelText('Email'), { target: { value: 'a@b.co' } });
+    fireEvent.change(screen.getByLabelText('Password'), { target: { value: 'password' } });
+    fireEvent.submit(screen.getByLabelText('Email').closest('form'));
+
+    expect(await screen.findByRole('alert')).toHaveTextContent("Couldn't save your trip");
+});
