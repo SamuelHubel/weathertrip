@@ -46,3 +46,11 @@ test('returns a short place name with its state, or country when there is no sta
   axios.get = vi.fn().mockResolvedValue({ data: [{ lat: '-23.5', lon: '-46.6', name: 'São Paulo', address: { state: 'São Paulo' } }] });
   expect((await geocodingService.geocodeLocation('sao paulo')).name).toBe('São Paulo');
 });
+
+// keep last: its lookups never finish, so the shared queue stays blocked afterwards
+test('refuses new places once 20 lookups are waiting, as a 429', async () => {
+  axios.get = vi.fn(() => new Promise(() => {}));
+  for (let i = 0; i < 20; i++) geocodingService.geocodeLocation(`stuck place ${i}`);
+
+  await expect(geocodingService.geocodeLocation('one too many')).rejects.toMatchObject({ response: { status: 429 } });
+});
