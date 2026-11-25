@@ -5,7 +5,7 @@ import TripInput from './components/TripInput.jsx';
 import TripLog from './components/TripLog.jsx';
 import fetchTrip, { fetchTripLog } from './services/tripService';
 import DriveSheet from './components/DriveSheet.jsx';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { getSky } from './sky';
 import axios from 'axios';
 // allows for login stuff
@@ -30,6 +30,8 @@ function App() {
     return () => clearInterval(id);
   }, []);
   const [tripLog, setTripLog] = useState([]);
+  // fetchTripLog always resolves to a list, empty on failure
+  const refreshLog = () => fetchTripLog().then(setTripLog);
 
   // user state to track if a user is logged in and store their token for authenticated requests
   const [user, setUser] = useState(null);
@@ -43,6 +45,10 @@ function App() {
   const [namingTripId, setNamingTripId] = useState(null);
   // trip the user asked to delete, waiting on their confirmation
   const [deletingTrip, setDeletingTrip] = useState(null);
+  // a failure outside the search form (a replay, saving a guest trip after sign-in), shown on the trip card
+  const [notice, setNotice] = useState(null);
+  // bumped on every new trip, so a slower earlier replay doesn't replace the one picked last
+  const latestTrip = useRef(0);
 
   // check if a token already exists (returning user)
   useEffect(() => {
@@ -66,6 +72,7 @@ function App() {
   }, []);
 
   const showTrip = (tripData, start, end, stops = []) => {
+    setNotice(null);
     setTrip(tripData);
     setLabel([start, ...stops, end].join(' → '));
     setSelected(null);
@@ -73,12 +80,11 @@ function App() {
   };
 
   const addTrip = (tripData, start, end, stops = []) => {
+    latestTrip.current++;
 
     showTrip(tripData, start, end, stops);
     // after adding a new trip, also update the trip log by fetching the latest logged trips from the server
-    fetchTripLog().then(data => {
-        if (data) setTripLog(data);
-    });
+    refreshLog();
 
     // the server sends an id only when it saved the trip, so replots and guests are not asked
     if (getToken() && tripData.id) setNamingTripId(tripData.id);
@@ -94,15 +100,20 @@ function App() {
   // saved trips have no weather, so replotting fetches it live without saving a duplicate
   // the saved places go back with their coordinates, so the server skips geocoding them again
   const replotTrip = async (entry) => {
-      const data = await fetchTrip(entry.start, entry.end, { stops: entry.stops ?? [], save: false }).catch(() => null);
-      const stops = entry.stops?.map((stop) => stop.location) ?? [];
-      showTrip(data ?? entry, entry.start.location, entry.end.location, stops);
+      const id = ++latestTrip.current;
+      try {
+        const data = await fetchTrip(entry.start, entry.end, { stops: entry.stops ?? [], save: false });
+        if (id !== latestTrip.current) return;
+        showTrip(data, entry.start.location, entry.end.location, entry.stops?.map((stop) => stop.location) ?? []);
+      } catch (error) {
+        if (id !== latestTrip.current) return;
+        setNotice(error.response?.data?.error || "Couldn't replay that trip. Check your connection and try again.");
+        setCardOpen(true);
+      }
   };
   // on initial load, fetch the trip log from the server to display in the sidebar
   useEffect(() => {
-        fetchTripLog().then(data => {
-            if (data) setTripLog(data);
-        });
+        refreshLog();
   }, []);
   
 
@@ -110,16 +121,17 @@ function App() {
   const handleLoginSuccess = (userData) => {
     setUser(userData);
     setShowLogin(false);
-    fetchTripLog(userData.token).then(data => {
-        if (data) setTripLog(data);
-    });
+    refreshLog();
     // the server only saves on a signed-in request, so plan the guest's trip again now
     if (pendingTrip) {
       const { start, end, stops } = pendingTrip;
       setPendingTrip(null);
       fetchTrip(start, end, { stops })
         .then(data => addTrip(data, start, end, stops))
-        .catch(error => console.error('Error saving pending trip:', error));
+        .catch(() => {
+          setNotice("Couldn't save your trip. Plot it again to add it to your log.");
+          setCardOpen(true);
+        });
     }
   };
 
@@ -129,6 +141,7 @@ function App() {
     setTripLog([]);
     setNamingTripId(null);
     setDeletingTrip(null);
+    setNotice(null);
     setTrip(null);
     setLabel('');
     setSelected(null);
@@ -165,6 +178,7 @@ function App() {
         <div className="trip-card-body">
           <TripInput addTrip={addTrip} />
           <TripLog tripLog={tripLog} onReplot={replotTrip} onDelete={setDeletingTrip} />
+          {notice && <div className="trip-error" role="alert">{notice}</div>}
         </div>
       </section>
 
@@ -192,7 +206,7 @@ function App() {
           tripId={namingTripId}
           onSaved={() => {
             setNamingTripId(null);
-            fetchTripLog().then(data => { if (data) setTripLog(data); });
+            refreshLog();
           }}
           onDismiss={() => setNamingTripId(null)}
         />

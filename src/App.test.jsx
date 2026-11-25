@@ -132,3 +132,67 @@ test('replaying a saved trip sends its saved coordinates, not just names', async
     await waitFor(() => expect(posted).toBeDefined());
     expect(posted).toEqual({ start: saved.start, end: saved.end, stops: saved.stops, save: false });
 });
+
+const savedTrip = (id, from, to) => ({
+    _id: id,
+    createdAt: '2026-11-01T00:00:00Z',
+    start: { location: from, lat: 39.74, lon: -104.99 },
+    stops: [],
+    end: { location: to, lat: 40.76, lon: -111.89 },
+});
+
+test('a slower earlier replay does not replace the trip picked last', async () => {
+    localStorage.setItem('wt_token', 'token');
+    const a = savedTrip('a', 'Denver', 'Moab');
+    const b = savedTrip('b', 'Boise', 'Reno');
+    const pending = {};
+    axios.defaults.adapter = async (config) => {
+        if (config.method === 'get') return respond(config, 200, [a, b]);
+        const { start } = JSON.parse(config.data);
+        return new Promise((resolve) => { pending[start.location] = () => resolve(respond(config, 200, { route: {} })); });
+    };
+    render(<App />);
+    fireEvent.click(await screen.findByRole('button', { name: /Denver → Moab/ }));
+    fireEvent.click(screen.getByRole('button', { name: /Boise → Reno/ }));
+    await waitFor(() => expect(Object.keys(pending)).toHaveLength(2));
+
+    pending.Boise();
+    const summary = await screen.findByRole('button', { name: /your drive/i });
+    pending.Denver();
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    expect(summary).toHaveTextContent('Boise → Reno');
+});
+
+test('a failed replay shows the server message instead of an empty trip', async () => {
+    localStorage.setItem('wt_token', 'token');
+    axios.defaults.adapter = async (config) =>
+        config.method === 'get'
+            ? respond(config, 200, [savedTrip('a', 'Denver', 'Moab')])
+            : respond(config, 503, { error: 'Map services are busy, try again in a minute' });
+    render(<App />);
+    fireEvent.click(await screen.findByRole('button', { name: /Denver → Moab/ }));
+
+    expect(await screen.findByRole('alert')).toHaveTextContent('Map services are busy');
+    expect(screen.queryByRole('complementary', { name: 'Your drive' })).not.toBeInTheDocument();
+});
+
+test('says so when the guest trip cannot be saved after signing in', async () => {
+    let posts = 0;
+    axios.defaults.adapter = async (config) => {
+        if (config.url.endsWith('/api/auth/login')) return respond(config, 200, { token: 'fresh', email: 'a@b.co' });
+        if (config.method === 'post') return ++posts === 1 ? respond(config, 200, { route: {} }) : respond(config, 503, { error: 'busy' });
+        return respond(config, 200, []);
+    };
+    render(<App />);
+    const [start, end] = screen.getAllByRole('textbox');
+    fireEvent.change(start, { target: { value: 'Denver' } });
+    fireEvent.change(end, { target: { value: 'Boulder' } });
+    fireEvent.click(screen.getByText('Plot route'));
+
+    await screen.findByText('Sign in to save your trips.');
+    fireEvent.change(screen.getByLabelText('Email'), { target: { value: 'a@b.co' } });
+    fireEvent.change(screen.getByLabelText('Password'), { target: { value: 'password' } });
+    fireEvent.submit(screen.getByLabelText('Email').closest('form'));
+
+    expect(await screen.findByRole('alert')).toHaveTextContent("Couldn't save your trip");
+});

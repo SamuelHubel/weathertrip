@@ -35,7 +35,10 @@ function sampleRoute(coords, intervalMeters) {
     accumulated = segDist - (remaining - intervalMeters);
   }
 
-  samples.push(coords[coords.length - 1]);
+  const end = coords[coords.length - 1];
+  // a sample just short of the end would be a second, near-identical weather point; never drop the start
+  if (samples.length > 1 && haversineDistance(samples[samples.length - 1], end) < intervalMeters / 4) samples.pop();
+  samples.push(end);
   return samples;
 }
 

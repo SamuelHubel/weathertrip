@@ -1,3 +1,4 @@
+// router for trip retrieval and trip logging
 import express from 'express';
 import rateLimit from 'express-rate-limit';
 import  getTrip  from '../controllers/tripController.js';
@@ -14,7 +15,16 @@ const tripReadLimiter = rateLimit({
   legacyHeaders: false,
 });
 
-tripRouter.post('/', tripReadLimiter, optionalAuth, getTrip);
+// planning costs geocoder quota (up to 10 lookups a trip), so it gets a tighter limit than the log routes
+const tripPlanLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 20,
+  message: { error: 'Too many trips planned, try again later' },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+tripRouter.post('/', tripPlanLimiter, optionalAuth, getTrip);
 
 tripRouter.get('/', tripReadLimiter, optionalAuth, getLoggedTrips);
 

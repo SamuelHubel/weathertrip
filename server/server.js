@@ -28,11 +28,9 @@ app.use(cors({
     if (!origin || allowedOrigins.includes(origin)) 
       return callback(null, true);
 
-    callback(new Error(`CORS blocked: ${origin}`));
+    // no CORS headers: the browser blocks the response; an Error here would be a 500 with a stack trace
+    callback(null, false);
   },
-
-  credentials: true,
-
 }));
 
 app.use(express.json());

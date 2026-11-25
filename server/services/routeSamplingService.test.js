@@ -181,6 +181,19 @@ describe('sampleRoute — single-segment edge cases', () => {
     expect(samples[0]).toEqual(manySegments[0]);
     expect(samples[samples.length - 1]).toEqual(manySegments[manySegments.length - 1]);
   });
+
+  it('does not add a sample right before the end', () => {
+    // ~160.5 km due north: a sample would land at 160 km, 0.5 km short of the end
+    const route = [[40, -105], [40 + 160_500 / 111_195, -105]];
+    const samples = sampleRoute(route, 80_000);
+    expect(samples).toHaveLength(3);
+    expect(samples[2]).toEqual(route[1]);
+  });
+
+  it('keeps the start even when it is close to the end', () => {
+    const samples = sampleRoute([[40, -105], [40.01, -105]], 80_000);
+    expect(samples).toEqual([[40, -105], [40.01, -105]]);
+  });
 });
 
 describe('sampleRoute — interval consistency', () => {

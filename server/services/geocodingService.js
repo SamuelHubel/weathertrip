@@ -1,11 +1,16 @@
 import axios from 'axios';
 
-// public Nominatim allows 1 request per second for the whole app, so lookups run one at a time, spaced out
-const GAP_MS = 1100;
+// lookups run one at a time, spaced out: public Nominatim allows 1 request per second for the whole app,
+// a keyed host (LocationIQ free plan) allows 2; check the plan's limit before lowering this
+// read per call: ES imports run before server.js loads .env
+const gapMs = () => (process.env.NOMINATIM_KEY ? 550 : 1100);
 let queue = Promise.resolve();
 // place string -> promise of { lat, lon } or null, so a repeated place costs no request
 // shortcut: in-memory and never pruned, move to a shared cache (or TTL) if several server instances run or memory grows
 const cache = new Map();
+// lookups in flight or waiting; past the cap new places are refused, so one client cannot stall every search
+const MAX_WAITING = 20;
+let waiting = 0;
 
 async function search(locationString) {
   const response = await axios.get(`${process.env.NOMINATIM_URL}/search`, {
@@ -43,8 +48,14 @@ const geocodingService = {
   geocodeLocation(locationString) {
     const key = locationString.trim().toLowerCase();
     if (!cache.has(key)) {
+      // shaped like an upstream 429, so the trip controller answers "busy, try again"
+      if (waiting >= MAX_WAITING) return Promise.reject(Object.assign(new Error('Geocoding queue is full'), { response: { status: 429 } }));
+      waiting++;
       const request = queue.then(() => search(locationString));
-      queue = request.catch(() => {}).then(() => new Promise((resolve) => setTimeout(resolve, GAP_MS)));
+      queue = request.catch(() => {}).then(() => {
+        waiting--;
+        return new Promise((resolve) => setTimeout(resolve, gapMs()));
+      });
       // a failed lookup is not cached, so the next request tries again
       request.catch(() => cache.delete(key));
       cache.set(key, request);

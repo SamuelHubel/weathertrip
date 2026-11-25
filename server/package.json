@@ -6,7 +6,7 @@
   "type": "module",
   "scripts": {
     "start": "node server.js",
-    "dev": "nodemon server.js",
+    "dev": "node --watch server.js",
     "test": "vitest run --config vitest.config.js"
   },
   "keywords": [
@@ -27,7 +27,6 @@
     "mongoose": "^9.11.4"
   },
   "devDependencies": {
-    "nodemon": "^3.0.1",
     "vitest": "^4.1.12"
   }
 }

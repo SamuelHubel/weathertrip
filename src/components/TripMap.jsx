@@ -5,14 +5,14 @@ import { MapContainer, TileLayer, Polyline, Marker, Popup, ZoomControl, useMap }
 import L from 'leaflet';
 import { weatherIcons, INCIDENTS } from '../sky';
 import { toF, toMph, mmToIn, cmToIn, compass } from '../units';
+// same breakpoint as the page layout, so the map's padding matches where the panels sit
+import { PHONE_QUERY as PHONE } from './DriveSheet';
 
 const startIcon = L.divIcon({ className: 'pin pin-start', iconSize: [16, 16] });
 const endIcon = L.divIcon({ className: 'pin pin-end', iconSize: [16, 16] });
 const stopIcon = L.divIcon({ className: 'pin pin-stop', iconSize: [14, 14] });
 
 const incidentIcon = (category) => L.divIcon({ className: 'incident-icon', iconSize: [26, 26], html: INCIDENTS[category]?.[0] ?? '⚠️' });
-
-const PHONE = '(max-width: 700px)';
 
 // frame a newly plotted route clear of the floating panels
 function FitRoute({ geometry }) {
@@ -56,7 +56,7 @@ function TripMap({ trip, time, selected, onSelect }) {
           <Polyline positions={trip.route.geometry} pathOptions={{ className: 'route-line', weight: 5 }} />
         )}
 
-        {trip?.start?.lat && (
+        {trip?.start?.lat != null && (
           <Marker position={[trip.start.lat, trip.start.lon]} icon={startIcon}>
             <Popup>Origin</Popup>
           </Marker>
@@ -68,7 +68,7 @@ function TripMap({ trip, time, selected, onSelect }) {
           </Marker>
         ))}
 
-        {trip?.end?.lat && (
+        {trip?.end?.lat != null && (
           <Marker position={[trip.end.lat, trip.end.lon]} icon={endIcon}>
             <Popup>Destination</Popup>
           </Marker>

@@ -123,12 +123,31 @@ describe('DriveSheet', () => {
     expect(screen.queryByText(/no notable weather/i)).not.toBeInTheDocument();
   });
 
+  it('says when road incidents could not be loaded, and counts them when weather is missing', () => {
+    const { unmount } = renderSheet({ ...weatherTrip, incidents: null });
+    expect(screen.getByText('Road incidents could not be loaded.')).toBeInTheDocument();
+    unmount();
+
+    renderSheet({ ...weatherTrip, weather: null, incidents: [{ lat: 40.7, lon: -111.8, category: 8 }] });
+    expect(screen.getByText('1 road incident on this route, shown on the map.')).toBeInTheDocument();
+    expect(screen.queryByText('Road incidents could not be loaded.')).not.toBeInTheDocument();
+  });
+
   it('flags freezing rain as icy roads', () => {
     renderSheet({
       ...weatherTrip,
       weather: [{ location: { latitude: 39.74, longitude: -104.99 }, temperature: -1, windspeed: 3, rain: 1, snowfall: 0, weathercode: 66 }],
     });
     expect(timeline().getByText('Icy roads possible')).toBeInTheDocument();
+  });
+
+  it('names strong wind as the hazard even when there is some rain', () => {
+    renderSheet({
+      ...weatherTrip,
+      weather: [{ location: { latitude: 39.74, longitude: -104.99 }, temperature: 8, windspeed: 20, rain: 4, snowfall: 0, weathercode: 61 }],
+    });
+    expect(timeline().getByText('Strong winds along route')).toBeInTheDocument();
+    expect(screen.queryByText(/rain showers ahead/i)).not.toBeInTheDocument();
   });
 
   it('does not flag medium-severity conditions', () => {
